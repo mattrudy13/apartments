@@ -1,0 +1,14 @@
+# Complexes to track. `scraper` picks the parser for the site's platform:
+#   realpage_craft - RealPage/Vest sites with embedded :floorplans/:units data (plain HTTP)
+#   entrata        - Entrata sites; `url` must be the floorplans listing page (uses Chrome)
+complexes:
+  - slug: attain-chics-beach
+    name: Attain at Chic's Beach
+    url: https://www.attainchicsbeach.com/
+    scraper: realpage_craft
+
+  - slug: renew-marina-shores
+    name: ReNew Marina Shores
+    url: https://www.renewmarinashores.com/virginia-beach/renew-marina-shores/conventional/
+    website: https://www.renewmarinashores.com/
+    scraper: entrata

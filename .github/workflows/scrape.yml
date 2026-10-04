@@ -1,0 +1,73 @@
+name: Scrape apartments
+
+on:
+  schedule:
+    - cron: "0 13 * * 1"   # Mondays 13:00 UTC (9am ET). Daily: "0 13 * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["site/**", "build.py", "complexes.yaml"]
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: scrape
+  cancel-in-progress: false
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: Parser tests
+        run: pytest -q
+
+      - name: Scrape
+        id: scrape
+        if: github.event_name != 'push'
+        # A failing site is recorded in data/status.json and shown as "stale";
+        # keep going so the other complexes still publish.
+        continue-on-error: true
+        run: python -m scraper.run
+
+      - name: Commit snapshots
+        if: github.event_name != 'push'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data
+          git diff --cached --quiet || git commit -m "data: snapshot $(date -u +%F)"
+          git push
+
+      - name: Build site data
+        run: python build.py
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: Flag scrape failures
+        if: steps.scrape.outcome == 'failure'
+        run: |
+          echo "::warning::One or more complexes failed to scrape — see data/status.json"
+
+  deploy:
+    needs: scrape
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

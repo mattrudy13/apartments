@@ -1,0 +1,422 @@
+{
+ "slug": "renew-marina-shores",
+ "name": "ReNew Marina Shores",
+ "url": "https://www.renewmarinashores.com/",
+ "scraped_at": "2026-10-04T21:39:09+00:00",
+ "property": {
+  "address": "2257 Willow Oak Cir., Virginia Beach, 23451",
+  "phone": "866-203-4610"
+ },
+ "floorplans": [
+  {
+   "code": "690912",
+   "name": "Arlington",
+   "beds": 1.0,
+   "baths": 1.0,
+   "sqft": 662,
+   "rent_min": null,
+   "rent_max": null,
+   "units_available": 0,
+   "earliest_available": null,
+   "image_url": "https://medialibrarycfo.entrata.com/3482/MLv3/4/22/2025/07/23/092552/6880ff00df4e22.65415297767.png",
+   "details_url": "https://www.renewmarinashores.com/virginia-beach/renew-marina-shores/floorplans/arlington-690912/fp_name/occupancy_type/conventional/",
+   "specials": [
+    "Two Months Free"
+   ]
+  },
+  {
+   "code": "690916",
+   "name": "Athens",
+   "beds": 1.0,
+   "baths": 1.0,
+   "sqft": 730,
+   "rent_min": 1944,
+   "rent_max": 2364,
+   "units_available": 6,
+   "earliest_available": "2026-11-17",
+   "image_url": "https://medialibrarycfo.entrata.com/3482/MLv3/4/22/2025/07/23/092653/6880ff3ce864c0.45939318833.png",
+   "details_url": "https://www.renewmarinashores.com/virginia-beach/renew-marina-shores/floorplans/athens-690916/fp_name/occupancy_type/conventional/",
+   "specials": [
+    "Two Months Free"
+   ]
+  },
+  {
+   "code": "690914",
+   "name": "Arlington Loft",
+   "beds": 1.0,
+   "baths": 1.0,
+   "sqft": 784,
+   "rent_min": null,
+   "rent_max": null,
+   "units_available": 0,
+   "earliest_available": null,
+   "image_url": "https://medialibrarycfo.entrata.com/3482/MLv3/4/22/2023/02/03/114947/63dd574bb31c66.50055838349.png",
+   "details_url": "https://www.renewmarinashores.com/virginia-beach/renew-marina-shores/floorplans/arlington-loft-690914/fp_name/occupancy_type/conventional/",
+   "specials": [
+    "Two Months Free"
+   ]
+  },
+  {
+   "code": "690918",
+   "name": "Baltimore",
+   "beds": 2.0,
+   "baths": 1.0,
+   "sqft": 859,
+   "rent_min": 2164,
+   "rent_max": 3224,
+   "units_available": 4,
+   "earliest_available": "2026-10-04",
+   "image_url": "https://medialibrarycfo.entrata.com/3482/MLv3/4/22/2025/07/23/112207/68811a3f832542.04728829791.png",
+   "details_url": "https://www.renewmarinashores.com/virginia-beach/renew-marina-shores/floorplans/baltimore-690918/fp_name/occupancy_type/conventional/",
+   "specials": [
+    "Two Months Free"
+   ]
+  },
+  {
+   "code": "690920",
+   "name": "Chesapeake",
+   "beds": 2.0,
+   "baths": 2.0,
+   "sqft": 1078,
+   "rent_min": 2324,
+   "rent_max": 3434,
+   "units_available": 5,
+   "earliest_available": "2026-10-04",
+   "image_url": "https://medialibrarycfo.entrata.com/3482/MLv3/4/22/2025/07/23/112244/68811a64afb2e1.28343243208.png",
+   "details_url": "https://www.renewmarinashores.com/virginia-beach/renew-marina-shores/floorplans/chesapeake-690920/fp_name/occupancy_type/conventional/",
+   "specials": [
+    "Two Months Free"
+   ]
+  },
+  {
+   "code": "690922",
+   "name": "Chesapeake Loft",
+   "beds": 2.0,
+   "baths": 2.0,
+   "sqft": 1234,
+   "rent_min": 2484,
+   "rent_max": 3664,
+   "units_available": 2,
+   "earliest_available": "2026-12-01",
+   "image_url": "https://medialibrarycfo.entrata.com/3482/MLv3/4/22/2025/07/23/112318/68811a86154e68.12320528805.png",
+   "details_url": "https://www.renewmarinashores.com/virginia-beach/renew-marina-shores/floorplans/chesapeake-loft-690922/fp_name/occupancy_type/conventional/",
+   "specials": [
+    "Two Months Free"
+   ]
+  },
+  {
+   "code": "690924",
+   "name": "Dover",
+   "beds": 3.0,
+   "baths": 2.0,
+   "sqft": 1202,
+   "rent_min": 2504,
+   "rent_max": 3734,
+   "units_available": 8,
+   "earliest_available": "2026-10-04",
+   "image_url": "https://medialibrarycfo.entrata.com/3482/MLv3/4/22/2025/07/23/112747/68811b936ee653.84361073882.png",
+   "details_url": "https://www.renewmarinashores.com/virginia-beach/renew-marina-shores/floorplans/dover-690924/fp_name/occupancy_type/conventional/",
+   "specials": [
+    "Two Months Free"
+   ]
+  },
+  {
+   "code": "690926",
+   "name": "Douglas",
+   "beds": 3.0,
+   "baths": 2.0,
+   "sqft": 1316,
+   "rent_min": 2794,
+   "rent_max": 4094,
+   "units_available": 3,
+   "earliest_available": "2026-10-04",
+   "image_url": "https://medialibrarycfo.entrata.com/3482/MLv3/4/22/2025/07/23/112823/68811bb7d33869.53534152958.png",
+   "details_url": "https://www.renewmarinashores.com/virginia-beach/renew-marina-shores/floorplans/douglas-690926/fp_name/occupancy_type/conventional/",
+   "specials": [
+    "Two Months Free"
+   ]
+  }
+ ],
+ "units": [
+  {
+   "unit_number": "110",
+   "floorplan_code": "690916",
+   "price": 1944,
+   "sqft": 730,
+   "floor": null,
+   "building": "2200",
+   "available_date": "2026-12-03",
+   "apply_url": null
+  },
+  {
+   "unit_number": "110",
+   "floorplan_code": "690916",
+   "price": 1944,
+   "sqft": 730,
+   "floor": null,
+   "building": "2208",
+   "available_date": "2026-12-16",
+   "apply_url": null
+  },
+  {
+   "unit_number": "110",
+   "floorplan_code": "690916",
+   "price": 1944,
+   "sqft": 730,
+   "floor": null,
+   "building": "2221",
+   "available_date": "2026-11-28",
+   "apply_url": null
+  },
+  {
+   "unit_number": "308",
+   "floorplan_code": "690916",
+   "price": 1944,
+   "sqft": 730,
+   "floor": null,
+   "building": "2213",
+   "available_date": "2026-11-17",
+   "apply_url": null
+  },
+  {
+   "unit_number": "102",
+   "floorplan_code": "690916",
+   "price": 1964,
+   "sqft": 730,
+   "floor": null,
+   "building": "2228",
+   "available_date": "2026-11-28",
+   "apply_url": null
+  },
+  {
+   "unit_number": "103",
+   "floorplan_code": "690916",
+   "price": 1964,
+   "sqft": 730,
+   "floor": null,
+   "building": "2213",
+   "available_date": "2026-12-10",
+   "apply_url": null
+  },
+  {
+   "unit_number": "106",
+   "floorplan_code": "690918",
+   "price": 2164,
+   "sqft": 859,
+   "floor": null,
+   "building": "2261",
+   "available_date": "2026-10-04",
+   "apply_url": null
+  },
+  {
+   "unit_number": "107",
+   "floorplan_code": "690918",
+   "price": 2164,
+   "sqft": 859,
+   "floor": null,
+   "building": "2212",
+   "available_date": "2026-12-12",
+   "apply_url": null
+  },
+  {
+   "unit_number": "108",
+   "floorplan_code": "690918",
+   "price": 2164,
+   "sqft": 859,
+   "floor": null,
+   "building": "2213",
+   "available_date": "2026-12-09",
+   "apply_url": null
+  },
+  {
+   "unit_number": "108",
+   "floorplan_code": "690918",
+   "price": 2184,
+   "sqft": 859,
+   "floor": null,
+   "building": "2208",
+   "available_date": "2026-12-16",
+   "apply_url": null
+  },
+  {
+   "unit_number": "106",
+   "floorplan_code": "690920",
+   "price": 2324,
+   "sqft": 1078,
+   "floor": null,
+   "building": "2265",
+   "available_date": "2026-11-30",
+   "apply_url": null
+  },
+  {
+   "unit_number": "204",
+   "floorplan_code": "690920",
+   "price": 2324,
+   "sqft": 1078,
+   "floor": null,
+   "building": "2261",
+   "available_date": "2026-12-01",
+   "apply_url": null
+  },
+  {
+   "unit_number": "206",
+   "floorplan_code": "690920",
+   "price": 2324,
+   "sqft": 1078,
+   "floor": null,
+   "building": "2205",
+   "available_date": "2026-10-04",
+   "apply_url": null
+  },
+  {
+   "unit_number": "109",
+   "floorplan_code": "690920",
+   "price": 2344,
+   "sqft": 1078,
+   "floor": null,
+   "building": "2220",
+   "available_date": "2026-10-17",
+   "apply_url": null
+  },
+  {
+   "unit_number": "209",
+   "floorplan_code": "690920",
+   "price": 2344,
+   "sqft": 1078,
+   "floor": null,
+   "building": "2208",
+   "available_date": "2026-10-24",
+   "apply_url": null
+  },
+  {
+   "unit_number": "303",
+   "floorplan_code": "690922",
+   "price": 2484,
+   "sqft": 1234,
+   "floor": null,
+   "building": "2241",
+   "available_date": "2026-12-01",
+   "apply_url": null
+  },
+  {
+   "unit_number": "307",
+   "floorplan_code": "690922",
+   "price": 2504,
+   "sqft": 1234,
+   "floor": null,
+   "building": "2212",
+   "available_date": "2026-12-31",
+   "apply_url": null
+  },
+  {
+   "unit_number": "102",
+   "floorplan_code": "690924",
+   "price": 2504,
+   "sqft": 1202,
+   "floor": null,
+   "building": "2221",
+   "available_date": "2026-10-04",
+   "apply_url": null
+  },
+  {
+   "unit_number": "202",
+   "floorplan_code": "690924",
+   "price": 2504,
+   "sqft": 1202,
+   "floor": null,
+   "building": "2209",
+   "available_date": "2026-10-09",
+   "apply_url": null
+  },
+  {
+   "unit_number": "302",
+   "floorplan_code": "690924",
+   "price": 2504,
+   "sqft": 1202,
+   "floor": null,
+   "building": "2200",
+   "available_date": "2026-10-13",
+   "apply_url": null
+  },
+  {
+   "unit_number": "302",
+   "floorplan_code": "690924",
+   "price": 2504,
+   "sqft": 1202,
+   "floor": null,
+   "building": "2212",
+   "available_date": "2026-10-10",
+   "apply_url": null
+  },
+  {
+   "unit_number": "309",
+   "floorplan_code": "690924",
+   "price": 2504,
+   "sqft": 1202,
+   "floor": null,
+   "building": "2261",
+   "available_date": "2026-10-27",
+   "apply_url": null
+  },
+  {
+   "unit_number": "202",
+   "floorplan_code": "690924",
+   "price": 2524,
+   "sqft": 1202,
+   "floor": null,
+   "building": "2268",
+   "available_date": "2026-10-08",
+   "apply_url": null
+  },
+  {
+   "unit_number": "302",
+   "floorplan_code": "690924",
+   "price": 2524,
+   "sqft": 1202,
+   "floor": null,
+   "building": "2213",
+   "available_date": "2026-10-07",
+   "apply_url": null
+  },
+  {
+   "unit_number": "309",
+   "floorplan_code": "690924",
+   "price": 2524,
+   "sqft": 1202,
+   "floor": null,
+   "building": "2200",
+   "available_date": "2026-11-03",
+   "apply_url": null
+  },
+  {
+   "unit_number": "207",
+   "floorplan_code": "690926",
+   "price": 2794,
+   "sqft": 1316,
+   "floor": null,
+   "building": "2221",
+   "available_date": "2026-10-04",
+   "apply_url": null
+  },
+  {
+   "unit_number": "208",
+   "floorplan_code": "690926",
+   "price": 2794,
+   "sqft": 1316,
+   "floor": null,
+   "building": "2205",
+   "available_date": "2026-10-04",
+   "apply_url": null
+  },
+  {
+   "unit_number": "206",
+   "floorplan_code": "690926",
+   "price": 2814,
+   "sqft": 1316,
+   "floor": null,
+   "building": "2261",
+   "available_date": "2026-10-04",
+   "apply_url": null
+  }
+ ]
+}

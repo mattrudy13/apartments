@@ -1,0 +1,120 @@
+:root {
+  color-scheme: light;
+  --bg: #f6f5f2;
+  --surface: #fcfcfb;
+  --surface-2: #f0efec;
+  --border: #e2e0da;
+  --text: #0b0b0b;
+  --text-2: #52514e;
+  --text-3: #7a7974;
+  --grid: #e8e6e1;
+  --accent: #2a78d6;
+  --up: #b42318;      /* price up = worse for a renter */
+  --down: #067647;
+  --warn-bg: #fff4e0;
+  --warn-text: #7a4b00;
+  --series-1: #2a78d6; --series-2: #eb6834; --series-3: #1baf7a; --series-4: #eda100;
+  --series-5: #e87ba4; --series-6: #008300; --series-7: #4a3aa7; --series-8: #e34948;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #121211; --surface: #1a1a19; --surface-2: #242422; --border: #33332f;
+    --text: #ffffff; --text-2: #c3c2b7; --text-3: #8f8e86; --grid: #2c2c29;
+    --accent: #3987e5; --up: #f97066; --down: #47cd89;
+    --warn-bg: #3a2a0a; --warn-text: #f5c66b;
+    --series-1: #3987e5; --series-2: #d95926; --series-3: #199e70; --series-4: #c98500;
+    --series-5: #d55181; --series-6: #008300; --series-7: #9085e9; --series-8: #e66767;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #121211; --surface: #1a1a19; --surface-2: #242422; --border: #33332f;
+  --text: #ffffff; --text-2: #c3c2b7; --text-3: #8f8e86; --grid: #2c2c29;
+  --accent: #3987e5; --up: #f97066; --down: #47cd89;
+  --warn-bg: #3a2a0a; --warn-text: #f5c66b;
+  --series-1: #3987e5; --series-2: #d95926; --series-3: #199e70; --series-4: #c98500;
+  --series-5: #d55181; --series-6: #008300; --series-7: #9085e9; --series-8: #e66767;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--text);
+  font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.wrap { max-width: 1100px; margin: 0 auto; padding: 24px 16px 64px; }
+header.top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+h1 { font-size: 24px; margin: 0; letter-spacing: -0.01em; }
+h2 { font-size: 16px; margin: 0 0 12px; }
+.muted { color: var(--text-2); }
+.small { font-size: 13px; }
+.num { font-variant-numeric: tabular-nums; }
+
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+.stack > * + * { margin-top: 16px; }
+.grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+
+/* stat tiles */
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.tile .label { font-size: 13px; color: var(--text-2); }
+.tile .value { font-size: 28px; font-weight: 650; letter-spacing: -0.02em; }
+.tile .sub { font-size: 13px; color: var(--text-2); }
+
+/* tables */
+.table-scroll { overflow-x: auto; margin: 0 -16px; padding: 0 16px; }
+table { width: 100%; border-collapse: collapse; }
+th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--border); white-space: nowrap; vertical-align: middle; }
+th { font-size: 12px; font-weight: 600; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.04em; }
+th.sortable { cursor: pointer; user-select: none; }
+th.sortable:hover { color: var(--text); }
+th[aria-sort="ascending"]::after { content: " ↑"; }
+th[aria-sort="descending"]::after { content: " ↓"; }
+td.r, th.r { text-align: right; }
+tr:last-child td { border-bottom: 0; }
+.name-cell a { font-weight: 600; }
+.name-cell .addr { font-size: 12px; color: var(--text-3); white-space: normal; }
+
+.delta { font-size: 12px; margin-left: 6px; }
+.delta.up { color: var(--up); }
+.delta.down { color: var(--down); }
+.delta.flat { color: var(--text-3); }
+.badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 999px; background: var(--surface-2); color: var(--text-2); }
+.badge.warn { background: var(--warn-bg); color: var(--warn-text); }
+.badge.special { background: color-mix(in srgb, var(--series-3) 18%, transparent); color: var(--text); }
+.banner { background: var(--warn-bg); color: var(--warn-text); border-radius: 8px; padding: 10px 12px; font-size: 14px; }
+
+/* floorplan rows */
+tr.fp-row { cursor: pointer; }
+tr.fp-row:hover td { background: var(--surface-2); }
+tr.fp-row.unavailable td { color: var(--text-3); }
+tr.fp-row td:first-child::before { content: "▸"; display: inline-block; width: 14px; color: var(--text-3); transition: transform .15s; }
+tr.fp-row.open td:first-child::before { transform: rotate(90deg); }
+tr.fp-row.no-units td:first-child::before { visibility: hidden; }
+tr.units-row td { background: var(--surface-2); padding: 8px 8px 12px 30px; }
+tr.units-row table th, tr.units-row table td { padding: 6px 8px; border-color: var(--border); }
+.fp-thumb { width: 42px; height: 32px; object-fit: contain; border-radius: 4px; background: #fff; vertical-align: middle; margin-right: 8px; }
+
+/* filters */
+.filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.chip { border: 1px solid var(--border); background: var(--surface); color: var(--text); border-radius: 999px; padding: 5px 12px; font: inherit; font-size: 13px; cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--text); color: var(--surface); border-color: var(--text); }
+label.toggle { font-size: 13px; color: var(--text-2); display: inline-flex; gap: 6px; align-items: center; margin-left: auto; }
+
+/* charts */
+.chart-box { position: relative; height: 260px; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 13px; color: var(--text-2); margin-bottom: 8px; }
+.legend span::before { content: ""; display: inline-block; width: 14px; height: 2px; border-radius: 1px; background: var(--c); vertical-align: middle; margin-right: 6px; }
+.note { font-size: 13px; color: var(--text-3); margin-top: 8px; }
+svg.spark { display: block; }
+
+.back { font-size: 14px; display: inline-block; margin-bottom: 8px; }
+footer { margin-top: 32px; font-size: 12px; color: var(--text-3); }
+
+@media (max-width: 640px) {
+  .tile .value { font-size: 22px; }
+  .hide-sm { display: none; }
+  label.toggle { margin-left: 0; }
+}
