@@ -1,6 +1,6 @@
 # Enhancements
 
-Ideas for the site, roughly in priority order. Check off as done.
+Ideas for the site, roughly in priority order. `[x]` done, `[~]` partly done.
 
 ## High value
 - [ ] **Price-drop / new-unit alerts** — the weekly job already diffs snapshots; notify
@@ -19,12 +19,20 @@ Ideas for the site, roughly in priority order. Check off as done.
 - [ ] **Shortlist** — star floorplans/units and see them on the overview (localStorage).
 
 ## Data & reliability
-- [ ] **"New this week" / "gone" badges** on units, from diffing against the previous snapshot.
-- [ ] **Scrape-health indicator** — last successful pull per complex, plus a warning if the
-      weekly job hasn't pushed in 8+ days (Mac off, or a site changed).
+- [~] **"New this week" / "gone" badges** — partly done: units show a "New" badge and the
+      complex page lists units no longer listed. Still open: surface new/gone counts on the
+      overview.
+- [~] **Scrape-health indicator** — partly done: a complex whose latest scrape failed shows
+      "stale". Still open: last successful pull per complex on the overview, and a warning if
+      the weekly job hasn't pushed in 8+ days (Mac off, or a site changed).
+- [ ] **Gentler ReNew scraping** — add a random 5–10 s pause between ReNew's detail pages
+      (Cloudflare-protected; currently back to back). Not urgent at weekly volume.
 - [ ] **Floorplan image lightbox** — image URLs are already scraped; only thumbnails shown now.
 
 ## Polish
 - [ ] **Map view** of complexes (Attain's data includes lat/long).
-- [ ] **Lease-term pricing** — ReNew's prices are for 15-mo leases; detail pages may list
-      other terms. Verify before trusting cross-complex comparisons.
+- [ ] **Lease-term pricing** — ReNew's prices are for 15-mo leases; Linkhorn Bay shows a
+      per-unit rent range (e.g. $1,672–$2,209) that likely varies by term, and we store the
+      low end. Capture terms where sites expose them before trusting cross-complex comparisons.
+- [ ] **More than 8 complexes** — chart colors come from an 8-slot palette; a 9th complex
+      would reuse a color. Fold extras into "Other" or facet the charts if the list grows.

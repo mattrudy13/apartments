@@ -4,7 +4,7 @@ Tracks availability and pricing for a list of apartment complexes and publishes 
 static dashboard to GitHub Pages: https://mattrudy13.github.io/apartments/
 See README.md for usage commands.
 
-## Status (2026-10-04)
+## Status (2026-10-05)
 
 Working end to end:
 - Scrapers for the four tracked complexes (`complexes.yaml`): Attain at Chic's Beach
@@ -13,13 +13,15 @@ Working end to end:
 - Weekly launchd job on the Mac scrapes and pushes snapshots; the GitHub Action
   (`.github/workflows/deploy.yml`) tests, builds `site/data/` and deploys Pages.
 - Overview page (`site/index.html`) and complex detail page (`site/complex.html?c=<slug>`).
-- First real snapshot: `data/snapshots/2026-10-04/`. Trend lines appear after the
-  second weekly pull.
-
 - Effective (net) rent from specials, and per-unit listing history (see sections below).
+- Real snapshots: `2026-10-04` (setup day; Linkhorn Bay and North Beach added that evening
+  with `--only`) and `2026-10-05` (first scheduled Monday run, 09:00, all four OK and
+  deployed). The scheduled job is confirmed working unattended. Next run: Mon 2026-10-12.
+  The two snapshots are one day apart, so week-over-week trends start being meaningful
+  after 2026-10-12.
 
-Possible next steps (see ENHANCEMENTS.md): add more complexes (a new platform needs a new `scraper/` module),
-switch to daily pulls (`scripts/install_schedule.sh daily`).
+Next steps: see ENHANCEMENTS.md (alerts are the top open item). Daily pulls are a one-liner
+(`scripts/install_schedule.sh daily`) if wanted.
 
 ## Layout
 
@@ -36,7 +38,8 @@ switch to daily pulls (`scripts/install_schedule.sh daily`).
 
 ## Why scraping runs on the Mac, not GitHub Actions
 
-Both sites block GitHub-hosted runners (tested 2026-10-05):
+The original two sites block GitHub-hosted runners (tested 2026-10-05; Linkhorn Bay and
+North Beach weren't tested there, and it doesn't matter since all scraping is local):
 - Attain returns **403** to GitHub's IPs (works fine from the Mac with plain HTTP).
 - ReNew's **Cloudflare challenge never clears** on the runner, even with real Chrome.
 
@@ -57,6 +60,13 @@ The script runs `git pull` before every scrape, so changes pushed from this Desk
 (e.g. new entries in `complexes.yaml`) are picked up automatically. If `requirements.txt`
 changes, reinstall deps in the clone's venv. Granting `bash` Full Disk Access was rejected
 as too broad. The README documents this setup.
+
+## Scraping load
+
+Weekly volume is tiny (Attain: 1 request; ReNew: ~7 Chrome page loads over ~50 s; Linkhorn
+Bay: 7 requests; North Beach: 2). To fill in a newly added complex without re-hitting the
+others, run `scraper.run --only <slug>` in the scheduler's clone and push (see README).
+A random pause between ReNew detail pages is listed in ENHANCEMENTS.md but not done.
 
 ## Site quirks
 
@@ -165,4 +175,8 @@ as too broad. The README documents this setup.
 - Desktop venv: `~/Desktop/coding/GitHub/.venv` (Python 3.9; code stays 3.9-compatible
   via `from __future__ import annotations`). CI uses Python 3.12.
 - Local preview: `python build.py && python -m http.server -d site 8000`.
-- Commit snapshots/data only via the scheduler; code changes from this copy.
+- Snapshots/data are committed only from the scheduler's clone (weekly job, or a manual
+  `--only` run there); code changes come from this Desktop copy. Scraping in this copy
+  is fine for testing, but discard `data/` changes before pulling.
+- Test UI changes against real data plus fake earlier snapshots in a scratch copy of the
+  repo (not in `data/`), then screenshot with Playwright in light/dark and at 390px width.

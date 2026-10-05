@@ -1,11 +1,18 @@
 # apartments
 
-Tracks availability and pricing for a list of apartment complexes. A weekly GitHub
-Action scrapes each complex's site, commits a snapshot to `data/snapshots/`, and
-publishes a static dashboard to GitHub Pages:
+Tracks availability and pricing for a list of apartment complexes. A weekly job on a
+Mac scrapes each complex's site and pushes a snapshot to `data/snapshots/`; a GitHub
+Action then rebuilds and publishes a static dashboard to GitHub Pages:
+https://mattrudy13.github.io/apartments/
 
-- **Overview**: units available, lowest price, change since the last pull, and history charts
-- **Complex page**: floorplans (sortable/filterable), units in each plan, price history by bedroom count
+- **Overview**: units available, lowest price (listed and net of specials), change since
+  the last pull, lowest price by bedroom count, and history charts
+- **Complex page**: current specials and how they were read, floorplans (sortable,
+  filterable by bedrooms), the units in each plan with net rent, days listed and price
+  changes, units no longer listed, and price history by bedroom count
+
+"Net" rent spreads specials (e.g. two months free) over the lease, applying caveats such
+as move-in-by dates per unit; see `scraper/specials.py`.
 
 ## Adding a complex
 
@@ -19,7 +26,19 @@ Add an entry to `complexes.yaml`. The `scraper` must match the site's platform:
 | `appfolio`       | AppFolio listings widget (Duda-built sites)   | the availability page     |
 
 A site on a different platform needs a new module in `scraper/` exposing
-`scrape(cfg, today) -> (PropertyInfo, [FloorPlan], [Unit])`, registered in `scraper/run.py`.
+`scrape(cfg, today) -> (PropertyInfo, [FloorPlan], [Unit])`, registered in `scraper/run.py`,
+plus a parser test against a saved copy of the page in `tests/fixtures/`.
+
+After pushing the new entry, fill it in without re-scraping the other complexes by
+running just that one in the scheduler's clone (see [Schedule](#schedule)):
+
+```sh
+cd ~/Library/Application\ Support/apartments-scraper && git pull
+.venv/bin/python -m scraper.run --only <slug>
+git add data && git commit -m "data: add <slug>" && git push
+```
+
+Otherwise it shows as "stale" until the next weekly run.
 
 ## Running locally
 
@@ -32,10 +51,16 @@ python build.py                         # writes site/data/*.json
 python -m http.server -d site 8000      # open http://localhost:8000
 ```
 
+To just view the latest data, skip the scrape: `git pull`, `python build.py`, then serve.
+Scraping from this copy writes snapshot files that the scheduler also writes; discard
+them before pulling (`git checkout data/`) so they don't conflict.
+
 ## Schedule
 
 The apartment sites block GitHub's servers (Attain returns 403; ReNew's Cloudflare
-check never clears), so scraping runs on a Mac and pushes the snapshot:
+check never clears), so scraping runs on a Mac and pushes the snapshot. Pushes to `main`
+that touch `data/`, `site/`, `scraper/`, `tests/`, `build.py` or `complexes.yaml` redeploy
+the site (docs-only changes don't); a failing test blocks the deploy.
 
 ```sh
 scripts/install_schedule.sh          # launchd job: Mondays 9:00 (runs on wake if asleep)
