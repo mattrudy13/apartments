@@ -2,7 +2,7 @@
  "slug": "attain-chics-beach",
  "name": "Attain at Chic's Beach",
  "url": "https://www.attainchicsbeach.com/",
- "scraped_at": "2026-10-05T01:35:07+00:00",
+ "scraped_at": "2026-10-05T02:14:58+00:00",
  "property": {
   "address": "4705 Windsong Dr, Virginia Beach, VA, 23455",
   "phone": "757-460-1789"
@@ -20,6 +20,7 @@
    "earliest_available": "2026-09-25",
    "image_url": null,
    "details_url": null,
+   "lease_months": null,
    "specials": []
   },
   {
@@ -34,6 +35,7 @@
    "earliest_available": "2026-08-14",
    "image_url": "https://optimise2.assets-servd.host/lackadaisical-tern/production/images/168926/218346/floor-plan-images/C46-H.jpg?w=2400&q=82&auto=format&fit=clip&dm=1767400800&s=6de86f29589a16e8d7b42aae62570e7b",
    "details_url": null,
+   "lease_months": null,
    "specials": []
   },
   {
@@ -48,6 +50,7 @@
    "earliest_available": "2025-12-30",
    "image_url": "https://optimise2.assets-servd.host/lackadaisical-tern/production/images/168926/218346/floor-plan-images/C40KA-H.jpg?w=2400&q=82&auto=format&fit=clip&dm=1767400797&s=5b0ba577ffafb73ca974c7c77375e72b",
    "details_url": null,
+   "lease_months": null,
    "specials": []
   },
   {
@@ -62,6 +65,7 @@
    "earliest_available": "2026-07-07",
    "image_url": "https://optimise2.assets-servd.host/lackadaisical-tern/production/images/168926/218346/floor-plan-images/C40K-H.jpg?w=2400&q=82&auto=format&fit=clip&dm=1767400795&s=58dfdd330ac7c797b7ff6839a2e5584b",
    "details_url": null,
+   "lease_months": null,
    "specials": []
   },
   {
@@ -76,6 +80,7 @@
    "earliest_available": "2026-10-17",
    "image_url": "https://optimise2.assets-servd.host/lackadaisical-tern/production/images/168926/218346/floor-plan-images/C40E-H.jpg?w=2400&q=82&auto=format&fit=clip&dm=1767400793&s=0a7e6c213005a1bf57f8721ec780f6c2",
    "details_url": null,
+   "lease_months": null,
    "specials": []
   },
   {
@@ -90,6 +95,7 @@
    "earliest_available": "2025-12-30",
    "image_url": "https://optimise2.assets-servd.host/lackadaisical-tern/production/images/168926/218346/floor-plan-images/B4-V-B4.1-V-B4E-V-and-B4E1-V.jpg?w=2400&q=82&auto=format&fit=clip&dm=1767400762&s=51274caa71282958d55b9e9ba6e9d323",
    "details_url": null,
+   "lease_months": null,
    "specials": []
   },
   {
@@ -104,6 +110,7 @@
    "earliest_available": "2025-12-30",
    "image_url": "https://optimise2.assets-servd.host/lackadaisical-tern/production/images/168926/218346/floor-plan-images/B4-V-B4.1-V-B4E-V-and-B4E1-V.jpg?w=2400&q=82&auto=format&fit=clip&dm=1767400762&s=51274caa71282958d55b9e9ba6e9d323",
    "details_url": null,
+   "lease_months": null,
    "specials": []
   },
   {
@@ -118,6 +125,7 @@
    "earliest_available": "2026-10-10",
    "image_url": "https://optimise2.assets-servd.host/lackadaisical-tern/production/images/168926/218346/floor-plan-images/B46D-H.jpg?w=2400&q=82&auto=format&fit=clip&dm=1767400788&s=8685f146d04700bf55757f8660747838",
    "details_url": null,
+   "lease_months": null,
    "specials": []
   },
   {
@@ -132,6 +140,7 @@
    "earliest_available": "2025-09-30",
    "image_url": "https://optimise2.assets-servd.host/lackadaisical-tern/production/images/168926/218346/floor-plan-images/B4-V-B4.1-V-B4E-V-and-B4E1-V.png?w=2400&q=82&auto=format&fit=clip&dm=1772060154&s=209231528fa6761478e3148c5d41d64c",
    "details_url": null,
+   "lease_months": null,
    "specials": []
   },
   {
@@ -146,6 +155,7 @@
    "earliest_available": "2026-04-03",
    "image_url": "https://optimise2.assets-servd.host/lackadaisical-tern/production/images/168926/218346/floor-plan-images/B4-V-B4.1-V-B4E-V-and-B4E1-V.jpg?w=2400&q=82&auto=format&fit=clip&dm=1767400762&s=51274caa71282958d55b9e9ba6e9d323",
    "details_url": null,
+   "lease_months": null,
    "specials": []
   },
   {
@@ -160,6 +170,7 @@
    "earliest_available": "2026-04-25",
    "image_url": "https://optimise2.assets-servd.host/lackadaisical-tern/production/images/168926/218346/floor-plan-images/B3E-V.jpg?w=2400&q=82&auto=format&fit=clip&dm=1767400759&s=3e4e71961fbfeae1ffce49546e797ccf",
    "details_url": null,
+   "lease_months": null,
    "specials": []
   },
   {
@@ -174,6 +185,7 @@
    "earliest_available": "2025-12-06",
    "image_url": "https://optimise2.assets-servd.host/lackadaisical-tern/production/images/168926/218346/floor-plan-images/Enclave-B38SM-2-bedroom.jpg?w=2400&q=82&auto=format&fit=clip&dm=1767400804&s=dc28163d661c95b9b740c869bb18bbd4",
    "details_url": null,
+   "lease_months": null,
    "specials": []
   },
   {
@@ -188,6 +200,7 @@
    "earliest_available": "2026-09-30",
    "image_url": "https://optimise2.assets-servd.host/lackadaisical-tern/production/images/168926/218346/floor-plan-images/B38S-H.jpg?w=2400&q=82&auto=format&fit=clip&dm=1767400783&s=edf8e9c3eb11336e2ec6e303cf3b0db1",
    "details_url": null,
+   "lease_months": null,
    "specials": []
   },
   {
@@ -202,6 +215,7 @@
    "earliest_available": "2025-12-30",
    "image_url": "https://optimise2.assets-servd.host/lackadaisical-tern/production/images/168926/218346/floor-plan-images/B38SM-H.jpg?w=2400&q=82&auto=format&fit=clip&dm=1767400786&s=bba8093a117785171b0dab85b202e121",
    "details_url": null,
+   "lease_months": null,
    "specials": []
   },
   {
@@ -216,6 +230,7 @@
    "earliest_available": "2026-06-20",
    "image_url": "https://optimise2.assets-servd.host/lackadaisical-tern/production/images/168926/218346/floor-plan-images/B38-H-and-B28A-H.jpg?w=2400&q=82&auto=format&fit=clip&dm=1767400779&s=3cefd4ea97b741ad4458686aada7de73",
    "details_url": null,
+   "lease_months": null,
    "specials": []
   },
   {
@@ -230,6 +245,7 @@
    "earliest_available": "2026-09-16",
    "image_url": "https://optimise2.assets-servd.host/lackadaisical-tern/production/images/168926/218346/floor-plan-images/B38-H-and-B28A-H.jpg?w=2400&q=82&auto=format&fit=clip&dm=1767400779&s=3cefd4ea97b741ad4458686aada7de73",
    "details_url": null,
+   "lease_months": null,
    "specials": []
   },
   {
@@ -244,6 +260,7 @@
    "earliest_available": "2026-10-08",
    "image_url": "https://optimise2.assets-servd.host/lackadaisical-tern/production/images/168926/218346/floor-plan-images/B36S-H.jpg?w=2400&q=82&auto=format&fit=clip&dm=1767400776&s=de2c652f0c4f515bcea8cb9249694072",
    "details_url": null,
+   "lease_months": null,
    "specials": []
   },
   {
@@ -258,6 +275,7 @@
    "earliest_available": "2026-09-17",
    "image_url": "https://optimise2.assets-servd.host/lackadaisical-tern/production/images/168926/218346/floor-plan-images/B36-H.jpg?w=2400&q=82&auto=format&fit=clip&dm=1767400774&s=4ffd762c0182b91117308643c177933f",
    "details_url": null,
+   "lease_months": null,
    "specials": []
   },
   {
@@ -272,6 +290,7 @@
    "earliest_available": "2025-12-08",
    "image_url": "https://optimise2.assets-servd.host/lackadaisical-tern/production/images/168926/218346/floor-plan-images/B34-H.jpg?w=2400&q=82&auto=format&fit=clip&dm=1767400771&s=2996800db1b7a2c273f7d8f9b0cca0de",
    "details_url": null,
+   "lease_months": null,
    "specials": []
   },
   {
@@ -286,6 +305,7 @@
    "earliest_available": "2026-09-08",
    "image_url": "https://optimise2.assets-servd.host/lackadaisical-tern/production/images/168926/218346/floor-plan-images/B30K-H.jpg?w=2400&q=82&auto=format&fit=clip&dm=1767400769&s=ab4be396f82116acf461a05d52c28821",
    "details_url": null,
+   "lease_months": null,
    "specials": []
   },
   {
@@ -300,6 +320,7 @@
    "earliest_available": "2026-08-08",
    "image_url": "https://optimise2.assets-servd.host/lackadaisical-tern/production/images/168926/218346/floor-plan-images/B3-V.jpg?w=2400&q=82&auto=format&fit=clip&dm=1767400757&s=cb1b31112945bb7e7ff5c6ee46e6dd63",
    "details_url": null,
+   "lease_months": null,
    "specials": []
   },
   {
@@ -314,6 +335,7 @@
    "earliest_available": "2026-07-31",
    "image_url": "https://optimise2.assets-servd.host/lackadaisical-tern/production/images/168926/218346/floor-plan-images/B2E-V-and-B2E.1-V.jpg?w=2400&q=82&auto=format&fit=clip&dm=1767400754&s=8f2159c680be0f732cc273267bb5d8bc",
    "details_url": null,
+   "lease_months": null,
    "specials": []
   },
   {
@@ -328,6 +350,7 @@
    "earliest_available": "2025-12-30",
    "image_url": "https://optimise2.assets-servd.host/lackadaisical-tern/production/images/168926/218346/floor-plan-images/B2E-V-and-B2E.1-V.jpg?w=2400&q=82&auto=format&fit=clip&dm=1767400754&s=8f2159c680be0f732cc273267bb5d8bc",
    "details_url": null,
+   "lease_months": null,
    "specials": []
   },
   {
@@ -342,6 +365,7 @@
    "earliest_available": "2026-07-29",
    "image_url": "https://optimise2.assets-servd.host/lackadaisical-tern/production/images/168926/218346/floor-plan-images/B28K-H.jpg?w=2400&q=82&auto=format&fit=clip&dm=1767400764&s=c25c0ff6a17cdb0f1f191ae7129307ca",
    "details_url": null,
+   "lease_months": null,
    "specials": []
   },
   {
@@ -356,6 +380,7 @@
    "earliest_available": "2026-10-09",
    "image_url": "https://optimise2.assets-servd.host/lackadaisical-tern/production/images/168926/218346/floor-plan-images/B2-V-and-B2.1-V.jpg?w=2400&q=82&auto=format&fit=clip&dm=1767400752&s=b6683bdde44f19f368f589c5dcdb7f8f",
    "details_url": null,
+   "lease_months": null,
    "specials": []
   },
   {
@@ -370,6 +395,7 @@
    "earliest_available": "2026-08-21",
    "image_url": "https://optimise2.assets-servd.host/lackadaisical-tern/production/images/168926/218346/floor-plan-images/B2-V-and-B2.1-V.jpg?w=2400&q=82&auto=format&fit=clip&dm=1767400752&s=b6683bdde44f19f368f589c5dcdb7f8f",
    "details_url": null,
+   "lease_months": null,
    "specials": []
   },
   {
@@ -384,6 +410,7 @@
    "earliest_available": "2026-05-23",
    "image_url": "https://optimise2.assets-servd.host/lackadaisical-tern/production/images/168926/218346/floor-plan-images/B1-V-B1E-V-and-B1E-ADA-V.jpg?w=2400&q=82&auto=format&fit=clip&dm=1767400749&s=4616a6eb6a8dac50c289ae0a925eb39b",
    "details_url": null,
+   "lease_months": null,
    "specials": []
   },
   {
@@ -398,6 +425,7 @@
    "earliest_available": "2026-04-30",
    "image_url": "https://optimise2.assets-servd.host/lackadaisical-tern/production/images/168926/218346/floor-plan-images/B1-V-B1E-V-and-B1E-ADA-V.jpg?w=2400&q=82&auto=format&fit=clip&dm=1767400749&s=4616a6eb6a8dac50c289ae0a925eb39b",
    "details_url": null,
+   "lease_months": null,
    "specials": []
   },
   {
@@ -412,6 +440,7 @@
    "earliest_available": "2026-12-08",
    "image_url": "https://optimise2.assets-servd.host/lackadaisical-tern/production/images/168926/218346/floor-plan-images/B1-V-B1E-V-and-B1E-ADA-V.jpg?w=2400&q=82&auto=format&fit=clip&dm=1767400749&s=4616a6eb6a8dac50c289ae0a925eb39b",
    "details_url": null,
+   "lease_months": null,
    "specials": []
   },
   {
@@ -426,6 +455,7 @@
    "earliest_available": "2026-09-07",
    "image_url": "https://optimise2.assets-servd.host/lackadaisical-tern/production/images/168926/218346/floor-plan-images/A4-V-and-A4.1-V.jpg?w=2400&q=82&auto=format&fit=clip&dm=1767400734&s=1ca71fab4dde36f8cc4f42c42b59971d",
    "details_url": null,
+   "lease_months": null,
    "specials": []
   },
   {
@@ -440,6 +470,7 @@
    "earliest_available": "2026-09-10",
    "image_url": "https://optimise2.assets-servd.host/lackadaisical-tern/production/images/168926/218346/floor-plan-images/A4-V-and-A4.1-V.jpg?w=2400&q=82&auto=format&fit=clip&dm=1767400734&s=1ca71fab4dde36f8cc4f42c42b59971d",
    "details_url": null,
+   "lease_months": null,
    "specials": []
   },
   {
@@ -454,6 +485,7 @@
    "earliest_available": "2026-09-07",
    "image_url": "https://optimise2.assets-servd.host/lackadaisical-tern/production/images/168926/218346/floor-plan-images/A3-V.jpg?w=2400&q=82&auto=format&fit=clip&dm=1767400731&s=08dc6c8e195f0d395701ccea4a10234c",
    "details_url": null,
+   "lease_months": null,
    "specials": []
   },
   {
@@ -468,6 +500,7 @@
    "earliest_available": "2026-09-19",
    "image_url": "https://optimise2.assets-servd.host/lackadaisical-tern/production/images/168926/218346/floor-plan-images/A28S-H.jpg?w=2400&q=82&auto=format&fit=clip&dm=1767400746&s=020818d56e35e69348b083add9fafd1d",
    "details_url": null,
+   "lease_months": null,
    "specials": []
   },
   {
@@ -482,6 +515,7 @@
    "earliest_available": "2026-04-14",
    "image_url": "https://optimise2.assets-servd.host/lackadaisical-tern/production/images/168926/218346/floor-plan-images/A28D-H.jpg?w=2400&q=82&auto=format&fit=clip&dm=1767400744&s=e514b7dc403fc0be1843b966f7cc442e",
    "details_url": null,
+   "lease_months": null,
    "specials": []
   },
   {
@@ -496,6 +530,7 @@
    "earliest_available": "2025-12-30",
    "image_url": "https://optimise2.assets-servd.host/lackadaisical-tern/production/images/168926/218346/floor-plan-images/A28-H.jpg?w=2400&q=82&auto=format&fit=clip&dm=1767400741&s=2b22df03f826c102d28a37ad14318ac9",
    "details_url": null,
+   "lease_months": null,
    "specials": []
   },
   {
@@ -510,6 +545,7 @@
    "earliest_available": "2026-10-08",
    "image_url": "https://optimise2.assets-servd.host/lackadaisical-tern/production/images/168926/218346/floor-plan-images/A28-H.jpg?w=2400&q=82&auto=format&fit=clip&dm=1767400741&s=2b22df03f826c102d28a37ad14318ac9",
    "details_url": null,
+   "lease_months": null,
    "specials": []
   },
   {
@@ -524,6 +560,7 @@
    "earliest_available": "2026-02-18",
    "image_url": "https://optimise2.assets-servd.host/lackadaisical-tern/production/images/168926/218346/floor-plan-images/A20K-H.jpg?w=2400&q=82&auto=format&fit=clip&dm=1767400739&s=327389e68526e224a82753878a44c18e",
    "details_url": null,
+   "lease_months": null,
    "specials": []
   },
   {
@@ -538,6 +575,7 @@
    "earliest_available": "2026-06-06",
    "image_url": "https://optimise2.assets-servd.host/lackadaisical-tern/production/images/168926/218346/floor-plan-images/A2.2-V.jpg?w=2400&q=82&auto=format&fit=clip&dm=1767400728&s=845530e625cc58c74b83d0a94e84bdb7",
    "details_url": null,
+   "lease_months": null,
    "specials": []
   },
   {
@@ -552,6 +590,7 @@
    "earliest_available": "2026-10-08",
    "image_url": "https://optimise2.assets-servd.host/lackadaisical-tern/production/images/168926/218346/floor-plan-images/A2.1-V.jpg?w=2400&q=82&auto=format&fit=clip&dm=1767400726&s=0683010099234f5c21003c867f06246a",
    "details_url": null,
+   "lease_months": null,
    "specials": []
   },
   {
@@ -566,6 +605,7 @@
    "earliest_available": "2025-12-30",
    "image_url": "https://optimise2.assets-servd.host/lackadaisical-tern/production/images/168926/218346/floor-plan-images/A16K-H.jpg?w=2400&q=82&auto=format&fit=clip&dm=1767400736&s=dc6d091a5276236319ecf2d5b0e34330",
    "details_url": null,
+   "lease_months": null,
    "specials": []
   },
   {
@@ -580,6 +620,7 @@
    "earliest_available": "2026-11-07",
    "image_url": "https://optimise2.assets-servd.host/lackadaisical-tern/production/images/168926/218346/floor-plan-images/A1-V-A1.1-V-and-A1.2-V.jpg?w=2400&q=82&auto=format&fit=clip&dm=1767400723&s=587a7f9991074176ec4e580858dbf19e",
    "details_url": null,
+   "lease_months": null,
    "specials": []
   },
   {
@@ -594,6 +635,7 @@
    "earliest_available": "2026-11-13",
    "image_url": "https://optimise2.assets-servd.host/lackadaisical-tern/production/images/168926/218346/floor-plan-images/A1-V-A1.1-V-and-A1.2-V.jpg?w=2400&q=82&auto=format&fit=clip&dm=1767400723&s=587a7f9991074176ec4e580858dbf19e",
    "details_url": null,
+   "lease_months": null,
    "specials": []
   },
   {
@@ -608,6 +650,7 @@
    "earliest_available": "2026-11-25",
    "image_url": "https://optimise2.assets-servd.host/lackadaisical-tern/production/images/168926/218346/floor-plan-images/A1-V-A1.1-V-and-A1.2-V.jpg?w=2400&q=82&auto=format&fit=clip&dm=1767400723&s=587a7f9991074176ec4e580858dbf19e",
    "details_url": null,
+   "lease_months": null,
    "specials": []
   },
   {
@@ -622,6 +665,7 @@
    "earliest_available": "2025-12-30",
    "image_url": null,
    "details_url": null,
+   "lease_months": null,
    "specials": []
   },
   {
@@ -636,6 +680,7 @@
    "earliest_available": "2026-09-14",
    "image_url": "https://optimise2.assets-servd.host/lackadaisical-tern/production/images/168926/218346/floor-plan-images/2-2-SHOW-V-and-2-2B-V.jpg?w=2400&q=82&auto=format&fit=clip&dm=1767400721&s=c65c286ca26e0c0451b9021713399269",
    "details_url": null,
+   "lease_months": null,
    "specials": []
   },
   {
@@ -650,6 +695,7 @@
    "earliest_available": "2026-08-19",
    "image_url": "https://optimise2.assets-servd.host/lackadaisical-tern/production/images/168926/218346/floor-plan-images/2-2-SHOW-V-and-2-2B-V.jpg?w=2400&q=82&auto=format&fit=clip&dm=1767400721&s=c65c286ca26e0c0451b9021713399269",
    "details_url": null,
+   "lease_months": null,
    "specials": []
   },
   {
@@ -664,6 +710,7 @@
    "earliest_available": "2026-08-05",
    "image_url": "https://optimise2.assets-servd.host/lackadaisical-tern/production/images/168926/218346/floor-plan-images/2-1A-V.jpg?w=2400&q=82&auto=format&fit=clip&dm=1767400719&s=2ef96a64c3a654ad69ef9a91834fc02f",
    "details_url": null,
+   "lease_months": null,
    "specials": []
   },
   {
@@ -678,6 +725,7 @@
    "earliest_available": "2026-10-10",
    "image_url": "https://optimise2.assets-servd.host/lackadaisical-tern/production/images/168926/218346/floor-plan-images/2-1.5B-V.jpg?w=2400&q=82&auto=format&fit=clip&dm=1767400716&s=eebc09110df61f79904528526b99d366",
    "details_url": null,
+   "lease_months": null,
    "specials": []
   },
   {
@@ -692,6 +740,7 @@
    "earliest_available": "2025-12-30",
    "image_url": "https://optimise2.assets-servd.host/lackadaisical-tern/production/images/168926/218346/floor-plan-images/2-1.5A-V.jpg?w=2400&q=82&auto=format&fit=clip&dm=1767400712&s=407f57c48051dfb3846b9ce5ce422801",
    "details_url": null,
+   "lease_months": null,
    "specials": []
   }
  ],
@@ -704,7 +753,9 @@
    "floor": "3",
    "building": "4720",
    "available_date": "2026-10-07",
-   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=394"
+   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=394",
+   "lease_months": null,
+   "specials": []
   },
   {
    "unit_number": "420",
@@ -714,7 +765,9 @@
    "floor": "4",
    "building": "4720",
    "available_date": "2026-09-14",
-   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=397"
+   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=397",
+   "lease_months": null,
+   "specials": []
   },
   {
    "unit_number": "202",
@@ -724,7 +777,9 @@
    "floor": "2",
    "building": "4728",
    "available_date": "2026-07-10",
-   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=400"
+   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=400",
+   "lease_months": null,
+   "specials": []
   },
   {
    "unit_number": "220",
@@ -734,7 +789,9 @@
    "floor": "2",
    "building": "4728",
    "available_date": "2026-09-18",
-   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=401"
+   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=401",
+   "lease_months": null,
+   "specials": []
   },
   {
    "unit_number": "402",
@@ -744,7 +801,9 @@
    "floor": "4",
    "building": "4728",
    "available_date": "2026-09-07",
-   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=404"
+   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=404",
+   "lease_months": null,
+   "specials": []
   },
   {
    "unit_number": "307",
@@ -754,7 +813,9 @@
    "floor": "3",
    "building": "4728",
    "available_date": "2026-08-14",
-   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=411"
+   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=411",
+   "lease_months": null,
+   "specials": []
   },
   {
    "unit_number": "104",
@@ -764,7 +825,9 @@
    "floor": "1",
    "building": "4705-WSH",
    "available_date": "2026-11-07",
-   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=74"
+   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=74",
+   "lease_months": null,
+   "specials": []
   },
   {
    "unit_number": "203",
@@ -774,7 +837,9 @@
    "floor": "2",
    "building": "4712",
    "available_date": "2026-12-22",
-   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=184"
+   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=184",
+   "lease_months": null,
+   "specials": []
   },
   {
    "unit_number": "406",
@@ -784,7 +849,9 @@
    "floor": "4",
    "building": "4720",
    "available_date": "2026-09-19",
-   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=252"
+   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=252",
+   "lease_months": null,
+   "specials": []
   },
   {
    "unit_number": "204",
@@ -794,7 +861,9 @@
    "floor": "2",
    "building": "4728",
    "available_date": "2026-09-24",
-   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=256"
+   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=256",
+   "lease_months": null,
+   "specials": []
   },
   {
    "unit_number": "308",
@@ -804,7 +873,9 @@
    "floor": "3",
    "building": "4728",
    "available_date": "2026-11-28",
-   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=262"
+   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=262",
+   "lease_months": null,
+   "specials": []
   },
   {
    "unit_number": "301",
@@ -814,7 +885,9 @@
    "floor": "3",
    "building": "4720",
    "available_date": "2026-09-25",
-   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=279"
+   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=279",
+   "lease_months": null,
+   "specials": []
   },
   {
    "unit_number": "415",
@@ -824,7 +897,9 @@
    "floor": "4",
    "building": "4728",
    "available_date": "2026-12-09",
-   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=290"
+   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=290",
+   "lease_months": null,
+   "specials": []
   },
   {
    "unit_number": "216",
@@ -834,7 +909,9 @@
    "floor": "2",
    "building": "4728",
    "available_date": "2026-11-21",
-   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=324"
+   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=324",
+   "lease_months": null,
+   "specials": []
   },
   {
    "unit_number": "201",
@@ -844,7 +921,9 @@
    "floor": "2",
    "building": "4736",
    "available_date": "2026-10-10",
-   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=5"
+   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=5",
+   "lease_months": null,
+   "specials": []
   },
   {
    "unit_number": "204",
@@ -854,7 +933,9 @@
    "floor": "2",
    "building": "4740",
    "available_date": "2026-09-14",
-   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=16"
+   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=16",
+   "lease_months": null,
+   "specials": []
   },
   {
    "unit_number": "102",
@@ -864,7 +945,9 @@
    "floor": "1",
    "building": "2375",
    "available_date": "2026-11-25",
-   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=30"
+   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=30",
+   "lease_months": null,
+   "specials": []
   },
   {
    "unit_number": "320",
@@ -874,7 +957,9 @@
    "floor": "3",
    "building": "4728",
    "available_date": "2026-07-07",
-   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=403"
+   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=403",
+   "lease_months": null,
+   "specials": []
   },
   {
    "unit_number": "104",
@@ -884,7 +969,9 @@
    "floor": "1",
    "building": "2345",
    "available_date": "2026-09-07",
-   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=64"
+   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=64",
+   "lease_months": null,
+   "specials": []
   },
   {
    "unit_number": "116",
@@ -894,7 +981,9 @@
    "floor": "1",
    "building": "4720",
    "available_date": "2026-10-08",
-   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=316"
+   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=316",
+   "lease_months": null,
+   "specials": []
   },
   {
    "unit_number": "123",
@@ -904,7 +993,9 @@
    "floor": "1",
    "building": "4705",
    "available_date": "2026-10-17",
-   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=381"
+   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=381",
+   "lease_months": null,
+   "specials": []
   },
   {
    "unit_number": "201",
@@ -914,7 +1005,9 @@
    "floor": "2",
    "building": "2349",
    "available_date": "2026-09-07",
-   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=111"
+   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=111",
+   "lease_months": null,
+   "specials": []
   },
   {
    "unit_number": "220",
@@ -924,7 +1017,9 @@
    "floor": "2",
    "building": "4720",
    "available_date": "2026-10-24",
-   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=393"
+   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=393",
+   "lease_months": null,
+   "specials": []
   },
   {
    "unit_number": "201",
@@ -934,7 +1029,9 @@
    "floor": "2",
    "building": "4753",
    "available_date": "2026-10-09",
-   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=191"
+   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=191",
+   "lease_months": null,
+   "specials": []
   },
   {
    "unit_number": "407",
@@ -944,7 +1041,9 @@
    "floor": "4",
    "building": "4720",
    "available_date": "2026-10-07",
-   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=409"
+   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=409",
+   "lease_months": null,
+   "specials": []
   },
   {
    "unit_number": "202",
@@ -954,7 +1053,9 @@
    "floor": "2",
    "building": "2371",
    "available_date": "2026-10-08",
-   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=43"
+   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=43",
+   "lease_months": null,
+   "specials": []
   },
   {
    "unit_number": "201",
@@ -964,7 +1065,9 @@
    "floor": "2",
    "building": "2370",
    "available_date": "2026-11-13",
-   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=33"
+   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=33",
+   "lease_months": null,
+   "specials": []
   },
   {
    "unit_number": "203",
@@ -974,7 +1077,9 @@
    "floor": "2",
    "building": "2337",
    "available_date": "2026-09-10",
-   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=89"
+   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=89",
+   "lease_months": null,
+   "specials": []
   },
   {
    "unit_number": "103",
@@ -984,7 +1089,9 @@
    "floor": "1",
    "building": "4753",
    "available_date": "2026-12-08",
-   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=154"
+   "apply_url": "https://9090442.onlineleasing.realpage.com?SiteId=5562856&UnitId=154",
+   "lease_months": null,
+   "specials": []
   }
  ]
 }

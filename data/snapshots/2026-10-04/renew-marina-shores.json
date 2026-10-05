@@ -2,7 +2,7 @@
  "slug": "renew-marina-shores",
  "name": "ReNew Marina Shores",
  "url": "https://www.renewmarinashores.com/",
- "scraped_at": "2026-10-05T01:36:00+00:00",
+ "scraped_at": "2026-10-05T02:15:46+00:00",
  "property": {
   "address": "2257 Willow Oak Cir., Virginia Beach, 23451",
   "phone": "866-203-4610"
@@ -20,8 +20,12 @@
    "earliest_available": null,
    "image_url": "https://medialibrarycfo.entrata.com/3482/MLv3/4/22/2025/07/23/092552/6880ff00df4e22.65415297767.png",
    "details_url": "https://www.renewmarinashores.com/virginia-beach/renew-marina-shores/floorplans/arlington-690912/fp_name/occupancy_type/conventional/",
+   "lease_months": null,
    "specials": [
-    "Two Months Free"
+    {
+     "title": "Two Months Free",
+     "description": "Enjoy two months FREE when you make ReNew Marina Shores. your new home! Offer valid on 12+ month lease terms. Please see a Leasing Consultant for details and restrictions."
+    }
    ]
   },
   {
@@ -36,8 +40,12 @@
    "earliest_available": "2026-11-17",
    "image_url": "https://medialibrarycfo.entrata.com/3482/MLv3/4/22/2025/07/23/092653/6880ff3ce864c0.45939318833.png",
    "details_url": "https://www.renewmarinashores.com/virginia-beach/renew-marina-shores/floorplans/athens-690916/fp_name/occupancy_type/conventional/",
+   "lease_months": 15,
    "specials": [
-    "Two Months Free"
+    {
+     "title": "Two Months Free",
+     "description": "Enjoy two months FREE when you make ReNew Marina Shores. your new home! Offer valid on 12+ month lease terms. Please see a Leasing Consultant for details and restrictions."
+    }
    ]
   },
   {
@@ -52,8 +60,12 @@
    "earliest_available": null,
    "image_url": "https://medialibrarycfo.entrata.com/3482/MLv3/4/22/2023/02/03/114947/63dd574bb31c66.50055838349.png",
    "details_url": "https://www.renewmarinashores.com/virginia-beach/renew-marina-shores/floorplans/arlington-loft-690914/fp_name/occupancy_type/conventional/",
+   "lease_months": null,
    "specials": [
-    "Two Months Free"
+    {
+     "title": "Two Months Free",
+     "description": "Enjoy two months FREE when you make ReNew Marina Shores. your new home! Offer valid on 12+ month lease terms. Please see a Leasing Consultant for details and restrictions."
+    }
    ]
   },
   {
@@ -68,8 +80,12 @@
    "earliest_available": "2026-10-04",
    "image_url": "https://medialibrarycfo.entrata.com/3482/MLv3/4/22/2025/07/23/112207/68811a3f832542.04728829791.png",
    "details_url": "https://www.renewmarinashores.com/virginia-beach/renew-marina-shores/floorplans/baltimore-690918/fp_name/occupancy_type/conventional/",
+   "lease_months": 15,
    "specials": [
-    "Two Months Free"
+    {
+     "title": "Two Months Free",
+     "description": "Enjoy two months FREE when you make ReNew Marina Shores. your new home! Offer valid on 12+ month lease terms. Please see a Leasing Consultant for details and restrictions."
+    }
    ]
   },
   {
@@ -84,8 +100,12 @@
    "earliest_available": "2026-10-04",
    "image_url": "https://medialibrarycfo.entrata.com/3482/MLv3/4/22/2025/07/23/112244/68811a64afb2e1.28343243208.png",
    "details_url": "https://www.renewmarinashores.com/virginia-beach/renew-marina-shores/floorplans/chesapeake-690920/fp_name/occupancy_type/conventional/",
+   "lease_months": 15,
    "specials": [
-    "Two Months Free"
+    {
+     "title": "Two Months Free",
+     "description": "Enjoy two months FREE when you make ReNew Marina Shores. your new home! Offer valid on 12+ month lease terms. Please see a Leasing Consultant for details and restrictions."
+    }
    ]
   },
   {
@@ -100,8 +120,12 @@
    "earliest_available": "2026-12-01",
    "image_url": "https://medialibrarycfo.entrata.com/3482/MLv3/4/22/2025/07/23/112318/68811a86154e68.12320528805.png",
    "details_url": "https://www.renewmarinashores.com/virginia-beach/renew-marina-shores/floorplans/chesapeake-loft-690922/fp_name/occupancy_type/conventional/",
+   "lease_months": 15,
    "specials": [
-    "Two Months Free"
+    {
+     "title": "Two Months Free",
+     "description": "Enjoy two months FREE when you make ReNew Marina Shores. your new home! Offer valid on 12+ month lease terms. Please see a Leasing Consultant for details and restrictions."
+    }
    ]
   },
   {
@@ -116,8 +140,12 @@
    "earliest_available": "2026-10-04",
    "image_url": "https://medialibrarycfo.entrata.com/3482/MLv3/4/22/2025/07/23/112747/68811b936ee653.84361073882.png",
    "details_url": "https://www.renewmarinashores.com/virginia-beach/renew-marina-shores/floorplans/dover-690924/fp_name/occupancy_type/conventional/",
+   "lease_months": 15,
    "specials": [
-    "Two Months Free"
+    {
+     "title": "Two Months Free",
+     "description": "Enjoy two months FREE when you make ReNew Marina Shores. your new home! Offer valid on 12+ month lease terms. Please see a Leasing Consultant for details and restrictions."
+    }
    ]
   },
   {
@@ -132,8 +160,12 @@
    "earliest_available": "2026-10-04",
    "image_url": "https://medialibrarycfo.entrata.com/3482/MLv3/4/22/2025/07/23/112823/68811bb7d33869.53534152958.png",
    "details_url": "https://www.renewmarinashores.com/virginia-beach/renew-marina-shores/floorplans/douglas-690926/fp_name/occupancy_type/conventional/",
+   "lease_months": 15,
    "specials": [
-    "Two Months Free"
+    {
+     "title": "Two Months Free",
+     "description": "Enjoy two months FREE when you make ReNew Marina Shores. your new home! Offer valid on 12+ month lease terms. Please see a Leasing Consultant for details and restrictions."
+    }
    ]
   }
  ],
@@ -146,7 +178,9 @@
    "floor": null,
    "building": "2200",
    "available_date": "2026-12-03",
-   "apply_url": null
+   "apply_url": null,
+   "lease_months": 15,
+   "specials": []
   },
   {
    "unit_number": "110",
@@ -156,7 +190,9 @@
    "floor": null,
    "building": "2208",
    "available_date": "2026-12-16",
-   "apply_url": null
+   "apply_url": null,
+   "lease_months": 15,
+   "specials": []
   },
   {
    "unit_number": "110",
@@ -166,7 +202,9 @@
    "floor": null,
    "building": "2221",
    "available_date": "2026-11-28",
-   "apply_url": null
+   "apply_url": null,
+   "lease_months": 15,
+   "specials": []
   },
   {
    "unit_number": "308",
@@ -176,7 +214,9 @@
    "floor": null,
    "building": "2213",
    "available_date": "2026-11-17",
-   "apply_url": null
+   "apply_url": null,
+   "lease_months": 15,
+   "specials": []
   },
   {
    "unit_number": "102",
@@ -186,7 +226,9 @@
    "floor": null,
    "building": "2228",
    "available_date": "2026-11-28",
-   "apply_url": null
+   "apply_url": null,
+   "lease_months": 15,
+   "specials": []
   },
   {
    "unit_number": "103",
@@ -196,7 +238,9 @@
    "floor": null,
    "building": "2213",
    "available_date": "2026-12-10",
-   "apply_url": null
+   "apply_url": null,
+   "lease_months": 15,
+   "specials": []
   },
   {
    "unit_number": "106",
@@ -206,7 +250,9 @@
    "floor": null,
    "building": "2261",
    "available_date": "2026-10-04",
-   "apply_url": null
+   "apply_url": null,
+   "lease_months": 15,
+   "specials": []
   },
   {
    "unit_number": "107",
@@ -216,7 +262,9 @@
    "floor": null,
    "building": "2212",
    "available_date": "2026-12-12",
-   "apply_url": null
+   "apply_url": null,
+   "lease_months": 15,
+   "specials": []
   },
   {
    "unit_number": "108",
@@ -226,7 +274,9 @@
    "floor": null,
    "building": "2213",
    "available_date": "2026-12-09",
-   "apply_url": null
+   "apply_url": null,
+   "lease_months": 15,
+   "specials": []
   },
   {
    "unit_number": "108",
@@ -236,7 +286,9 @@
    "floor": null,
    "building": "2208",
    "available_date": "2026-12-16",
-   "apply_url": null
+   "apply_url": null,
+   "lease_months": 15,
+   "specials": []
   },
   {
    "unit_number": "106",
@@ -246,7 +298,9 @@
    "floor": null,
    "building": "2265",
    "available_date": "2026-11-30",
-   "apply_url": null
+   "apply_url": null,
+   "lease_months": 15,
+   "specials": []
   },
   {
    "unit_number": "204",
@@ -256,7 +310,9 @@
    "floor": null,
    "building": "2261",
    "available_date": "2026-12-01",
-   "apply_url": null
+   "apply_url": null,
+   "lease_months": 15,
+   "specials": []
   },
   {
    "unit_number": "206",
@@ -266,7 +322,9 @@
    "floor": null,
    "building": "2205",
    "available_date": "2026-10-04",
-   "apply_url": null
+   "apply_url": null,
+   "lease_months": 15,
+   "specials": []
   },
   {
    "unit_number": "109",
@@ -276,7 +334,9 @@
    "floor": null,
    "building": "2220",
    "available_date": "2026-10-17",
-   "apply_url": null
+   "apply_url": null,
+   "lease_months": 15,
+   "specials": []
   },
   {
    "unit_number": "209",
@@ -286,7 +346,9 @@
    "floor": null,
    "building": "2208",
    "available_date": "2026-10-24",
-   "apply_url": null
+   "apply_url": null,
+   "lease_months": 15,
+   "specials": []
   },
   {
    "unit_number": "303",
@@ -296,7 +358,9 @@
    "floor": null,
    "building": "2241",
    "available_date": "2026-12-01",
-   "apply_url": null
+   "apply_url": null,
+   "lease_months": 15,
+   "specials": []
   },
   {
    "unit_number": "307",
@@ -306,7 +370,9 @@
    "floor": null,
    "building": "2212",
    "available_date": "2026-12-31",
-   "apply_url": null
+   "apply_url": null,
+   "lease_months": 15,
+   "specials": []
   },
   {
    "unit_number": "102",
@@ -316,7 +382,9 @@
    "floor": null,
    "building": "2221",
    "available_date": "2026-10-04",
-   "apply_url": null
+   "apply_url": null,
+   "lease_months": 15,
+   "specials": []
   },
   {
    "unit_number": "202",
@@ -326,7 +394,9 @@
    "floor": null,
    "building": "2209",
    "available_date": "2026-10-09",
-   "apply_url": null
+   "apply_url": null,
+   "lease_months": 15,
+   "specials": []
   },
   {
    "unit_number": "302",
@@ -336,7 +406,9 @@
    "floor": null,
    "building": "2200",
    "available_date": "2026-10-13",
-   "apply_url": null
+   "apply_url": null,
+   "lease_months": 15,
+   "specials": []
   },
   {
    "unit_number": "302",
@@ -346,7 +418,9 @@
    "floor": null,
    "building": "2212",
    "available_date": "2026-10-10",
-   "apply_url": null
+   "apply_url": null,
+   "lease_months": 15,
+   "specials": []
   },
   {
    "unit_number": "309",
@@ -356,7 +430,9 @@
    "floor": null,
    "building": "2261",
    "available_date": "2026-10-27",
-   "apply_url": null
+   "apply_url": null,
+   "lease_months": 15,
+   "specials": []
   },
   {
    "unit_number": "202",
@@ -366,7 +442,9 @@
    "floor": null,
    "building": "2268",
    "available_date": "2026-10-08",
-   "apply_url": null
+   "apply_url": null,
+   "lease_months": 15,
+   "specials": []
   },
   {
    "unit_number": "302",
@@ -376,7 +454,9 @@
    "floor": null,
    "building": "2213",
    "available_date": "2026-10-07",
-   "apply_url": null
+   "apply_url": null,
+   "lease_months": 15,
+   "specials": []
   },
   {
    "unit_number": "309",
@@ -386,7 +466,9 @@
    "floor": null,
    "building": "2200",
    "available_date": "2026-11-03",
-   "apply_url": null
+   "apply_url": null,
+   "lease_months": 15,
+   "specials": []
   },
   {
    "unit_number": "207",
@@ -396,7 +478,9 @@
    "floor": null,
    "building": "2221",
    "available_date": "2026-10-04",
-   "apply_url": null
+   "apply_url": null,
+   "lease_months": 15,
+   "specials": []
   },
   {
    "unit_number": "208",
@@ -406,7 +490,9 @@
    "floor": null,
    "building": "2205",
    "available_date": "2026-10-04",
-   "apply_url": null
+   "apply_url": null,
+   "lease_months": 15,
+   "specials": []
   },
   {
    "unit_number": "206",
@@ -416,7 +502,9 @@
    "floor": null,
    "building": "2261",
    "available_date": "2026-10-04",
-   "apply_url": null
+   "apply_url": null,
+   "lease_months": 15,
+   "specials": []
   }
  ]
 }
