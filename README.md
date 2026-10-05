@@ -44,7 +44,23 @@ tail -f ~/Library/Logs/apartments-scraper.log
 ```
 
 The job uses `.venv/bin/python` in the repo unless `APARTMENTS_PYTHON` is set when
-installing. Each push to `data/` triggers `.github/workflows/deploy.yml`, which runs
+installing.
+
+**Run the scheduler from a clone outside `~/Desktop`, `~/Documents` or `~/Downloads`.**
+macOS privacy protection blocks launchd jobs from reading those folders ("Operation
+not permitted"). The current setup uses a dedicated clone with its own venv:
+
+```sh
+D="$HOME/Library/Application Support/apartments-scraper"
+git clone https://github.com/mattrudy13/apartments.git "$D"
+/usr/bin/python3 -m venv "$D/.venv"
+"$D/.venv/bin/pip" install -r "$D/requirements.txt"
+"$D/scripts/install_schedule.sh"
+```
+
+The job pulls before each run, so changes pushed from any other copy (e.g. new entries
+in `complexes.yaml`) are picked up automatically. If `requirements.txt` changes, rerun the
+`pip install` line above. Each push to `data/` triggers `.github/workflows/deploy.yml`, which runs
 the tests, rebuilds `site/data/` and deploys Pages
 (https://mattrudy13.github.io/apartments/).
 
