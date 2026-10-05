@@ -1,14 +1,12 @@
 {
  "attain-chics-beach": {
-  "error": "Client error '403 Forbidden' for url 'https://www.attainchicsbeach.com/'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403",
-  "last_attempt": "2026-10-05",
+  "last_attempt": "2026-10-04",
   "last_success": "2026-10-04",
-  "ok": false
+  "ok": true
  },
  "renew-marina-shores": {
-  "error": "Stuck on Cloudflare challenge: https://www.renewmarinashores.com/virginia-beach/renew-marina-shores/conventional/",
-  "last_attempt": "2026-10-05",
+  "last_attempt": "2026-10-04",
   "last_success": "2026-10-04",
-  "ok": false
+  "ok": true
  }
 }
