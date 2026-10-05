@@ -6,10 +6,10 @@ Ideas for the site, roughly in priority order. Check off as done.
 - [ ] **Price-drop / new-unit alerts** — the weekly job already diffs snapshots; notify
       (email or ntfy.sh / Pushover) when a unit drops below a target price or a watched
       floorplan becomes available.
-- [ ] **Effective rent with specials** — e.g. ReNew's "Two Months Free" on a 15-mo lease is
+- [x] **Effective rent with specials** — e.g. ReNew's "Two Months Free" on a 15-mo lease is
       ~13% off. Show net monthly rent beside the listed price. Specials text is already
       scraped; needs parsing into months-free / lease length.
-- [ ] **Unit-level history** — snapshots store every unit: show days on market and price
+- [x] **Unit-level history** — snapshots store every unit: show days on market and price
       changes per unit ("listed 5 weeks, dropped twice").
 
 ## Comparison

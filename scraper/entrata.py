@@ -32,6 +32,21 @@ def _cell_text(cell: Tag) -> str:
     return _text(cell)
 
 
+def _lease_months(el: Optional[Tag]) -> Optional[int]:
+    """'15mo lease' / '12 month lease' -> 15 / 12."""
+    m = re.search(r"(\d{1,2})\s*(?:mo|month)", _text(el), re.I)
+    return int(m.group(1)) if m else None
+
+
+def _specials(card: Tag) -> list:
+    out = []
+    for block in card.select(".fp-special-main-content"):
+        title = _text(block.select_one(".fp-special-name"))
+        if title:
+            out.append({"title": title, "description": _text(block.select_one(".lease-desc"))})
+    return out
+
+
 def parse_property(page: str) -> PropertyInfo:
     for m in re.finditer(r'<script type="application/ld\+json">(.*?)</script>', page, re.S):
         try:
@@ -101,7 +116,8 @@ def parse_floorplans(page: str, today: Optional[date] = None) -> List[FloorPlan]
                 earliest_available=parse_date(date_m.group(1)) if date_m else None,
                 image_url=(img.get("data-url") or img.get("src")) if img else None,
                 details_url=details_url,
-                specials=[_text(s) for s in card.select(".fp-special-name")],
+                lease_months=_lease_months(card.select_one(".lease-term-name")),
+                specials=_specials(card),
             )
         )
     return plans
@@ -123,6 +139,7 @@ def parse_units(page: str, floorplan_code: str, today: Optional[date] = None) ->
             number = values.get("unit")
             if not number:
                 continue
+            lease_months = _lease_months(row.select_one(".lease-term-name"))
             price = re.search(r"\$[\d,]+", values.get("rent", ""))
             units.append(
                 Unit(
@@ -132,6 +149,7 @@ def parse_units(page: str, floorplan_code: str, today: Optional[date] = None) ->
                     sqft=to_int(values.get("sq.ft.")),
                     building=values.get("building") or None,
                     available_date=parse_date(values.get("available"), today),
+                    lease_months=lease_months,
                 )
             )
     return units

@@ -38,6 +38,23 @@ function deltaEl(value, { isPrice = false } = {}) {
   return h("span", { class: `delta ${good ? "down" : "up"}`, title: "vs previous pull" }, text);
 }
 
+/** "net $1,685" line shown under a listed price when specials lower it. */
+function netEl(eff, listed) {
+  if (eff == null || listed == null || eff >= listed) return null;
+  return h("div", { class: "net", title: "Effective monthly rent after specials, spread over the lease" }, `net ${money(eff)}`);
+}
+
+const weeksLabel = (days) => (days < 7 ? `${days}d` : `${Math.round(days / 7)} wk`);
+
+/** Chip pair that toggles a chart between listed and net (after specials) prices. */
+function priceModeChips(state, onChange) {
+  const row = h("div", { class: "filters", style: "margin-bottom:8px" });
+  const draw = () => row.replaceChildren(...[["listed", "Listed price"], ["net", "Net of specials"]].map(([k, label]) =>
+    h("button", { class: "chip", "aria-pressed": String(state.mode === k), onclick: () => { state.mode = k; draw(); onChange(); } }, label)));
+  draw();
+  return row;
+}
+
 function sparkline(values, { width = 90, height = 26, color = cssVar("--accent") } = {}) {
   const pts = values.map((v, i) => [i, v]).filter(([, v]) => v != null);
   const ns = "http://www.w3.org/2000/svg";
@@ -115,7 +132,10 @@ function lineChart(canvas, labels, series, { money: isMoney = true } = {}) {
       plugins: [crosshair],
     });
   };
-  const entry = { make, chart: make() };
+  // Re-drawing a canvas (e.g. listed/net toggle) replaces its chart instead of stacking a new one.
+  const i = charts.findIndex((c) => c.canvas === canvas);
+  if (i >= 0) { charts[i].chart.destroy(); charts.splice(i, 1); }
+  const entry = { canvas, make, chart: make() };
   charts.push(entry);
   return entry.chart;
 }
@@ -155,6 +175,13 @@ async function renderOverview() {
       h("div", { class: "card tile" }, h("div", { class: "label" }, "Lowest price anywhere"),
         h("div", { class: "value num" }, money(cheapest && cheapest.min_price)),
         h("div", { class: "sub" }, cheapest ? cheapest.name : "")),
+      (() => {
+        const best = complexes.filter((c) => c.min_effective != null).sort((a, b) => a.min_effective - b.min_effective)[0];
+        return best && best.min_effective < (cheapest ? cheapest.min_price : Infinity)
+          ? h("div", { class: "card tile" }, h("div", { class: "label" }, "Lowest net of specials"),
+              h("div", { class: "value num" }, money(best.min_effective)), h("div", { class: "sub" }, best.name))
+          : null;
+      })(),
     ),
   );
 
@@ -167,10 +194,10 @@ async function renderOverview() {
         c.stale ? h("span", { class: "badge warn", style: "margin-left:8px", title: c.error || "" }, "stale") : null,
         h("div", { class: "addr" }, c.address || "")),
       h("td", { class: "r num" }, c.units ?? "—", deltaEl(c.units_delta)),
-      h("td", { class: "r num" }, money(c.min_price), deltaEl(c.min_price_delta, { isPrice: true })),
+      h("td", { class: "r num" }, money(c.min_price), deltaEl(c.min_price_delta, { isPrice: true }), netEl(c.min_effective, c.min_price)),
       bedKeys.map((k) => {
         const b = (c.by_beds || {})[k];
-        return h("td", { class: "r num hide-sm" }, b ? h("span", {}, money(b.min_price), h("span", { class: "muted small" }, ` (${b.units})`)) : h("span", { class: "muted" }, "—"));
+        return h("td", { class: "r num hide-sm" }, b ? [h("span", {}, money(b.min_price), h("span", { class: "muted small" }, ` (${b.units})`)), netEl(b.min_effective, b.min_price)] : h("span", { class: "muted" }, "—"));
       }),
       h("td", { class: "hide-sm" }, sparkline((c.history || []).map((p) => p.min_price), { color: seriesColor(colorIndex[c.slug]) })),
       h("td", { class: "muted small" }, fmtDate(c.date)),
@@ -186,7 +213,7 @@ async function renderOverview() {
             bedKeys.map((k) => h("th", { class: "r hide-sm", title: "Lowest price (units available)" }, k)),
             h("th", { class: "hide-sm" }, "Price trend"), h("th", {}, "Updated"))),
           h("tbody", {}, rows))),
-      h("p", { class: "note" }, "Deltas compare with the previous pull. Bedroom columns show the lowest price with units available in parentheses."),
+      h("p", { class: "note" }, "Deltas compare with the previous pull. Bedroom columns show the lowest price with units available in parentheses. “Net” is the effective monthly rent after specials (e.g. months free) spread over the lease."),
     ),
   );
 
@@ -196,12 +223,16 @@ async function renderOverview() {
     const byDate = Object.fromEntries((c.history || []).map((p) => [p.date, p[key]]));
     return { label: c.name, colorIndex: colorIndex[c.slug], data: dates.map((d) => byDate[d] ?? null) };
   });
-  const priceSeries = seriesFor("min_price"), unitSeries = seriesFor("units");
+  const unitSeries = seriesFor("units");
+  const ovMode = { mode: "listed" };
+  const priceSeries = seriesFor("min_price");
   const priceCanvas = h("canvas", { role: "img", "aria-label": "Lowest available price over time by complex" });
   const unitCanvas = h("canvas", { role: "img", "aria-label": "Units available over time by complex" });
   add(root, 
     h("div", { class: "grid-2" },
-      h("div", { class: "card" }, h("h2", {}, "Lowest price over time"), legendEl(priceSeries), h("div", { class: "chart-box" }, priceCanvas)),
+      h("div", { class: "card" }, h("h2", {}, "Lowest price over time"),
+        priceModeChips(ovMode, () => lineChart(priceCanvas, dates, seriesFor(ovMode.mode === "net" ? "min_effective" : "min_price"))),
+        legendEl(priceSeries), h("div", { class: "chart-box" }, priceCanvas)),
       h("div", { class: "card" }, h("h2", {}, "Units available over time"), legendEl(unitSeries), h("div", { class: "chart-box" }, unitCanvas)),
     ),
     dates.length < 2 ? h("p", { class: "note" }, "History builds up with each scheduled pull — trend lines appear after the second one.") : null,
@@ -211,6 +242,14 @@ async function renderOverview() {
 }
 
 // ---------- complex detail page ----------
+function describeTerms(t) {
+  const parts = [];
+  if (t.months_free) parts.push(`${+t.months_free.toFixed(2)} month${t.months_free === 1 ? "" : "s"} free`);
+  if (t.one_time_off) parts.push(`${money(t.one_time_off)} off once`);
+  if (t.monthly_off) parts.push(`${money(t.monthly_off)} off per month`);
+  return `Read as: ${parts.join(" + ")}${t.caveats.length ? " — " + t.caveats.join(", ") : ""}.`;
+}
+
 async function renderComplex() {
   const slug = new URLSearchParams(location.search).get("c");
   const root = document.getElementById("app");
@@ -239,7 +278,7 @@ async function renderComplex() {
   add(root, 
     h("div", { class: "tiles" },
       h("div", { class: "card tile" }, h("div", { class: "label" }, "Units available"), h("div", { class: "value num" }, s.units ?? "—"), h("div", { class: "sub" }, deltaEl(s.units_delta) || "")),
-      h("div", { class: "card tile" }, h("div", { class: "label" }, "Lowest price"), h("div", { class: "value num" }, money(s.min_price)), h("div", { class: "sub" }, deltaEl(s.min_price_delta, { isPrice: true }) || "")),
+      h("div", { class: "card tile" }, h("div", { class: "label" }, "Lowest price"), h("div", { class: "value num" }, money(s.min_price)), h("div", { class: "sub" }, deltaEl(s.min_price_delta, { isPrice: true }) || "", netEl(s.min_effective, s.min_price))),
       h("div", { class: "card tile" }, h("div", { class: "label" }, "Floorplans with availability"), h("div", { class: "value num" }, `${availPlans.length} / ${d.floorplans.length}`)),
     ),
   );
@@ -264,6 +303,7 @@ async function renderComplex() {
     { key: "beds", label: "Bed / Bath", r: false },
     { key: "sqft", label: "Sq ft", r: true, hideSm: true },
     { key: "rent_min", label: "From", r: true },
+    { key: "effective_min", label: "Net", r: true },
     { key: "units_available", label: "Units", r: true },
     { key: "earliest_available", label: "Earliest", r: false },
   ];
@@ -278,6 +318,36 @@ async function renderComplex() {
       h("th", { class: "hide-sm" }, "Trend"), h("th", { class: "hide-sm" }, "Specials")));
   };
 
+  const caveatText = (t) => (t.caveats.length ? t.caveats.join(" · ") : "");
+  const specialBadge = (t) => h("span", {
+    class: `badge ${t.parsed ? "special" : ""}`,
+    title: [t.title, t.description, t.parsed ? caveatText(t) : "Terms not understood — not included in net rent"].filter(Boolean).join("\n"),
+  }, t.title, t.parsed ? "" : " ?", t.caveats.length && t.parsed ? h("span", { class: "caveat" }, ` · ${caveatText(t)}`) : null);
+  const unitNetEl = (u) => {
+    const e = u.effective;
+    if (!e) return h("span", { class: "muted" }, "—");
+    const lines = [
+      e.applied.length ? `Applied: ${e.applied.join(", ")}` : "No specials apply",
+      `${e.lease_months}-month lease${e.lease_assumed ? " (assumed)" : ""}`,
+      ...e.skipped.map((x) => `Not applied — ${x}`),
+      e.uncertain ? "Special is for select units only; ask whether this unit qualifies." : null,
+    ].filter(Boolean);
+    if (!e.applied.length) return h("span", { class: "muted", title: lines.join("\n") }, "n/a");
+    return h("span", { title: lines.join("\n") }, h("strong", {}, money(e.rent)), e.uncertain ? " *" : "");
+  };
+  const listedEl = (hist) => {
+    if (!hist) return "—";
+    if (hist.is_new) return h("span", { class: "badge new" }, "New");
+    return h("span", { title: `First seen ${fmtDate(hist.first_seen)}` }, weeksLabel(hist.days_listed));
+  };
+  const priceChangeEl = (hist) => {
+    if (!hist || !hist.price_changes) return h("span", { class: "muted" }, "—");
+    const title = hist.price_history.map((p) => `${fmtDate(p.date)}: ${money(p.price)}`).join("\n");
+    const up = hist.price_change > 0;
+    return h("span", { class: `delta ${up ? "up" : "down"}`, style: "margin-left:0", title },
+      `${up ? "▲" : "▼"} ${money(Math.abs(hist.price_change))}`,
+      h("span", { class: "muted" }, ` (${hist.price_changes}×)`));
+  };
   const availLabel = (iso) => (!iso ? "—" : iso <= today ? "Now" : fmtDate(iso));
   const open = new Set();
   const drawTable = () => {
@@ -304,19 +374,25 @@ async function renderComplex() {
         h("td", { class: "r num hide-sm" }, f.sqft ? f.sqft.toLocaleString() : "—"),
         h("td", { class: "r num" }, f.units_available ? money(f.rent_min) : "—",
           f.units_available && f.rent_max && f.rent_max !== f.rent_min ? h("span", { class: "muted small" }, ` – ${money(f.rent_max)}`) : null),
+        h("td", { class: "r num" }, f.units_available && f.effective_min != null && f.effective_min < f.rent_min
+          ? h("strong", { title: "Lowest effective monthly rent after specials" }, money(f.effective_min)) : h("span", { class: "muted" }, "—")),
         h("td", { class: "r num" }, f.units_available || h("span", { class: "muted" }, "0")),
         h("td", {}, f.units_available ? availLabel(f.earliest_available) : "—"),
         h("td", { class: "hide-sm" }, sparkline(hist, { width: 70, height: 22 })),
-        h("td", { class: "hide-sm" }, f.specials.map((sp) => h("span", { class: "badge special" }, sp))),
+        h("td", { class: "hide-sm specials-cell" }, (f.special_terms || []).map((t) => specialBadge(t))),
       ));
       if (isOpen) {
         rows.push(h("tr", { class: "units-row" }, h("td", { colspan: columns.length + 2 },
           h("table", {},
-            h("thead", {}, h("tr", {}, h("th", {}, "Unit"), hasBuilding && h("th", {}, "Building"), hasFloor && h("th", {}, "Floor"), h("th", { class: "r" }, "Price"), h("th", { class: "r" }, "Sq ft"), h("th", {}, "Available"), h("th", {}, ""))),
+            h("thead", {}, h("tr", {}, h("th", {}, "Unit"), hasBuilding && h("th", {}, "Building"), hasFloor && h("th", {}, "Floor"), h("th", { class: "r" }, "Price"), h("th", { class: "r" }, "Net"), h("th", { class: "r" }, "Sq ft"), h("th", {}, "Available"), h("th", {}, "Listed"), h("th", {}, "Price change"), h("th", {}, ""))),
             h("tbody", {}, units.map((u) => h("tr", {},
               h("td", { class: "num" }, u.unit_number), hasBuilding && h("td", {}, u.building || "—"), hasFloor && h("td", {}, u.floor || "—"),
-              h("td", { class: "r num" }, money(u.price)), h("td", { class: "r num" }, u.sqft ? u.sqft.toLocaleString() : "—"),
+              h("td", { class: "r num" }, money(u.price)),
+              h("td", { class: "r num" }, unitNetEl(u)),
+              h("td", { class: "r num" }, u.sqft ? u.sqft.toLocaleString() : "—"),
               h("td", {}, availLabel(u.available_date)),
+              h("td", {}, listedEl(u.history)),
+              h("td", { class: "num" }, priceChangeEl(u.history)),
               h("td", {}, u.apply_url ? h("a", { href: u.apply_url, target: "_blank", rel: "noopener", onclick: (e) => e.stopPropagation() }, "Apply ↗") : ""),
             )))))));
       }
@@ -326,21 +402,42 @@ async function renderComplex() {
   };
 
   drawFilters(); drawHead(); drawTable();
+  const uniqueSpecials = [...new Map(d.floorplans.flatMap((f) => f.special_terms || []).map((t) => [t.title + t.description, t])).values()];
+  if (uniqueSpecials.length) {
+    const lease = d.floorplans.map((f) => f.lease_months).find(Boolean);
+    add(root, h("div", { class: "card stack" },
+      h("h2", {}, "Current specials"),
+      uniqueSpecials.map((t) => h("div", { class: "special-row" },
+        h("div", {}, h("strong", {}, t.title), t.parsed ? null : h("span", { class: "badge", style: "margin-left:8px" }, "not included in net rent")),
+        t.description ? h("div", { class: "muted small" }, t.description) : null,
+        t.parsed ? h("div", { class: "small" }, describeTerms(t)) : null)),
+      h("p", { class: "note" }, lease
+        ? `Prices are quoted for a ${lease}-month lease, so net rent spreads the discount over ${lease} months.`
+        : "The site doesn't say which lease term prices are for; net rent assumes 12 months."),
+    ));
+  }
   add(root, h("div", { class: "card stack" },
     h("h2", {}, "Floorplans"), filterRow,
     h("div", { class: "table-scroll" }, h("table", {}, thead, tbody)),
-    h("p", { class: "note" }, "Click a floorplan to see its available units. “From” is the lowest listed price; the trend shows that plan's lowest price at each pull."),
+    h("p", { class: "note" }, "Click a floorplan to see its available units. “From” is the lowest listed price; “Net” is the lowest effective monthly rent after specials. Hover a unit's net rent for how it was calculated (* = the special is for select units only, so confirm the unit qualifies). The trend shows that plan's lowest listed price at each pull."),
+    d.gone_units && d.gone_units.length ? h("p", { class: "note" },
+      `No longer listed since ${fmtDate(d.gone_units[0].last_seen)}: `,
+      d.gone_units.map((g) => `${g.building ? g.building + " #" : "#"}${g.unit_number} (${money(g.last_price)})`).join(", ")) : null,
   ));
 
   // Price history by bedroom count (few series → readable; per-plan trends live in the table)
   const bedKeys = [...new Set(d.bed_history.flatMap((p) => Object.keys(p.by_beds)))].sort();
-  const series = bedKeys.map((k, i) => ({
+  const bedSeries = (key) => bedKeys.map((k, i) => ({
     label: k, colorIndex: i,
-    data: d.bed_history.map((p) => (p.by_beds[k] ? p.by_beds[k].min_price : null)),
+    data: d.bed_history.map((p) => (p.by_beds[k] ? p.by_beds[k][key] : null)),
   }));
+  const series = bedSeries("min_price");
+  const cxMode = { mode: "listed" };
   const canvas = h("canvas", { role: "img", "aria-label": "Lowest price over time by bedroom count" });
   add(root, h("div", { class: "card" },
-    h("h2", {}, "Lowest price by bedroom count"), legendEl(series), h("div", { class: "chart-box" }, canvas),
+    h("h2", {}, "Lowest price by bedroom count"),
+    priceModeChips(cxMode, () => lineChart(canvas, d.dates, bedSeries(cxMode.mode === "net" ? "min_effective" : "min_price"))),
+    legendEl(series), h("div", { class: "chart-box" }, canvas),
     d.dates.length < 2 ? h("p", { class: "note" }, "History builds up with each scheduled pull — trend lines appear after the second one.") : null,
   ));
   lineChart(canvas, d.dates, series);

@@ -36,12 +36,14 @@ def test_entrata_floorplans_listing():
     by_name = {p.name: p for p in plans}
     arlington = by_name["Arlington"]
     assert arlington.units_available == 0 and arlington.rent_min is None
-    assert arlington.specials == ["Two Months Free"]
+    assert [sp["title"] for sp in arlington.specials] == ["Two Months Free"]
+    assert "12+ month lease terms" in arlington.specials[0]["description"]
 
     athens = by_name["Athens"]
     assert (athens.code, athens.beds, athens.baths, athens.sqft) == ("690916", 1, 1, 730)
     assert (athens.rent_min, athens.rent_max) == (1944, 2364)
     assert athens.earliest_available == "2026-11-17"
+    assert athens.lease_months == 15
 
     douglas = by_name["Douglas"]
     assert (douglas.beds, douglas.units_available, douglas.rent_min) == (3, 3, 2794)
@@ -55,6 +57,7 @@ def test_entrata_units_detail():
         ("208", "2205", 2794, 1316, "2026-10-04"),
         ("206", "2261", 2814, 1316, "2026-10-04"),
     ]
+    assert all(u.lease_months == 15 for u in units)
 
 
 def test_entrata_property_info():

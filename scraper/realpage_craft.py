@@ -22,6 +22,28 @@ def _prop(page: str, name: str):
     return json.loads(html.unescape(m.group(1)))
 
 
+def _specials(raw) -> list:
+    """Normalize a RealPage specials field (string, dict or list of either) to [{title, description}].
+
+    No live example has been seen yet (the property had none when this was written), so
+    accept the common shapes and keep the raw text for the specials parser.
+    """
+    if not raw:
+        return []
+    items = raw if isinstance(raw, list) else [raw]
+    out = []
+    for item in items:
+        if isinstance(item, dict):
+            title = item.get("title") or item.get("name") or item.get("specialTitle") or ""
+            desc = item.get("description") or item.get("text") or item.get("specialDescription") or ""
+            if title or desc:
+                out.append({"title": str(title or desc)[:120], "description": str(desc)})
+        elif str(item).strip():
+            text = re.sub(r"<[^>]+>", " ", html.unescape(str(item))).strip()
+            out.append({"title": text[:120], "description": text})
+    return out
+
+
 def parse(page: str, today: Optional[date] = None) -> Tuple[PropertyInfo, List[FloorPlan], List[Unit]]:
     prop = _prop(page, "property")
     raw_fps = _prop(page, "floorplans")
@@ -37,6 +59,7 @@ def parse(page: str, today: Optional[date] = None) -> Tuple[PropertyInfo, List[F
             building=u.get("buildingNumber") or u.get("buildingName"),
             available_date=parse_date(u.get("unitAvailableDate"), today),
             apply_url=u.get("unitApplicationLink"),
+            specials=_specials(u.get("unitSpecials")),
         )
         for u in raw_units
         if u.get("unitAvailable")
@@ -54,7 +77,9 @@ def parse(page: str, today: Optional[date] = None) -> Tuple[PropertyInfo, List[F
             units_available=int(f.get("numberUnitsAvailable") or 0),
             earliest_available=parse_date(f.get("floorPlanEarliestAvailableDate"), today),
             image_url=f.get("floorPlanImageFull") or f.get("floorPlanImage"),
-            specials=["Special available"] if f.get("floorPlanHasSpecials") else [],
+            # The flag carries no terms; shown as a badge, not used for effective rent.
+            specials=[{"title": "Special available", "description": "See the property website for details."}]
+            if f.get("floorPlanHasSpecials") else [],
         )
         for f in raw_fps
     ]

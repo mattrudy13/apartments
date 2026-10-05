@@ -15,7 +15,9 @@ Working end to end:
 - First real snapshot: `data/snapshots/2026-10-04/`. Trend lines appear after the
   second weekly pull.
 
-Possible next steps: add more complexes (a new platform needs a new `scraper/` module),
+- Effective (net) rent from specials, and per-unit listing history (see sections below).
+
+Possible next steps (see ENHANCEMENTS.md): add more complexes (a new platform needs a new `scraper/` module),
 switch to daily pulls (`scripts/install_schedule.sh daily`).
 
 ## Layout
@@ -88,6 +90,32 @@ as too broad. The README documents this setup.
   Chromium if Chrome isn't installed. Waits out "Just a moment..." titles (up to ~45s).
 - A full ReNew scrape takes ~50s (listing page + one detail page per available plan).
 
+## Specials and effective rent
+
+- Scrapers store specials raw as `[{title, description}]` on floorplans (and units for
+  RealPage `unitSpecials`), plus `lease_months` when the site states a term (ReNew: "15mo lease").
+  Old snapshots stored plain title strings; `build.normalize_specials` handles both.
+- `scraper/specials.py` parses text into terms (months/weeks free, $ off once or monthly,
+  min lease, move-in-by date, sign-by/expiry date, "select units"). Parsing happens in
+  `build.py`, so parser fixes apply retroactively to all snapshots.
+- Effective rent = (rent × lease − free months × rent − one-time $) ÷ lease − monthly $.
+  Lease defaults to 12 months when unknown (flagged `lease_assumed`).
+- A special is skipped (and the reason recorded) when: terms weren't understood, offer
+  expired before the scrape date, the move-in deadline already passed, the quoted lease is
+  shorter than its minimum, or **the unit's available date is after its move-in-by date**
+  (checked per unit). "Select units" specials still apply but are flagged with `*`.
+- ReNew today: "Two Months Free" on 12+ month leases, prices quoted for 15 months →
+  net = 13/15 of listed (e.g. $1,944 → $1,685). Attain had no specials when built
+  (`propertySpecialsAvailable: false`); its specials format is unverified, parsed defensively.
+
+## Unit history
+
+- `build.unit_histories` keys units by `building#unit_number` and tracks a listing streak:
+  first seen, days listed, price changes. A unit that drops off and reappears starts a new
+  streak. Units in the previous snapshot but not the latest are reported as `gone_units`.
+- History only accrues from real snapshots (one per week), so "New"/price changes show
+  up after the second pull.
+
 ## Design choices (frontend)
 
 - Chart colors use the dataviz skill's validated categorical palette (CSS vars
@@ -98,6 +126,7 @@ as too broad. The README documents this setup.
   trends are sparklines in the floorplan table instead.
 - One y-axis per chart: price and unit count are separate charts on the overview.
 - Price deltas: up is red (bad for a renter), down is green; unit deltas the reverse.
+- "Net" values appear only when specials lower the price; charts have a Listed / Net toggle.
 - A complex whose latest scrape failed is flagged "stale" and keeps showing its last good data.
 
 ## Dev notes

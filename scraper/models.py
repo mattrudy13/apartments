@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 
 @dataclass
@@ -18,7 +18,8 @@ class FloorPlan:
     earliest_available: Optional[str] = None  # ISO date
     image_url: Optional[str] = None
     details_url: Optional[str] = None
-    specials: List[str] = field(default_factory=list)
+    lease_months: Optional[int] = None  # lease term the listed price is quoted for, if shown
+    specials: List[Dict[str, str]] = field(default_factory=list)  # [{title, description}]
 
 
 @dataclass
@@ -31,6 +32,8 @@ class Unit:
     building: Optional[str] = None
     available_date: Optional[str] = None  # ISO date; on/before scrape date means "now"
     apply_url: Optional[str] = None
+    lease_months: Optional[int] = None
+    specials: List[Dict[str, str]] = field(default_factory=list)  # unit-specific specials
 
 
 @dataclass
