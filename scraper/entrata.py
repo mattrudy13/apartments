@@ -53,7 +53,8 @@ def parse_property(page: str) -> PropertyInfo:
             data = json.loads(m.group(1))
         except ValueError:
             continue
-        if data.get("@type") != "ApartmentComplex":
+        types = data.get("@type") if isinstance(data, dict) else None
+        if "ApartmentComplex" not in (types if isinstance(types, list) else [types]):
             continue
         addr = data.get("address") or {}
         parts = [addr.get("streetAddress"), addr.get("addressLocality"), addr.get("addressRegion"), addr.get("postalCode")]

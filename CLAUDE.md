@@ -7,8 +7,9 @@ See README.md for usage commands.
 ## Status (2026-10-04)
 
 Working end to end:
-- Scrapers for both tracked complexes (`complexes.yaml`): Attain at Chic's Beach
-  (`realpage_craft`) and ReNew Marina Shores (`entrata`).
+- Scrapers for the four tracked complexes (`complexes.yaml`): Attain at Chic's Beach
+  (`realpage_craft`), ReNew Marina Shores (`entrata`), Linkhorn Bay (`rentcafe`) and
+  North Beach (`appfolio`).
 - Weekly launchd job on the Mac scrapes and pushes snapshots; the GitHub Action
   (`.github/workflows/deploy.yml`) tests, builds `site/data/` and deploys Pages.
 - Overview page (`site/index.html`) and complex detail page (`site/complex.html?c=<slug>`).
@@ -82,6 +83,33 @@ as too broad. The README documents this setup.
 - No floor data; the UI hides the Floor/Building columns when no unit has them.
 - Address/phone come from the `ApartmentComplex` JSON-LD block.
 
+**Linkhorn Bay (Yardi RentCafe)** — plain HTTP
+- `/floorplans` has one `.fp-container` card per plan (code = numeric ID in
+  `id="fp-container-602897"`), with "Starting at" price and "N Available". The count
+  element has `data-max="6"`, so cards may cap the count; the scraper uses the number
+  of unit rows on each plan's page (`/floorplans/the-birch`, `tr.unit-container`).
+- Unit rent is a range ("$1,672 to $2,209", varies by lease term/move-in); the lowest is
+  stored as the price. Lease term isn't stated, so net rent would assume 12 months.
+- Floor comes from amenities ("Second Floor Unit"). Unit numbers like `502S12` are unique,
+  so building is left empty.
+- JSON-LD `@type` is a list (`["LocalBusiness", "ApartmentComplex"]`);
+  `entrata.parse_property` (shared) accepts both forms.
+- No specials listed when added (2026-10-04); only a generic "special offers valid for
+  new residents" disclaimer.
+
+**North Beach (AppFolio listings on a Duda site)** — plain HTTP
+- The floor-plans page is static marketing text. Real data: the availability page's
+  widget calls `/rts/collections/public/<siteAlias>/runtime/collection/appfolio-listings/query-data`;
+  `siteAlias` (`d12fed8f`) is in the page HTML, so the scraper derives the endpoint.
+- The collection holds the whole management company's account (Pembroke: 88 listings,
+  6 properties); filter to this site by `portfolio_url`. Paged (`page.totalPages`).
+- Each listing is a unit; floorplans are grouped by `unit_template_name`, so renovated
+  and unrenovated versions ("Shore" vs "Shore (Renovated)") are separate plans. Only
+  plans with listings appear (no unavailable plans).
+- Unit numbers repeat across buildings (`#204` in several street addresses); building =
+  street address, so the building + unit key keeps them distinct.
+- No specials; fees in `fee_values` are optional pet fees only.
+
 ## Verified browser behavior (ReNew's Cloudflare, from the Mac)
 
 - Playwright's **bundled Chromium (headless) does NOT pass** — stuck on a Turnstile challenge.
@@ -126,7 +154,10 @@ as too broad. The README documents this setup.
   trends are sparklines in the floorplan table instead.
 - One y-axis per chart: price and unit count are separate charts on the overview.
 - Price deltas: up is red (bad for a renter), down is green; unit deltas the reverse.
-- "Net" values appear only when specials lower the price; charts have a Listed / Net toggle.
+- "Net" values appear only when specials lower the price (Net columns are hidden at a
+  complex with none); charts have a Listed / Net toggle.
+- Unit "Listed" age: units already present at the first pull show "—" on day zero and
+  "N wk+" afterwards, since their true listing date is unknown.
 - A complex whose latest scrape failed is flagged "stale" and keeps showing its last good data.
 
 ## Dev notes

@@ -16,11 +16,16 @@ from pathlib import Path
 
 import yaml
 
-from . import entrata, realpage_craft
+from . import appfolio, entrata, realpage_craft, rentcafe
 from .models import Snapshot
 
 ROOT = Path(__file__).resolve().parent.parent
-SCRAPERS = {"realpage_craft": realpage_craft.scrape, "entrata": entrata.scrape}
+SCRAPERS = {
+    "realpage_craft": realpage_craft.scrape,
+    "entrata": entrata.scrape,
+    "rentcafe": rentcafe.scrape,
+    "appfolio": appfolio.scrape,
+}
 
 log = logging.getLogger("scraper")
 

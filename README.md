@@ -15,6 +15,8 @@ Add an entry to `complexes.yaml`. The `scraper` must match the site's platform:
 |------------------|----------------------------------------------|---------------------------|
 | `realpage_craft` | RealPage / Vest sites with embedded unit data | homepage                  |
 | `entrata`        | Entrata sites (behind Cloudflare; uses Chrome) | the floorplans listing page |
+| `rentcafe`       | Yardi RentCafe sites                          | the `/floorplans` page    |
+| `appfolio`       | AppFolio listings widget (Duda-built sites)   | the availability page     |
 
 A site on a different platform needs a new module in `scraper/` exposing
 `scrape(cfg, today) -> (PropertyInfo, [FloorPlan], [Unit])`, registered in `scraper/run.py`.

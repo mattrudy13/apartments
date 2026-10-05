@@ -272,6 +272,7 @@ async function renderComplex() {
   for (const u of d.units) (unitsByPlan[u.floorplan_code] ||= []).push(u);
   const today = d.date;
   const hasBuilding = d.units.some((u) => u.building), hasFloor = d.units.some((u) => u.floor);
+  const hasNet = d.floorplans.some((f) => f.effective_min != null && f.effective_min < f.rent_min);
 
   // Tiles
   const availPlans = d.floorplans.filter((f) => f.units_available > 0);
@@ -303,10 +304,10 @@ async function renderComplex() {
     { key: "beds", label: "Bed / Bath", r: false },
     { key: "sqft", label: "Sq ft", r: true, hideSm: true },
     { key: "rent_min", label: "From", r: true },
-    { key: "effective_min", label: "Net", r: true },
+    hasNet && { key: "effective_min", label: "Net", r: true },
     { key: "units_available", label: "Units", r: true },
     { key: "earliest_available", label: "Earliest", r: false },
-  ];
+  ].filter(Boolean);
   const thead = h("thead");
   const drawHead = () => {
     thead.replaceChildren(h("tr", {},
@@ -338,7 +339,11 @@ async function renderComplex() {
   const listedEl = (hist) => {
     if (!hist) return "—";
     if (hist.is_new) return h("span", { class: "badge new" }, "New");
-    return h("span", { title: `First seen ${fmtDate(hist.first_seen)}` }, weeksLabel(hist.days_listed));
+    // Units already listed at the first pull have been on the market at least this long.
+    const sinceStart = hist.first_seen === d.dates[0];
+    if (sinceStart && hist.days_listed === 0) return h("span", { class: "muted", title: "Listed when tracking started" }, "—");
+    return h("span", { title: `First seen ${fmtDate(hist.first_seen)}${sinceStart ? " (when tracking started)" : ""}` },
+      weeksLabel(hist.days_listed) + (sinceStart ? "+" : ""));
   };
   const priceChangeEl = (hist) => {
     if (!hist || !hist.price_changes) return h("span", { class: "muted" }, "—");
@@ -374,7 +379,7 @@ async function renderComplex() {
         h("td", { class: "r num hide-sm" }, f.sqft ? f.sqft.toLocaleString() : "—"),
         h("td", { class: "r num" }, f.units_available ? money(f.rent_min) : "—",
           f.units_available && f.rent_max && f.rent_max !== f.rent_min ? h("span", { class: "muted small" }, ` – ${money(f.rent_max)}`) : null),
-        h("td", { class: "r num" }, f.units_available && f.effective_min != null && f.effective_min < f.rent_min
+        hasNet && h("td", { class: "r num" }, f.units_available && f.effective_min != null && f.effective_min < f.rent_min
           ? h("strong", { title: "Lowest effective monthly rent after specials" }, money(f.effective_min)) : h("span", { class: "muted" }, "—")),
         h("td", { class: "r num" }, f.units_available || h("span", { class: "muted" }, "0")),
         h("td", {}, f.units_available ? availLabel(f.earliest_available) : "—"),
@@ -384,11 +389,11 @@ async function renderComplex() {
       if (isOpen) {
         rows.push(h("tr", { class: "units-row" }, h("td", { colspan: columns.length + 2 },
           h("table", {},
-            h("thead", {}, h("tr", {}, h("th", {}, "Unit"), hasBuilding && h("th", {}, "Building"), hasFloor && h("th", {}, "Floor"), h("th", { class: "r" }, "Price"), h("th", { class: "r" }, "Net"), h("th", { class: "r" }, "Sq ft"), h("th", {}, "Available"), h("th", {}, "Listed"), h("th", {}, "Price change"), h("th", {}, ""))),
+            h("thead", {}, h("tr", {}, h("th", {}, "Unit"), hasBuilding && h("th", {}, "Building"), hasFloor && h("th", {}, "Floor"), h("th", { class: "r" }, "Price"), hasNet && h("th", { class: "r" }, "Net"), h("th", { class: "r" }, "Sq ft"), h("th", {}, "Available"), h("th", {}, "Listed"), h("th", {}, "Price change"), h("th", {}, ""))),
             h("tbody", {}, units.map((u) => h("tr", {},
               h("td", { class: "num" }, u.unit_number), hasBuilding && h("td", {}, u.building || "—"), hasFloor && h("td", {}, u.floor || "—"),
               h("td", { class: "r num" }, money(u.price)),
-              h("td", { class: "r num" }, unitNetEl(u)),
+              hasNet && h("td", { class: "r num" }, unitNetEl(u)),
               h("td", { class: "r num" }, u.sqft ? u.sqft.toLocaleString() : "—"),
               h("td", {}, availLabel(u.available_date)),
               h("td", {}, listedEl(u.history)),

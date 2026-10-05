@@ -1,6 +1,8 @@
 # Complexes to track. `scraper` picks the parser for the site's platform:
 #   realpage_craft - RealPage/Vest sites with embedded :floorplans/:units data (plain HTTP)
 #   entrata        - Entrata sites; `url` must be the floorplans listing page (uses Chrome)
+#   rentcafe       - Yardi RentCafe sites; `url` is the /floorplans page (plain HTTP)
+#   appfolio       - AppFolio listings widget; `url` is the availability page (plain HTTP)
 complexes:
   - slug: attain-chics-beach
     name: Attain at Chic's Beach
@@ -12,3 +14,15 @@ complexes:
     url: https://www.renewmarinashores.com/virginia-beach/renew-marina-shores/conventional/
     website: https://www.renewmarinashores.com/
     scraper: entrata
+
+  - slug: linkhorn-bay
+    name: Linkhorn Bay Apartments
+    url: https://www.linkhornbayapartments-prg.com/floorplans
+    website: https://www.linkhornbayapartments-prg.com/
+    scraper: rentcafe
+
+  - slug: north-beach
+    name: North Beach
+    url: https://www.northbeachvbliving.com/availability
+    website: https://www.northbeachvbliving.com/
+    scraper: appfolio
