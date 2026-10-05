@@ -48,7 +48,7 @@ Don't try to work around this with proxies; the Mac-based schedule is the chosen
 ## The scheduler uses a separate clone (not this Desktop copy)
 
 macOS privacy protection (TCC) blocks launchd jobs from reading `~/Desktop`
-("Operation not permitted"), which covers this repo and `~/Desktop/coding/GitHub/.venv`.
+("Operation not permitted"), which covers this repo and its `.venv`.
 So the launchd job runs from its own clone with its own venv:
 
 - Clone: `~/Library/Application Support/apartments-scraper` (venv at `.venv/` inside it)
@@ -172,7 +172,8 @@ A random pause between ReNew detail pages is listed in ENHANCEMENTS.md but not d
 
 ## Dev notes
 
-- Desktop venv: `~/Desktop/coding/GitHub/.venv` (Python 3.9; code stays 3.9-compatible
+- Desktop copy: `~/Desktop/coding/GitHub/apartments`, venv at `.venv/` inside it (Python 3.9;
+  activate with `source .venv/bin/activate`; code stays 3.9-compatible
   via `from __future__ import annotations`). CI uses Python 3.12.
 - Local preview: `python build.py && python -m http.server -d site 8000`.
 - Snapshots/data are committed only from the scheduler's clone (weekly job, or a manual
