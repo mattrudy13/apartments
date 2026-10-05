@@ -1,0 +1,52 @@
+name: Build and deploy site
+
+# Scraping runs on a Mac (scripts/scrape_and_push.sh via launchd) because the
+# apartment sites block GitHub's servers. Pushing a new snapshot to data/
+# triggers this workflow, which rebuilds the site data and deploys Pages.
+on:
+  push:
+    branches: [main]
+    paths: ["data/**", "site/**", "build.py", "complexes.yaml", "scraper/**", "tests/**"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: Parser tests
+        run: pytest -q
+
+      - name: Build site data
+        run: python build.py
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -32,9 +32,21 @@ python -m http.server -d site 8000      # open http://localhost:8000
 
 ## Schedule
 
-`.github/workflows/scrape.yml` runs Mondays at 13:00 UTC and on demand
-(Actions → Scrape apartments → Run workflow). For daily pulls change the cron to
-`0 13 * * *`. Enable Pages once under Settings → Pages → Source: **GitHub Actions**.
+The apartment sites block GitHub's servers (Attain returns 403; ReNew's Cloudflare
+check never clears), so scraping runs on a Mac and pushes the snapshot:
 
-If a site fails to scrape, the run still publishes; that complex is marked
-**stale** and keeps showing its last good data. Errors are recorded in `data/status.json`.
+```sh
+scripts/install_schedule.sh          # launchd job: Mondays 9:00 (runs on wake if asleep)
+scripts/install_schedule.sh daily    # every day 9:00
+scripts/install_schedule.sh uninstall
+launchctl kickstart gui/$(id -u)/com.apartments.scraper   # run it now
+tail -f ~/Library/Logs/apartments-scraper.log
+```
+
+The job uses `.venv/bin/python` in the repo unless `APARTMENTS_PYTHON` is set when
+installing. Each push to `data/` triggers `.github/workflows/deploy.yml`, which runs
+the tests, rebuilds `site/data/` and deploys Pages
+(https://mattrudy13.github.io/apartments/).
+
+If a site fails to scrape, the run still pushes; that complex is marked **stale** and
+keeps showing its last good data. Errors are recorded in `data/status.json`.
