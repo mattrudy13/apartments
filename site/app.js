@@ -402,7 +402,7 @@ async function renderComplex() {
     if (!hist) return "—";
     if (hist.is_new) return h("span", { class: "badge new" }, "New");
     // Units already listed at the first pull have been on the market at least this long.
-    const sinceStart = hist.first_seen === d.dates[0];
+    const sinceStart = hist.first_seen === (d.history_start || d.dates[0]);
     if (sinceStart && hist.days_listed === 0) return h("span", { class: "muted", title: "Listed when tracking started" }, "—");
     return h("span", { title: `First seen ${fmtDate(hist.first_seen)}${sinceStart ? " (when tracking started)" : ""}` },
       weeksLabel(hist.days_listed) + (sinceStart ? "+" : ""));

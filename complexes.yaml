@@ -10,7 +10,10 @@ complexes:
   - slug: attain-chics-beach
     name: Attain at Chic's Beach
     url: https://www.attainchicsbeach.com/
-    scraper: realpage_craft
+    # SightMap holds the live prices; the page's embedded :units data (realpage_craft) had
+    # stale prices and wrong floorplans for some units (e.g. 4705 #104), so it isn't used.
+    scraper: sightmap
+    unit_history_since: "2026-10-06"  # unit IDs changed with the switch to SightMap
 
   - slug: renew-marina-shores
     name: ReNew Marina Shores

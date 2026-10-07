@@ -7,7 +7,8 @@ See README.md for usage commands.
 ## Status (2026-10-06)
 
 Working end to end:
-- Nine tracked complexes (`complexes.yaml`): Attain at Chic's Beach (`realpage_craft`),
+- Nine tracked complexes (`complexes.yaml`): Attain at Chic's Beach (`sightmap`, was
+  `realpage_craft` until 2026-10-06),
   ReNew Marina Shores (`entrata`), Linkhorn Bay (`rentcafe`), North Beach (`appfolio`), and
   added 2026-10-06: Nexus (`sightmap`), Indigo 19 (`rentcafe`, no prices), North Hill
   (`realpage_leasestar`), Salt Meadow Bay (`rentcafe`, card layout) and Columbus Station (`g5`).
@@ -73,14 +74,26 @@ A random pause between ReNew detail pages is listed in ENHANCEMENTS.md but not d
 
 ## Site quirks
 
-**Attain (RealPage / Vest Craft template)**
-- All data is embedded in the homepage as HTML-escaped JSON Vue props:
-  `:property`, `:floorplans`, `:units`. Plain HTTP with a browser User-Agent works.
-- `:units` includes unavailable units (with prices); keep only `unitAvailable: true`.
-  Unavailable units carry a placeholder date `12/31/0000` (parsed to `None`).
-- Floorplan **names and codes differ slightly** (e.g. name `A4.1V`, code `A4.1-V`).
-  Units reference `floorPlanCode`, so match units to floorplans **by code**, never by name.
-- Sum of `numberUnitsAvailable` matched the count of available units (29) when verified.
+**Attain (RealPage / Vest Craft template + Engrain SightMap)** — plain HTTP, scraper `sightmap`
+- Since 2026-10-06 Attain is read from its **SightMap** (embed id `gow32268p2m`, JSON-escaped
+  in the page data as `"sightmapEmbedUrl":"https:\/\/sightmap.com\/embed\/gow32268p2m"`).
+  SightMap holds the live prices: base rent + total with required fees (~$135/mo), flat
+  12-month pricing.
+- Why: the page's embedded Vue `:units` data (the old `realpage_craft` source) was stale or
+  wrong. 10 of 26 available units had different prices, and 4705 #104 was filed as a 1BR A3
+  at $1,692 when SightMap (and the site's map) shows a 2BR B2.1 at $1,515 base / $1,650
+  total. The user spotted it on the site.
+- Building IDs differ between sources ("4705-WSH" vs "4705"; Haven Residences buildings are
+  "1"/"2"/"3" in SightMap), so `complexes.yaml` sets `unit_history_since: 2026-10-06` for
+  Attain. Unit tracking (new/gone/days listed) restarts there; the complex-level price trend
+  keeps the older data.
+- SightMap lists only plans; sqft/images for plans without units come from the page's
+  embedded `:floorplans` data (names match after dropping the `-V`/`-H` suffix), and the
+  phone from `:property`.
+- `realpage_craft` is kept for other Vest/RealPage sites. Its notes still apply: the
+  embedded data uses `floorPlanCode` (match units by code, not name), keeps only
+  `unitAvailable: true`, and uses a `12/31/0000` placeholder date. Treat its prices as
+  possibly stale; prefer a SightMap embed when the site has one.
 
 **ReNew (Entrata, behind Cloudflare)**
 - Configured `url` is the floorplans listing page (`/virginia-beach/renew-marina-shores/conventional/`).

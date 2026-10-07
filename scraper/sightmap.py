@@ -42,8 +42,32 @@ def sqft_on_page(text: str, plan_name: str) -> Optional[int]:
     return to_int(m.group(1)) if m else None
 
 
+def _norm(name: str) -> str:
+    """'A4.1-V' / 'A4.1V' / 'A4.1' -> 'a4.1' for matching plan names across sources."""
+    return re.sub(r"[-\s]?[vh]$", "", (name or "").strip().lower())
+
+
+def page_plan_details(page: str) -> dict:
+    """{normalized plan name: (sqft, image)} from RealPage/Vest embedded `:floorplans` data, if the
+    page has it (Attain). Fills sqft/images for plans SightMap lists without units."""
+    try:
+        from .realpage_craft import _prop
+        plans = _prop(page, "floorplans")
+    except Exception:
+        return {}
+    out = {}
+    for f in plans:
+        detail = (to_int(f.get("floorPlanInteriorSquareFeet")), f.get("floorPlanImageFull") or f.get("floorPlanImage"))
+        for key in (f.get("floorPlanCode"), f.get("floorPlanName")):
+            if key:
+                out.setdefault(_norm(key), detail)
+    return out
+
+
 def parse(data: dict, today: Optional[date] = None, page: str = "") -> Tuple[List[FloorPlan], List[Unit]]:
     sm = data.get("data", data)
+    # "Flat pricing" sites quote every price for one lease term (Attain: 12 months).
+    flat_lease = to_int(sm.get("flat_pricing_lease_term_months")) if sm.get("pricing_strategy") == "flat_pricing" else None
     plans_by_id = {str(fp["id"]): fp for fp in sm.get("floor_plans", [])}
 
     units = []
@@ -59,11 +83,12 @@ def parse(data: dict, today: Optional[date] = None, page: str = "") -> Tuple[Lis
             sqft=to_int(u.get("area")),
             building=u.get("building") or None,
             available_date=parse_date(u.get("available_on"), today),
-            lease_months=int(lease.group(1)) if lease else None,
+            lease_months=int(lease.group(1)) if lease else flat_lease,
             specials=[{"title": special[:120], "description": special}] if special else [],
         ))
 
     text = page_text(page) if page else ""
+    extra = page_plan_details(page) if page else {}
     by_plan = defaultdict(list)
     for u in units:
         by_plan[u.floorplan_code].append(u)
@@ -81,12 +106,12 @@ def parse(data: dict, today: Optional[date] = None, page: str = "") -> Tuple[Lis
             name=name,
             beds=to_float(fp.get("bedroom_count")),
             baths=to_float(fp.get("bathroom_count")),
-            sqft=min(sqfts) if sqfts else sqft_on_page(text, name),
+            sqft=min(sqfts) if sqfts else (sqft_on_page(text, name) or (extra.get(_norm(name)) or (None, None))[0]),
             rent_min=min(prices) if prices else None,
             rent_max=max(prices) if prices else None,
             units_available=len(us),
             earliest_available=dates[0] if dates else None,
-            image_url=fp.get("image_url"),
+            image_url=fp.get("image_url") or (extra.get(_norm(name)) or (None, None))[1],
             lease_months=next((u.lease_months for u in us if u.lease_months), None),
         ))
     return floorplans, units
@@ -94,7 +119,8 @@ def parse(data: dict, today: Optional[date] = None, page: str = "") -> Tuple[Lis
 
 def scrape(cfg: dict, today: Optional[date] = None) -> Tuple[PropertyInfo, List[FloorPlan], List[Unit]]:
     page = http_get(cfg["url"])
-    embed = re.search(r"https://sightmap\.com/embed/([a-z0-9]+)", page)
+    # Plain link, or JSON-escaped inside page data (Attain: "https:\/\/sightmap.com\/embed\/<id>").
+    embed = re.search(r"sightmap\.com\\?/embed\\?/([a-z0-9]{6,})", page)
     if not embed:
         raise ValueError("No SightMap embed on page; site template may have changed")
     embed_page = http_get(f"https://sightmap.com/embed/{embed.group(1)}")
@@ -102,4 +128,13 @@ def scrape(cfg: dict, today: Optional[date] = None) -> Tuple[PropertyInfo, List[
     if not api:
         raise ValueError("SightMap data URL not found in embed page")
     floorplans, units = parse(json.loads(http_get(api.group(0))), today, page)
-    return parse_property(page), floorplans, units
+    info = parse_property(page)
+    if not info.phone and ':property="' in page:  # RealPage/Vest pages (Attain) carry the phone in :property
+        try:
+            from .realpage_craft import _prop
+            prop = _prop(page, "property")
+            info.phone = prop.get("phone") or None
+            info.address = info.address or prop.get("address")
+        except Exception:
+            pass
+    return info, floorplans, units

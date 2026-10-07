@@ -102,3 +102,12 @@ def test_unpriced_units_have_no_price_changes():
         return s
     uh, _ = unit_histories(history(call_snap(), call_snap()))
     assert uh["A#1"]["price_changes"] == 0 and uh["A#1"]["price_change"] == 0
+
+
+def test_unit_history_since_restarts_unit_tracking():
+    h = history(snap([unit("101", 2000, building="4705-WSH")]), snap([unit("101", 2000, building="4705")]))
+    cfg = {"slug": "t", "name": "Test", "url": "x", "unit_history_since": "2026-09-27"}
+    summary, detail = build_complex(cfg, h, {"ok": True})
+    u = detail["units"][0]["history"]
+    assert detail["gone_units"] == [] and u["is_new"] is False and detail["history_start"] == "2026-09-27"
+    assert len(summary["history"]) == 2  # complex-level price history keeps the older data

@@ -220,7 +220,11 @@ def build_complex(cfg: dict, history: list, st: dict) -> Tuple[dict, Optional[di
                 "effective_min": fp.get("effective_min"),
                 "units": fp["units_available"],
             })
-    uh, gone = unit_histories(history)
+    # After a data-source switch, unit IDs change (Attain: "4705-WSH #104" -> "4705 #104"), so
+    # unit tracking restarts at `unit_history_since` instead of flagging every unit new/gone.
+    since = str(cfg.get("unit_history_since") or "")
+    unit_window = [(d, s) for d, s in history if d >= since] or history[-1:]
+    uh, gone = unit_histories(unit_window)
     for u in latest["units"]:
         u["history"] = uh.get(unit_key(u))
     detail = {
@@ -230,6 +234,7 @@ def build_complex(cfg: dict, history: list, st: dict) -> Tuple[dict, Optional[di
         "bed_history": [{"date": p["date"], "by_beds": p["by_beds"]} for p in series],
         "floorplan_history": fp_history,
         "gone_units": gone,
+        "history_start": unit_window[0][0],
         "stale": stale,
         "error": error,
     }

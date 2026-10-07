@@ -206,3 +206,23 @@ def test_rentcafe_card_layout_salt_meadow():
     assert next(x for x in units if x.unit_number == "0837-116").available_date == "2026-11-02"  # "Date Available:"
     plain = next(x for x in units if x.unit_number == "0817-113")  # no fee breakdown: "Starting at" is the rent
     assert (plain.price, plain.total_price) == (2416, None)
+
+
+def test_sightmap_attain_live_prices():
+    """Attain's embedded page data had stale prices and the wrong plan for 4705 #104;
+    SightMap has the live ones (base $1,515, $1,650 total, plan B2.1)."""
+    import json
+    import re
+
+    from scraper import sightmap
+
+    page = read("attain.html")
+    # The embed URL is JSON-escaped inside the page data.
+    assert re.search(r"sightmap\.com\\?/embed\\?/([a-z0-9]{6,})", page).group(1) == "gow32268p2m"
+    plans, units = sightmap.parse(json.loads(read("sightmap_attain_api.json")), TODAY, page)
+    assert len(units) == 26
+    u = next(x for x in units if (x.building, x.unit_number) == ("4705", "104"))
+    plan = next(p for p in plans if p.code == u.floorplan_code)
+    assert (plan.name, plan.beds, u.price, u.total_price, u.lease_months) == ("B2.1", 2, 1515, 1650, 12)
+    # Plans without units get sqft/images from the page's embedded :floorplans data.
+    assert sum(1 for p in plans if not p.sqft) <= 1
