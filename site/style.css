@@ -119,7 +119,7 @@ footer { margin-top: 32px; font-size: 12px; color: var(--text-3); }
   label.toggle { margin-left: 0; }
 }
 .show-sm { display: none; }
-@media (max-width: 640px) { .show-sm { display: inline; } }
+@media (max-width: 640px) { .show-sm { display: inline; } div.show-sm { display: block; } }
 
 /* specials & net rent */
 .net { font-size: 12px; color: var(--down); font-weight: 600; }
@@ -154,4 +154,8 @@ tr.dim td { color: var(--text-3); }
 .banner.info { background: var(--surface-2); color: var(--text); }
 @media (max-width: 640px) {
   button.star { width: 32px; height: 32px; }
+  /* floorplan table: let names and bed/bath wrap so price and $/sq ft fit on a phone */
+  td.bed-cell { white-space: normal; }
+  td.fp-name strong { display: inline-block; vertical-align: middle; white-space: normal; max-width: 92px; line-height: 1.3; }
+  tr.fp-row td { padding-left: 5px; padding-right: 5px; }
 }

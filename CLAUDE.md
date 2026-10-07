@@ -259,6 +259,8 @@ A random pause between ReNew detail pages is listed in ENHANCEMENTS.md but not d
 - A complex whose latest scrape failed is flagged "stale" and keeps showing its last good data.
 - **$/sq ft** uses the listed price (base, or incl. fees at total-basis sites); net-of-specials
   $/sq ft is in the tooltip. Plans use `rent_min` / plan sqft; units fall back to plan sqft.
+  On phones (≤640px) the floorplan table hides that column and shows "$x.xx/sq ft" under the
+  From price instead; names and bed/bath wrap so the price fits without scrolling sideways.
 - **Shortlist** lives in `localStorage` (`apartments.shortlist.v1`), per browser by the user's
   choice; a `?shortlist=<base64url JSON>` share link moves it between devices (imported on the
   overview, then stripped from the URL). Ids: `<slug>|u|<building>#<unit>` (same key as

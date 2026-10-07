@@ -655,11 +655,13 @@ async function renderComplex() {
       },
         h("td", { class: "fp-name" }, starBtn(planEntry(d, f), onStar),
           f.image_url ? h("img", { class: "fp-thumb hide-sm", src: f.image_url, alt: "", loading: "lazy" }) : null, h("strong", {}, f.name)),
-        h("td", {}, `${bedLabel(f.beds)} / ${f.baths ?? "—"} BA`),
+        h("td", { class: "bed-cell" }, `${bedLabel(f.beds)} / ${f.baths ?? "—"} BA`),
         h("td", { class: "r num hide-sm" }, f.sqft ? f.sqft.toLocaleString() : "—"),
         h("td", { class: "r num" }, f.units_available ? priceOrCall(f.rent_min, f.units_available) : "—",
-          f.units_available && f.rent_max && f.rent_max !== f.rent_min ? h("span", { class: "muted small" }, ` – ${money(f.rent_max)}`) : null,
-          f.units_available && f.total_min && !totalBasis ? h("div", { class: "muted small", title: "Base rent plus required monthly fees" }, `${money(f.total_min)} total`) : null),
+          f.units_available && f.rent_max && f.rent_max !== f.rent_min ? h("span", { class: "muted small hide-sm" }, ` – ${money(f.rent_max)}`) : null,
+          f.units_available && f.total_min && !totalBasis ? h("div", { class: "muted small", title: "Base rent plus required monthly fees" }, `${money(f.total_min)} total`) : null,
+          // Phones hide the $/sq ft column, so show it under the price instead.
+          f.ppsf != null ? h("div", { class: "muted small show-sm" }, `${fmtPpsf(f.ppsf)}/sq ft`) : null),
         h("td", { class: "r num hide-sm" }, f.units_available ? ppsfEl(f.rent_min, f.effective_min, f.sqft) : h("span", { class: "muted" }, "—")),
         hasNet && h("td", { class: "r num" }, f.units_available && f.effective_min != null && f.effective_min < f.rent_min
           ? h("strong", { title: "Lowest effective monthly rent after specials" }, money(f.effective_min)) : h("span", { class: "muted" }, "—")),
