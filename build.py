@@ -86,26 +86,53 @@ def apply_specials(snap: dict, snap_date: str) -> None:
         fp["total_min"] = min(totals) if totals else None
 
 
+def unit_totals(snap: dict) -> List[Tuple[dict, int, int]]:
+    """[(unit, total/mo, net total/mo)] for units whose total monthly cost is known: the site's
+    total (rent + required fees), or the price itself when the site only shows totals.
+    Net total = total minus the same specials savings applied to the rent."""
+    total_basis = snap.get("price_basis") == "total"
+    out = []
+    for u in snap["units"]:
+        total = u.get("total_price") or (u["price"] if total_basis else None)
+        if total:
+            savings = (u.get("effective") or {}).get("savings") or 0
+            out.append((u, total, total - savings))
+    return out
+
+
 def metrics(snap: dict) -> dict:
     """Headline numbers for one snapshot (call apply_specials first)."""
     available = [fp for fp in snap["floorplans"] if fp["units_available"]]
     prices = [fp["rent_min"] for fp in available if fp["rent_min"]]
     prices += [u["price"] for u in snap["units"] if u["price"]]
     eff = [fp["effective_min"] for fp in available if fp.get("effective_min")]
-    totals = [u.get("total_price") for u in snap["units"] if u.get("total_price")]
     units = sum(fp["units_available"] for fp in snap["floorplans"])
-    by_beds = defaultdict(lambda: {"units": 0, "min_price": None, "min_effective": None})
+    by_beds = defaultdict(lambda: {"units": 0, "min_price": None, "min_effective": None,
+                                   "min_total": None, "min_total_net": None})
+
+    def lower(b, key, val):
+        if val and (b[key] is None or val < b[key]):
+            b[key] = val
+
     for fp in available:
         b = by_beds[bed_label(fp["beds"])]
         b["units"] += fp["units_available"]
-        for key, val in (("min_price", fp["rent_min"]), ("min_effective", fp.get("effective_min"))):
-            if val and (b[key] is None or val < b[key]):
-                b[key] = val
+        lower(b, "min_price", fp["rent_min"])
+        lower(b, "min_effective", fp.get("effective_min"))
+    beds_of = {fp["code"]: bed_label(fp["beds"]) for fp in snap["floorplans"]}
+    totals_known = unit_totals(snap)
+    for u, total, net in totals_known:
+        b = by_beds[beds_of.get(u["floorplan_code"], "Other")]
+        lower(b, "min_total", total)
+        lower(b, "min_total_net", net)
     return {
         "units": units,
         "min_price": min(prices) if prices else None,
         "min_effective": min(eff) if eff else None,
-        "min_total": min(totals) if totals else None,
+        "min_total": min(t for _, t, _ in totals_known) if totals_known else None,
+        "min_total_net": min(n for _, _, n in totals_known) if totals_known else None,
+        # Share of available units whose total monthly cost (with fees) is known.
+        "total_known": round(len(totals_known) / len(snap["units"]), 2) if snap["units"] else 0,
         # False when units are listed but the site publishes no prices (e.g. "Rent: Call").
         "priced": bool(prices) or units == 0,
         "by_beds": dict(sorted(by_beds.items(), key=lambda kv: bed_sort_key(kv[0]))),
@@ -158,6 +185,58 @@ def unit_histories(history: List[Tuple[str, dict]]) -> Tuple[dict, list]:
     return out, gone
 
 
+# ---------- data checks ----------
+
+BIG_MOVE = 0.15  # a >15% price move in one pull is unusual enough to flag
+
+
+def data_checks(window: List[Tuple[str, dict]], series: List[dict]) -> List[str]:
+    """Reasons a complex's latest data looks off, comparing it only with itself (plans vs their
+    own units, and this pull vs the previous one). Never compares across bedroom counts: a 2BR
+    priced below a 1BR is normal."""
+    if not window:
+        return []
+    date_, snap = window[-1]
+    reasons = []
+    units = snap["units"]
+
+    # Plan counts vs unit rows (only meaningful when the site gives unit rows at all).
+    if units:
+        rows = defaultdict(int)
+        for u in units:
+            rows[u["floorplan_code"]] += 1
+        off = [f"{fp['name']}: {fp['units_available']} available, {rows.get(fp['code'], 0)} listed"
+               for fp in snap["floorplans"] if fp["units_available"] != rows.get(fp["code"], 0)]
+        if off:
+            reasons.append("Plan counts don't match unit lists (" + "; ".join(off[:3]) + (f"; +{len(off) - 3} more" if len(off) > 3 else "") + ")")
+        missing = sum(1 for u in units if u["price"] is None)
+        if 0 < missing < len(units):
+            reasons.append(f"{missing} of {len(units)} units have no price")
+
+    # This pull vs the previous one (within the same data source).
+    cur = next((p for p in reversed(series) if p["date"] == date_), None)
+    prev = next((p for p in reversed(series) if p["date"] < date_ and p["date"] >= window[0][0]), None)
+    if cur and prev:
+        if cur["min_price"] and prev["min_price"]:
+            move = (cur["min_price"] - prev["min_price"]) / prev["min_price"]
+            if abs(move) > BIG_MOVE:
+                reasons.append(f"Lowest price moved {move:+.0%} since {prev['date']} (${prev['min_price']:,} → ${cur['min_price']:,})")
+        if prev["units"] and not cur["units"]:
+            reasons.append(f"No units available (had {prev['units']} on {prev['date']})")
+        elif prev["units"] >= 5 and cur["units"] < prev["units"] * 0.4:
+            reasons.append(f"Available units dropped from {prev['units']} to {cur['units']} since {prev['date']}")
+    if len(window) > 1:
+        before = {unit_key(u): u["price"] for u in window[-2][1]["units"] if u["price"]}
+        jumps = []
+        for u in units:
+            old = before.get(unit_key(u))
+            if old and u["price"] and abs(u["price"] - old) / old > BIG_MOVE:
+                jumps.append(f"#{u['unit_number']} ${old:,} → ${u['price']:,}")
+        if jumps:
+            reasons.append("Unit price jumps over 15%: " + ", ".join(jumps[:3]) + (f", +{len(jumps) - 3} more" if len(jumps) > 3 else ""))
+    return reasons
+
+
 # ---------- build ----------
 
 def delta(cur, prev):
@@ -182,10 +261,12 @@ def build_complex(cfg: dict, history: list, st: dict) -> Tuple[dict, Optional[di
         return {"slug": slug, "name": cfg["name"], "url": cfg.get("website") or cfg["url"],
                 "stale": True, "error": error, "history": []}, None
 
+    # Snapshots from before price_basis existed: use the scraper's declared basis.
+    basis = getattr(MODULES.get(cfg.get("scraper")), "PRICE_BASIS", "base")
+    for _, snap in history:
+        snap["price_basis"] = snap.get("price_basis") or basis
     series = [{"date": d, **metrics(s)} for d, s in history]
     latest_date, latest = history[-1]
-    # Snapshots from before price_basis existed: use the scraper's declared basis.
-    latest["price_basis"] = latest.get("price_basis") or getattr(MODULES.get(cfg.get("scraper")), "PRICE_BASIS", "base")
     cur, prev = series[-1], (series[-2] if len(series) > 1 else None)
 
     summary = {
@@ -198,6 +279,8 @@ def build_complex(cfg: dict, history: list, st: dict) -> Tuple[dict, Optional[di
         "min_price": cur["min_price"],
         "min_effective": cur["min_effective"],
         "min_total": cur["min_total"],
+        "min_total_net": cur["min_total_net"],
+        "total_known": cur["total_known"],
         "priced": cur["priced"],
         "price_basis": latest["price_basis"],
         "by_beds": cur["by_beds"],
@@ -225,6 +308,8 @@ def build_complex(cfg: dict, history: list, st: dict) -> Tuple[dict, Optional[di
     since = str(cfg.get("unit_history_since") or "")
     unit_window = [(d, s) for d, s in history if d >= since] or history[-1:]
     uh, gone = unit_histories(unit_window)
+    checks = data_checks(unit_window, series)
+    summary["checks"] = checks
     for u in latest["units"]:
         u["history"] = uh.get(unit_key(u))
     detail = {
@@ -235,6 +320,7 @@ def build_complex(cfg: dict, history: list, st: dict) -> Tuple[dict, Optional[di
         "floorplan_history": fp_history,
         "gone_units": gone,
         "history_start": unit_window[0][0],
+        "checks": checks,
         "stale": stale,
         "error": error,
     }

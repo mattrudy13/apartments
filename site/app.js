@@ -199,7 +199,12 @@ async function renderOverview() {
 
   // Table: sortable; defaults to cheapest first. Price sorts use the net price when specials lower it.
   const bedKeys = sortBedKeys(complexes.flatMap((c) => Object.keys(c.by_beds || {})));
-  const bestPrice = (x) => (x ? (x.min_effective ?? x.min_price ?? null) : null);
+  // "base": base rent (net when specials lower it). "total": total monthly incl. required fees
+  // (net of specials) where the site lists fees; otherwise falls back to base, marked.
+  const priceMode = { mode: "base" };
+  const baseBest = (x) => (x ? (x.min_effective ?? x.min_price ?? null) : null);
+  const totalBest = (x) => (x ? (x.min_total_net ?? x.min_total ?? null) : null);
+  const bestPrice = (x) => (priceMode.mode === "total" ? (totalBest(x) ?? baseBest(x)) : baseBest(x));
   const sortValue = {
     name: (c) => c.name.toLowerCase(),
     units: (c) => c.units ?? null,
@@ -207,23 +212,36 @@ async function renderOverview() {
     ...Object.fromEntries(bedKeys.map((k) => [`bed:${k}`, (c) => bestPrice((c.by_beds || {})[k])])),
   };
   const tableState = { sort: "price", dir: 1 };
-  const thead = h("thead"), tbody = h("tbody");
+  const thead = h("thead"), tbody = h("tbody"), modeChips = h("div", { class: "filters" });
   const sortTh = (key, label, cls = "", title = null) => h("th", {
     class: `sortable ${cls}`, title,
     "aria-sort": tableState.sort === key ? (tableState.dir > 0 ? "ascending" : "descending") : null,
     onclick: () => { tableState.dir = tableState.sort === key ? -tableState.dir : 1; tableState.sort = key; drawTable(); },
   }, label);
+  const noFees = () => h("div", { class: "muted small", title: "This site doesn't list its required monthly fees; showing base rent" }, "fees not listed");
+  /** Price cell content for a complex or bedroom bucket in the current mode. */
+  const priceCell = (x, units, { complex = false } = {}) => {
+    if (priceMode.mode === "total" && x && x.min_total != null) {
+      return [h("span", { title: "Total monthly: rent plus required monthly fees" }, money(x.min_total)), netEl(x.min_total_net, x.min_total)];
+    }
+    const showFeesNote = priceMode.mode === "total" && x && x.min_price != null;
+    return [priceOrCall(x ? x.min_price : null, units), netEl(x && x.min_effective, x && x.min_price), showFeesNote ? noFees() : null,
+      complex && priceMode.mode === "base" ? deltaEl(x.min_price_delta, { isPrice: true }) : null,
+      complex && priceMode.mode === "base" && x.price_basis === "total" && x.min_price != null ? h("div", { class: "muted small", title: "This site only shows prices that include required monthly fees" }, "incl. fees") : null];
+  };
+  const checksBadge = (c) => (c.checks && c.checks.length
+    ? h("span", { class: "badge warn", style: "margin-left:8px", title: "Data looks off:\n" + c.checks.join("\n") }, "check data") : null);
   const row = (c) => h("tr", {},
     h("td", { class: "name-cell" },
       h("a", { href: `complex.html?c=${encodeURIComponent(c.slug)}` }, c.name),
       c.stale ? h("span", { class: "badge warn", style: "margin-left:8px", title: c.error || "" }, "stale") : null,
+      checksBadge(c),
       h("div", { class: "addr" }, c.address || "")),
     h("td", { class: "r num" }, c.units ?? "—", deltaEl(c.units_delta)),
-    h("td", { class: "r num" }, priceOrCall(c.min_price, c.units), deltaEl(c.min_price_delta, { isPrice: true }),
-      netEl(c.min_effective, c.min_price), c.price_basis === "total" && c.min_price != null ? h("div", { class: "muted small", title: "This site only shows prices that include required monthly fees" }, "incl. fees") : null),
+    h("td", { class: "r num" }, priceCell(c, c.units, { complex: true })),
     bedKeys.map((k) => {
       const b = (c.by_beds || {})[k];
-      return h("td", { class: "r num hide-sm" }, b ? [h("span", {}, priceOrCall(b.min_price, b.units), h("span", { class: "muted small" }, ` (${b.units})`)), netEl(b.min_effective, b.min_price)] : h("span", { class: "muted" }, "—"));
+      return h("td", { class: "r num hide-sm" }, b ? [h("span", {}, priceCell(b, b.units)[0], h("span", { class: "muted small" }, ` (${b.units})`)), ...priceCell(b, b.units).slice(1)] : h("span", { class: "muted" }, "—"));
     }),
     h("td", { class: "hide-sm" }, sparkline((c.history || []).map((p) => p.min_price))),
     h("td", { class: "muted small" }, fmtDate(c.date)),
@@ -236,18 +254,21 @@ async function renderOverview() {
       if (av == null) return 1; if (bv == null) return -1;  // no price / no units: always last
       return (av < bv ? -1 : av > bv ? 1 : 0) * tableState.dir;
     });
+    modeChips.replaceChildren(...[["base", "Base rent"], ["total", "Total per month"]].map(([k, label]) =>
+      h("button", { class: "chip", "aria-pressed": String(priceMode.mode === k), onclick: () => { priceMode.mode = k; drawTable(); } }, label)));
     thead.replaceChildren(h("tr", {},
-      sortTh("name", "Complex"), sortTh("units", "Units", "r"), sortTh("price", "Lowest price", "r", "Sorted by net price when specials lower it"),
+      sortTh("name", "Complex"), sortTh("units", "Units", "r"), sortTh("price", priceMode.mode === "total" ? "Lowest total/mo" : "Lowest price", "r", "Sorted by net price when specials lower it"),
       bedKeys.map((k) => sortTh(`bed:${k}`, k, "r hide-sm", "Lowest price (units available); sorted by net price when specials lower it")),
       h("th", { class: "hide-sm" }, "Price trend"), h("th", {}, "Updated")));
     tbody.replaceChildren(...sorted.map(row));
   };
   drawTable();
   add(root,
-    h("div", { class: "card" },
+    h("div", { class: "card stack" },
       h("h2", {}, "Availability"),
+      modeChips,
       h("div", { class: "table-scroll" }, h("table", {}, thead, tbody)),
-      h("p", { class: "note" }, "Click a column to sort; price columns sort by net price when specials lower it, and complexes without a price go last. Prices are base rent where the site shows it. Deltas compare with the previous pull. Bedroom columns show the lowest price with units available in parentheses. “Net” is the effective monthly rent after specials (e.g. months free) spread over the lease. “Call” means the complex lists units but doesn't publish prices."),
+      h("p", { class: "note" }, "Click a column to sort; price columns sort by net price when specials lower it, and complexes without a price go last. Prices are base rent where the site shows it. Deltas compare with the previous pull. Bedroom columns show the lowest price with units available in parentheses. “Net” is the effective monthly rent after specials (e.g. months free) spread over the lease. “Call” means the complex lists units but doesn't publish prices. “Total per month” adds the required monthly fees a site lists (e.g. trash, pest control); sites that don't list fees show base rent, marked “fees not listed”."),
     ),
   );
 
@@ -323,6 +344,9 @@ async function renderComplex() {
       [d.property.address, d.property.phone].filter(Boolean).join(" · "), " · ",
       h("a", { href: d.url, target: "_blank", rel: "noopener" }, "Official site ↗")),
     d.stale ? h("div", { class: "banner" }, `The latest pull failed (${d.error || "unknown error"}). Showing data from ${fmtDate(d.date)}.`) : null,
+    d.checks && d.checks.length ? h("div", { class: "banner" },
+      h("strong", {}, "Data looks off — double-check on the official site:"),
+      h("ul", { style: "margin:6px 0 0 18px;padding:0" }, d.checks.map((r) => h("li", {}, r)))) : null,
   );
 
   const unitsByPlan = {};

@@ -231,6 +231,15 @@ A random pause between ReNew detail pages is listed in ENHANCEMENTS.md but not d
 - Detail-page charts use the dataviz skill's validated categorical palette (CSS vars
   `--series-1..8`, separate light/dark steps in `site/style.css`), in fixed order.
 - Unpriced complexes/plans/units show "Call"; bedroom columns sort Studio, 1 BR, 2 BR, ...
+- Overview table has a **Base rent / Total per month** switch. Total = site's total with
+  required fees (or the price itself for total-basis sites like ReNew), net of the same
+  specials savings as base; complexes without listed fees fall back to base rent and show
+  "fees not listed" (so they can rank artificially low in total mode).
+- **Data checks** (`build.data_checks`) flag a complex with a "check data" badge and a banner
+  listing reasons: plan counts ≠ unit rows, some units missing prices, lowest price or a
+  unit's price moving >15% since the previous pull, availability dropping to 0 or by >60%.
+  They compare a complex only with itself, never across bedroom counts (a 2BR priced below
+  a 1BR happens often), and only within `unit_history_since`.
 - The overview table is sortable (Complex, Units, Lowest price, each bedroom column) and
   defaults to cheapest first. Price sorts use the net price when specials lower it;
   complexes with no price (or no units of that size) always sort last.

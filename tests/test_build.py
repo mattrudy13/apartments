@@ -111,3 +111,38 @@ def test_unit_history_since_restarts_unit_tracking():
     u = detail["units"][0]["history"]
     assert detail["gone_units"] == [] and u["is_new"] is False and detail["history_start"] == "2026-09-27"
     assert len(summary["history"]) == 2  # complex-level price history keeps the older data
+
+
+def test_total_monthly_with_specials_and_beds():
+    u1, u2 = unit("1", 1500, lease=12), unit("2", 1600, lease=12)
+    u1["total_price"], u2["total_price"] = 1650, 1700
+    s = snap([u1, u2], specials=[{"title": "1 Month Free", "description": ""}], lease=12)
+    summary, _ = build_complex({"slug": "t", "name": "T", "url": "x"}, history(s), {"ok": True})
+    # $1,500 rent with 1 month free on 12 -> saves $125/mo; net total = 1650 - 125
+    assert (summary["min_total"], summary["min_total_net"], summary["total_known"]) == (1650, 1525, 1.0)
+    assert summary["by_beds"]["1 BR"]["min_total_net"] == 1525
+
+
+def test_total_basis_prices_count_as_totals():
+    s = snap([unit("1", 1944)])
+    summary, _ = build_complex({"slug": "r", "name": "R", "url": "x", "scraper": "entrata"}, history(s), {"ok": True})
+    assert summary["min_total"] == 1944 and summary["total_known"] == 1.0
+
+
+def test_data_checks_flag_self_inconsistency_only():
+    a = snap([unit("101", 2000), unit("102", 2100), unit("103", 1500, code="P1")])
+    b = snap([unit("101", 2400), unit("102", 2100), unit("103", 1500)])
+    b["floorplans"][0]["units_available"] = 5  # plan says 5, only 3 unit rows
+    summary, detail = build_complex({"slug": "t", "name": "T", "url": "x"}, history(a, b), {"ok": True})
+    text = " | ".join(summary["checks"])
+    assert "Plan counts don't match" in text and "#101 $2,000 → $2,400" in text
+    assert detail["checks"] == summary["checks"]
+
+
+def test_data_checks_quiet_for_normal_data():
+    # A 2BR cheaper than a 1BR is normal and must not be flagged.
+    a = snap([unit("1", 1800), unit("2", 1700)])
+    a["floorplans"].append({"code": "P2", "name": "P2", "beds": 2, "rent_min": 1700, "units_available": 0,
+                            "earliest_available": None, "lease_months": None, "specials": []})
+    summary, _ = build_complex({"slug": "t", "name": "T", "url": "x"}, history(a, a), {"ok": True})
+    assert summary["checks"] == []

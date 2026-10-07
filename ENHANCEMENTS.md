@@ -7,15 +7,6 @@ Finished items move to **Done** at the bottom.
 - [ ] **Price-drop / new-unit alerts** — the weekly job already diffs snapshots; notify
       (ntfy.sh / Pushover / email) when a unit drops below a target price, a watched floorplan
       opens up, or a scrape fails. Could run as a step at the end of `scrape_and_push.sh`.
-- [ ] **Data sanity checks** — Attain's embedded data was quietly wrong (stale prices, a 2BR
-      filed as a 1BR) until it was noticed on the site. At build time, flag a complex when:
-      card counts disagree with unit rows, a plan's "from" price is below every unit's
-      price, units outside the plan's bed count, prices jump >15% week over week, or the unit
-      count drops to 0. Show a "check data" badge and list the reasons on the complex page.
-- [ ] **Compare by total monthly cost** — prices are base rent, but required fees vary
-      (Attain ~$135/mo, Salt Meadow ~$40, North Hill ~$26, ReNew only shows totals). Add a
-      "Total/mo" sort/toggle on the overview, using the total where a site gives it and
-      marking complexes where it's unknown.
 
 ## Comparison
 - [ ] **Cross-complex search page** — one table of all available units, filterable by beds,
@@ -61,3 +52,9 @@ Finished items move to **Done** at the bottom.
 - [x] **Base vs total pricing** — base rent everywhere a site shows it, total with fees
       stored and shown alongside; Entrata's total-only prices marked "incl. fees".
 - [x] **Sites without prices** — tracked for units/availability, shown as "Call".
+- [x] **Data sanity checks** — "check data" badge + reasons when a complex disagrees with
+      itself: plan counts vs unit lists, units missing prices, >15% lowest-price or unit-price
+      moves, availability dropping to 0 or by >60%. Never compares across bedroom counts
+      (a 2BR below a 1BR is normal).
+- [x] **Compare by total monthly cost** — "Base rent / Total per month" switch on the overview;
+      totals net of specials, and sites without listed fees fall back to base, marked.
