@@ -4,12 +4,13 @@ Tracks availability and pricing for a list of apartment complexes and publishes 
 static dashboard to GitHub Pages: https://mattrudy13.github.io/apartments/
 See README.md for usage commands.
 
-## Status (2026-10-05)
+## Status (2026-10-06)
 
 Working end to end:
-- Scrapers for the four tracked complexes (`complexes.yaml`): Attain at Chic's Beach
-  (`realpage_craft`), ReNew Marina Shores (`entrata`), Linkhorn Bay (`rentcafe`) and
-  North Beach (`appfolio`).
+- Nine tracked complexes (`complexes.yaml`): Attain at Chic's Beach (`realpage_craft`),
+  ReNew Marina Shores (`entrata`), Linkhorn Bay (`rentcafe`), North Beach (`appfolio`), and
+  added 2026-10-06: Nexus (`sightmap`), Indigo 19 (`rentcafe`, no prices), North Hill
+  (`realpage_leasestar`), Salt Meadow Bay (`rentcafe`, card layout) and Columbus Station (`g5`).
 - Weekly launchd job on the Mac scrapes and pushes snapshots; the GitHub Action
   (`.github/workflows/deploy.yml`) tests, builds `site/data/` and deploys Pages.
 - Overview page (`site/index.html`) and complex detail page (`site/complex.html?c=<slug>`).
@@ -64,8 +65,10 @@ as too broad. The README documents this setup.
 ## Scraping load
 
 Weekly volume is tiny (Attain: 1 request; ReNew: ~7 Chrome page loads over ~50 s; Linkhorn
-Bay: 7 requests; North Beach: 2). To fill in a newly added complex without re-hitting the
-others, run `scraper.run --only <slug>` in the scheduler's clone and push (see README).
+Bay: 7 requests; North Beach: 2; Nexus: 3; Indigo 19: ~7; North Hill: 1 Chrome page load;
+Salt Meadow Bay: ~7; Columbus Station: ~6 GraphQL POSTs). Only ReNew and North Hill use
+Chrome. To fill in a newly added complex without re-hitting the others, run
+`scraper.run --only <slug>` in the scheduler's clone and push (see README).
 A random pause between ReNew detail pages is listed in ENHANCEMENTS.md but not done.
 
 ## Site quirks
@@ -120,6 +123,47 @@ A random pause between ReNew detail pages is listed in ENHANCEMENTS.md but not d
   street address, so the building + unit key keeps them distinct.
 - No specials; fees in `fee_values` are optional pet fees only.
 
+**Nexus (Greystar site + Engrain SightMap)** — plain HTTP
+- `/floorplans/` embeds `sightmap.com/embed/<id>`; that embed page names the data URL
+  `sightmap.com/app/api/v1/<asset>/sightmaps/<n>` (public JSON; httpx handles its compression).
+- Units have base `price`, `total_price` (list; includes required monthly fees),
+  `display_lease_term` ("14 Months"), `available_on`, `building`, `specials_description`.
+- Floor plan `name` is a JSON string (`{"name":"A1","provider_id":...}`); a `TEMP` placeholder
+  plan is skipped. SightMap has no plan sqft, so plans without units take sqft from the page
+  cards ("A0 / 1 bed / 1 bath / 563 sq. ft.").
+- JSON-LD is wrapped in `@graph`; `entrata.parse_property` handles that.
+
+**Indigo 19 (RentCafe, Greystar)** — plain HTTP, **no prices**
+- Cards say "Call for Details" with no plan link; plan pages still exist at
+  `/floorplans/<name-slug>` and list units as "Rent: Call" with no dates. The SecureCafe
+  leasing site returns 403 to plain requests. Tracked for units/availability; price None,
+  `priced: False`, shown as "Call".
+
+**North Hill (RealPage LeaseStar, Greystar)** — Chrome
+- Data API `api.ws.realpage.com/v2/property/8871769/{floorplans,units?available=true...}`
+  returns 401 without a token the page's JS gets, so `realpage_leasestar` loads the page
+  with `Browser.get_json_responses` and reads those responses.
+- Units: `rent` (base), `totalRent` (incl. required fees), `minLeaseTermInMonth` (15),
+  `floorNumber`, `vacantDate`. Plan-level `bedRooms` is wrong for some plans (B2 says 1, its
+  units are 2-bed; the property is all 2BR), so when units contradict plans, plans without
+  units fall back to the most common unit bed count.
+- The site shows a stale banner special ("2 Weeks Base Rent Free When You Move In by May
+  31st!"), which isn't scraped. It prompted the stale-date rule in `specials.py` (below).
+
+**Salt Meadow Bay (RentCafe, card layout)** — plain HTTP
+- Plan pages list units as cards (`#availApts .card`), not table rows:
+  "Apartment: # 0837-210", "Available Now" / "Date Available: 11/2/2026", "Total Monthly
+  Leasing Price Starting at: $2,373", "Base rent $2,333 · 9-month term". Cards without the
+  "Total" label show only "Starting at" (treated as rent). `rentcafe.parse_units` falls back
+  to this layout when there are no `tr.unit-container` rows.
+
+**Columbus Station (G5 Marketing Cloud)** — plain HTTP
+- Data from `inventory.g5marketingcloud.com/graphql` (no auth): `apartmentComplex(locationUrn)`
+  for floorplans, then `units(floorplanId)` per plan with units. The `g5-cl-...` URN is in
+  the page HTML. Queries in `g5.py` are trimmed copies of the site's; units limit raised
+  from 9 to 100. Plans show a rate range even with 0 units (ignored when nothing's available).
+- Apply URLs carry a widget tail (`&SearchUrl=...{widget.moveInDate...}`), trimmed.
+
 ## Verified browser behavior (ReNew's Cloudflare, from the Mac)
 
 - Playwright's **bundled Chromium (headless) does NOT pass** — stuck on a Turnstile challenge.
@@ -127,6 +171,15 @@ A random pause between ReNew detail pages is listed in ENHANCEMENTS.md but not d
   `fetch.Browser` therefore prefers `channel="chrome"` and only falls back to bundled
   Chromium if Chrome isn't installed. Waits out "Just a moment..." titles (up to ~45s).
 - A full ReNew scrape takes ~50s (listing page + one detail page per available plan).
+
+## Price basis
+
+- `Unit.price` is **base rent** wherever a site shows it; `Unit.total_price` holds a
+  "total monthly" price (base + required monthly fees) when shown (Nexus, North Hill, Salt
+  Meadow Bay). Entrata (ReNew) only shows the total, so its scraper declares
+  `PRICE_BASIS = "total"`, saved as `Snapshot.price_basis`; snapshots from before that
+  field existed get the basis from the scraper module at build time. The UI labels those
+  prices "incl. fees".
 
 ## Specials and effective rent
 
@@ -136,6 +189,9 @@ A random pause between ReNew detail pages is listed in ENHANCEMENTS.md but not d
 - `scraper/specials.py` parses text into terms (months/weeks free, $ off once or monthly,
   min lease, move-in-by date, sign-by/expiry date, "select units"). Parsing happens in
   `build.py`, so parser fixes apply retroactively to all snapshots.
+- Deadlines without a year: a date >60 days past rolls to next year only if that lands within
+  ~120 days ("Jan 15" seen in December); otherwise it stays in the past, so a stale banner
+  ("May 31" in October) reads as ended.
 - Effective rent = (rent × lease − free months × rent − one-time $) ÷ lease − monthly $.
   Lease defaults to 12 months when unknown (flagged `lease_assumed`).
 - A special is skipped (and the reason recorded) when: terms weren't understood, offer
@@ -156,9 +212,12 @@ A random pause between ReNew detail pages is listed in ENHANCEMENTS.md but not d
 
 ## Design choices (frontend)
 
-- Chart colors use the dataviz skill's validated categorical palette (CSS vars
-  `--series-1..8`, separate light/dark steps in `site/style.css`), assigned in fixed
-  order. Color follows the entity (complex order in `complexes.yaml`), not rank.
+- Overview trends are **small multiples**: one mini chart per complex, all on one shared
+  y-scale, single accent color, with chips for Lowest price / Net of specials / Units. This
+  replaced combined multi-line charts once there were more complexes (9) than palette colors (8).
+- Detail-page charts use the dataviz skill's validated categorical palette (CSS vars
+  `--series-1..8`, separate light/dark steps in `site/style.css`), in fixed order.
+- Unpriced complexes/plans/units show "Call"; bedroom columns sort Studio, 1 BR, 2 BR, ...
 - Complex detail page charts **lowest price by bedroom count** (≤4 series) instead of
   one line per floorplan (Attain has 49 plans, which would be unreadable). Per-floorplan
   trends are sparklines in the floorplan table instead.

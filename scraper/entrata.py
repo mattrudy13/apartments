@@ -19,6 +19,7 @@ from .fetch import Browser, parse_date, to_float, to_int
 from .models import FloorPlan, PropertyInfo, Unit
 
 log = logging.getLogger(__name__)
+PRICE_BASIS = "total"  # prices are "Total Monthly Leasing Price" (rent + required fees)
 
 
 def _text(el: Optional[Tag]) -> str:
@@ -47,16 +48,29 @@ def _specials(card: Tag) -> list:
     return out
 
 
-def parse_property(page: str) -> PropertyInfo:
-    for m in re.finditer(r'<script type="application/ld\+json">(.*?)</script>', page, re.S):
+def _ld_items(page: str):
+    """Every JSON-LD object on the page, including those inside @graph lists."""
+    for m in re.finditer(r'<script[^>]*application/ld\+json[^>]*>(.*?)</script>', page, re.S):
         try:
             data = json.loads(m.group(1))
         except ValueError:
             continue
-        types = data.get("@type") if isinstance(data, dict) else None
+        for item in data if isinstance(data, list) else [data]:
+            if isinstance(item, dict):
+                yield from (x for x in item.get("@graph", [item]) if isinstance(x, dict))
+
+
+def parse_property(page: str) -> PropertyInfo:
+    """Address/phone from the schema.org ApartmentComplex JSON-LD (shared by most scrapers)."""
+    for data in _ld_items(page):
+        types = data.get("@type")
         if "ApartmentComplex" not in (types if isinstance(types, list) else [types]):
             continue
         addr = data.get("address") or {}
+        if isinstance(addr, list):
+            addr = addr[0] if addr else {}
+        if isinstance(addr, str):
+            addr = {"streetAddress": addr}
         parts = [addr.get("streetAddress"), addr.get("addressLocality"), addr.get("addressRegion"), addr.get("postalCode")]
         phone = re.sub(r"\D", "", data.get("telephone") or "")
         if len(phone) == 10:

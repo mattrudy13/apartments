@@ -3,6 +3,9 @@
 #   entrata        - Entrata sites; `url` must be the floorplans listing page (uses Chrome)
 #   rentcafe       - Yardi RentCafe sites; `url` is the /floorplans page (plain HTTP)
 #   appfolio       - AppFolio listings widget; `url` is the availability page (plain HTTP)
+#   sightmap       - sites embedding an Engrain SightMap; `url` is the page with the embed (plain HTTP)
+#   realpage_leasestar - RealPage LeaseStar sites; `url` is the floor-plans page (uses Chrome)
+#   g5             - G5 Marketing Cloud sites; `url` is the floor-plans page (plain HTTP)
 complexes:
   - slug: attain-chics-beach
     name: Attain at Chic's Beach
@@ -26,3 +29,33 @@ complexes:
     url: https://www.northbeachvbliving.com/availability
     website: https://www.northbeachvbliving.com/
     scraper: appfolio
+
+  - slug: nexus
+    name: Nexus
+    url: https://liveatnexus.com/floorplans/
+    website: https://liveatnexus.com/
+    scraper: sightmap
+
+  - slug: indigo-19
+    name: Indigo 19
+    url: https://www.indigo19apartments.com/floorplans
+    website: https://www.indigo19apartments.com/
+    scraper: rentcafe  # publishes no prices ("Rent: Call"); units/availability only
+
+  - slug: north-hill
+    name: North Hill
+    url: https://www.livenorthhillapts.com/floor-plans.aspx
+    website: https://www.livenorthhillapts.com/
+    scraper: realpage_leasestar
+
+  - slug: salt-meadow-bay
+    name: Salt Meadow Bay
+    url: https://www.saltmeadowbay.com/floorplans
+    website: https://www.saltmeadowbay.com/
+    scraper: rentcafe
+
+  - slug: columbus-station
+    name: Columbus Station
+    url: https://www.columbusstationapartments.com/apartments/va/virginia-beach/floor-plans
+    website: https://www.columbusstationapartments.com/
+    scraper: g5

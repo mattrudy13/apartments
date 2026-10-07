@@ -5,7 +5,7 @@ import logging
 import re
 import time
 from datetime import date, datetime
-from typing import Optional
+from typing import Dict, List, Optional
 
 import httpx
 
@@ -49,6 +49,33 @@ class Browser:
         self._pw.stop()
 
     def get(self, url: str, settle_ms: int = 3000) -> str:
+        self._open(url, settle_ms)
+        return self._page.content()
+
+    def get_json_responses(self, url: str, match: List[str], settle_ms: int = 8000) -> Dict[str, object]:
+        """Load `url` and return the JSON body of the first response whose URL contains each
+        `match` substring (for sites whose data API needs a token only the page can obtain)."""
+        found: Dict[str, object] = {}
+
+        def on_response(resp):
+            for m in match:
+                if m not in found and m in resp.url:
+                    try:
+                        found[m] = resp.json()
+                    except Exception:  # non-JSON (e.g. preflight); keep waiting
+                        pass
+
+        self._page.on("response", on_response)
+        try:
+            self._open(url, settle_ms)
+        finally:
+            self._page.remove_listener("response", on_response)
+        missing = [m for m in match if m not in found]
+        if missing:
+            raise RuntimeError(f"Page never requested {missing}: {url}")
+        return found
+
+    def _open(self, url: str, settle_ms: int) -> None:
         page = self._page
         page.goto(url, wait_until="domcontentloaded", timeout=60000)
         for _ in range(30):
@@ -58,7 +85,6 @@ class Browser:
         else:
             raise RuntimeError(f"Stuck on Cloudflare challenge: {url}")
         page.wait_for_timeout(settle_ms)
-        return page.content()
 
 
 # --- parsing helpers -------------------------------------------------------

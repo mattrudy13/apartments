@@ -24,6 +24,7 @@ def test_renew_live_special():
     ("1 Month Free", 1), ("One month free!", 1), ("Get 6 weeks free", round(6 * 7 / (365 / 12), 3)),
     ("Half a month free", 0.5), ("1/2 month free", 0.5), ("First month's rent free", 1),
     ("Free rent for 2 months", 2), ("Up to 8 Weeks Free", round(8 * 7 / (365 / 12), 3)),
+    ("2 Weeks Base Rent Free", round(2 * 7 / (365 / 12), 3)),
 ])
 def test_months_free(title, months):
     t = p(title)
@@ -111,3 +112,13 @@ def test_effective_expired_offer_and_mixed_specials():
 
 def test_effective_none_without_specials():
     assert effective_rent(1800, [], 12, None, "2026-10-04") is None
+
+
+def test_stale_no_year_deadline_stays_in_past():
+    # North Hill's banner "move in by May 31st" seen in October is a leftover, not next May.
+    t = parse_special("2 Weeks Base Rent Free", "When you move in by May 31st!", date(2026, 10, 6))
+    assert t.move_in_by == "2026-05-31"
+    e = effective_rent(1820, [t], 15, "2026-10-08", "2026-10-06")
+    assert e.rent == 1820 and "has passed" in e.skipped[0]
+    # ...while a near-future deadline across the new year still rolls forward.
+    assert parse_special("1 month free", "move in by Jan 15", date(2026, 12, 1)).move_in_by == "2027-01-15"

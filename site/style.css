@@ -127,3 +127,12 @@ footer { margin-top: 32px; font-size: 12px; color: var(--text-3); }
 .special-row > div + div { margin-top: 2px; }
 td.specials-cell { white-space: normal; min-width: 160px; max-width: 240px; }
 td.specials-cell .badge { white-space: normal; line-height: 1.4; margin: 1px 0; }
+
+/* overview small multiples */
+.multiples { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+.mini { border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px 6px; background: var(--surface); min-width: 0; }
+.mini-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 13px; }
+.mini-head a { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mini-value { font-weight: 650; white-space: nowrap; }
+.mini-chart { position: relative; height: 120px; margin-top: 4px; }
+.mini-empty { height: 120px; display: flex; align-items: center; justify-content: center; }

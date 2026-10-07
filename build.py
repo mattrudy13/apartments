@@ -14,12 +14,23 @@ from typing import List, Optional, Tuple
 
 import yaml
 
+from scraper.run import MODULES
 from scraper.specials import effective_rent, parse_special
 
 ROOT = Path(__file__).resolve().parent
 SNAPSHOTS = ROOT / "data" / "snapshots"
 OUT = ROOT / "site" / "data"
 DEFAULT_LEASE_MONTHS = 12  # used for effective rent when the site doesn't say
+
+
+def bed_sort_key(label: str):
+    """Studio, 1 BR, 2 BR, ... Other."""
+    if label == "Studio":
+        return 0.0
+    try:
+        return float(label.split()[0])
+    except ValueError:
+        return 99.0
 
 
 def bed_label(beds) -> str:
@@ -71,6 +82,8 @@ def apply_specials(snap: dict, snap_date: str) -> None:
             fp_eff = compute(fp["rent_min"], fp.get("lease_months"), fp.get("earliest_available"))
             effs.append(fp_eff["rent"] if fp_eff else fp["rent_min"])
         fp["effective_min"] = min(effs) if effs and fp["units_available"] else None
+        totals = [u.get("total_price") for u in units_by_plan.get(fp["code"], []) if u.get("total_price")]
+        fp["total_min"] = min(totals) if totals else None
 
 
 def metrics(snap: dict) -> dict:
@@ -79,6 +92,8 @@ def metrics(snap: dict) -> dict:
     prices = [fp["rent_min"] for fp in available if fp["rent_min"]]
     prices += [u["price"] for u in snap["units"] if u["price"]]
     eff = [fp["effective_min"] for fp in available if fp.get("effective_min")]
+    totals = [u.get("total_price") for u in snap["units"] if u.get("total_price")]
+    units = sum(fp["units_available"] for fp in snap["floorplans"])
     by_beds = defaultdict(lambda: {"units": 0, "min_price": None, "min_effective": None})
     for fp in available:
         b = by_beds[bed_label(fp["beds"])]
@@ -87,10 +102,13 @@ def metrics(snap: dict) -> dict:
             if val and (b[key] is None or val < b[key]):
                 b[key] = val
     return {
-        "units": sum(fp["units_available"] for fp in snap["floorplans"]),
+        "units": units,
         "min_price": min(prices) if prices else None,
         "min_effective": min(eff) if eff else None,
-        "by_beds": dict(sorted(by_beds.items())),
+        "min_total": min(totals) if totals else None,
+        # False when units are listed but the site publishes no prices (e.g. "Rent: Call").
+        "priced": bool(prices) or units == 0,
+        "by_beds": dict(sorted(by_beds.items(), key=lambda kv: bed_sort_key(kv[0]))),
     }
 
 
@@ -130,7 +148,7 @@ def unit_histories(history: List[Tuple[str, dict]]) -> Tuple[dict, list]:
             "is_new": multiple and st["first_seen"] == latest_date,
             "price_history": prices,
             "price_change": prices[-1]["price"] - prices[0]["price"] if len(prices) > 1 else 0,
-            "price_changes": len(prices) - 1,
+            "price_changes": max(len(prices) - 1, 0),  # no prices at all ("Call") -> 0, not -1
         }
     gone = [
         {"unit_number": u["unit_number"], "building": u.get("building"), "floorplan_code": u["floorplan_code"],
@@ -166,6 +184,8 @@ def build_complex(cfg: dict, history: list, st: dict) -> Tuple[dict, Optional[di
 
     series = [{"date": d, **metrics(s)} for d, s in history]
     latest_date, latest = history[-1]
+    # Snapshots from before price_basis existed: use the scraper's declared basis.
+    latest["price_basis"] = latest.get("price_basis") or getattr(MODULES.get(cfg.get("scraper")), "PRICE_BASIS", "base")
     cur, prev = series[-1], (series[-2] if len(series) > 1 else None)
 
     summary = {
@@ -177,6 +197,9 @@ def build_complex(cfg: dict, history: list, st: dict) -> Tuple[dict, Optional[di
         "units": cur["units"],
         "min_price": cur["min_price"],
         "min_effective": cur["min_effective"],
+        "min_total": cur["min_total"],
+        "priced": cur["priced"],
+        "price_basis": latest["price_basis"],
         "by_beds": cur["by_beds"],
         "units_delta": delta(cur["units"], prev and prev["units"]),
         "min_price_delta": delta(cur["min_price"], prev and prev["min_price"]),

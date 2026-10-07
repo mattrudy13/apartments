@@ -32,6 +32,7 @@ class Unit:
     building: Optional[str] = None
     available_date: Optional[str] = None  # ISO date; on/before scrape date means "now"
     apply_url: Optional[str] = None
+    total_price: Optional[int] = None  # base rent + required monthly fees, when the site shows it
     lease_months: Optional[int] = None
     specials: List[Dict[str, str]] = field(default_factory=list)  # unit-specific specials
 
@@ -51,6 +52,9 @@ class Snapshot:
     property: PropertyInfo
     floorplans: List[FloorPlan]
     units: List[Unit]
+    # "base": `price` is base rent (default). "total": the site only shows a total that
+    # already includes required monthly fees (e.g. Entrata's "Total Monthly Leasing Price").
+    price_basis: str = "base"
 
     def to_dict(self) -> dict:
         return asdict(self)

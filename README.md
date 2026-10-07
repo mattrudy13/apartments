@@ -6,7 +6,8 @@ Action then rebuilds and publishes a static dashboard to GitHub Pages:
 https://mattrudy13.github.io/apartments/
 
 - **Overview**: units available, lowest price (listed and net of specials), change since
-  the last pull, lowest price by bedroom count, and history charts
+  the last pull, lowest price by bedroom count, and trend charts (one small chart per
+  complex on a shared scale)
 - **Complex page**: current specials and how they were read, floorplans (sortable,
   filterable by bedrooms), the units in each plan with net rent, days listed and price
   changes, units no longer listed, and price history by bedroom count
@@ -24,6 +25,17 @@ Add an entry to `complexes.yaml`. The `scraper` must match the site's platform:
 | `entrata`        | Entrata sites (behind Cloudflare; uses Chrome) | the floorplans listing page |
 | `rentcafe`       | Yardi RentCafe sites                          | the `/floorplans` page    |
 | `appfolio`       | AppFolio listings widget (Duda-built sites)   | the availability page     |
+| `sightmap`       | sites embedding an Engrain SightMap           | the page with the embed (e.g. `/floorplans/`) |
+| `realpage_leasestar` | RealPage LeaseStar sites (uses Chrome)    | the floor-plans page      |
+| `g5`             | G5 Marketing Cloud sites                      | the floor-plans page      |
+
+RentCafe sites come in two unit layouts (table rows or cards); both are handled. Some
+sites publish no prices ("Rent: Call"); they're tracked for units and availability and
+show "Call" instead of a price.
+
+Prices are **base rent** wherever a site shows it; a site's "total monthly" price (rent plus
+required monthly fees) is stored as `total_price` and shown beside it. Entrata sites only
+show the total, so those prices are marked "incl. fees".
 
 A site on a different platform needs a new module in `scraper/` exposing
 `scrape(cfg, today) -> (PropertyInfo, [FloorPlan], [Unit])`, registered in `scraper/run.py`,

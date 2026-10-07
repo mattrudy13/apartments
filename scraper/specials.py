@@ -69,8 +69,14 @@ def _parse_loose_date(text: str, ref: date) -> Optional[date]:
             d = datetime.strptime(t, fmt).date().replace(year=ref.year)
         except ValueError:
             continue
-        # A deadline with no year that's well in the past means next year (e.g. "Jan 15" seen in Dec).
-        return d.replace(year=ref.year + 1) if (ref - d).days > 60 else d
+        # No year given. A date well in the past usually means next year ("Jan 15" seen in
+        # December), but only if that lands soon; otherwise it's a stale banner ("May 31"
+        # seen in October) and stays in the past so the offer reads as ended.
+        if (ref - d).days > 60:
+            nxt = d.replace(year=ref.year + 1)
+            if (nxt - ref).days <= 120:
+                return nxt
+        return d
     return None
 
 
@@ -81,7 +87,7 @@ def parse_special(title: str, description: str = "", ref: Optional[date] = None)
     low = text.lower()
 
     # --- discount amount (take the first clear statement; title usually leads) ---
-    m = re.search(_NUM + r"\s+(months?|weeks?)\s+(?:of\s+)?(?:rent\s+)?free", low) or \
+    m = re.search(_NUM + r"\s+(months?|weeks?)\s+(?:of\s+)?(?:base\s+)?(?:rent\s+)?free", low) or \
         re.search(r"free\s+(?:rent\s+)?(?:for\s+)?" + _NUM + r"\s+(months?|weeks?)", low)
     if m:
         qty = _num(m.group(1))

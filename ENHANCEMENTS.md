@@ -34,5 +34,5 @@ Ideas for the site, roughly in priority order. `[x]` done, `[~]` partly done.
 - [ ] **Lease-term pricing** — ReNew's prices are for 15-mo leases; Linkhorn Bay shows a
       per-unit rent range (e.g. $1,672–$2,209) that likely varies by term, and we store the
       low end. Capture terms where sites expose them before trusting cross-complex comparisons.
-- [ ] **More than 8 complexes** — chart colors come from an 8-slot palette; a 9th complex
-      would reuse a color. Fold extras into "Other" or facet the charts if the list grows.
+- [x] **More than 8 complexes** — the overview's trend charts are small multiples (one
+      card per complex, shared scale), so the list can grow without running out of colors.

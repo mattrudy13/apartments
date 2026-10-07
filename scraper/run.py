@@ -16,15 +16,18 @@ from pathlib import Path
 
 import yaml
 
-from . import appfolio, entrata, realpage_craft, rentcafe
+from . import appfolio, entrata, g5, realpage_craft, realpage_leasestar, rentcafe, sightmap
 from .models import Snapshot
 
 ROOT = Path(__file__).resolve().parent.parent
-SCRAPERS = {
-    "realpage_craft": realpage_craft.scrape,
-    "entrata": entrata.scrape,
-    "rentcafe": rentcafe.scrape,
-    "appfolio": appfolio.scrape,
+MODULES = {
+    "realpage_craft": realpage_craft,
+    "entrata": entrata,
+    "rentcafe": rentcafe,
+    "appfolio": appfolio,
+    "sightmap": sightmap,
+    "realpage_leasestar": realpage_leasestar,
+    "g5": g5,
 }
 
 log = logging.getLogger("scraper")
@@ -35,7 +38,8 @@ def load_complexes() -> list:
 
 
 def scrape_one(cfg: dict, today: date) -> Snapshot:
-    info, floorplans, units = SCRAPERS[cfg["scraper"]](cfg, today)
+    module = MODULES[cfg["scraper"]]
+    info, floorplans, units = module.scrape(cfg, today)
     if not floorplans:
         raise ValueError("No floorplans parsed")
     return Snapshot(
@@ -46,6 +50,7 @@ def scrape_one(cfg: dict, today: date) -> Snapshot:
         property=info,
         floorplans=floorplans,
         units=units,
+        price_basis=getattr(module, "PRICE_BASIS", "base"),
     )
 
 

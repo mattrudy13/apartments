@@ -122,3 +122,87 @@ def test_appfolio_filters_to_site_and_groups_floorplans():
     assert (u.unit_number, u.building, u.price, u.available_date) == ("101", "4600 Downeast Court", 2079, "2026-10-25")
     # Same unit number in different buildings stays distinct.
     assert len({(x.building, x.unit_number) for x in units}) == 24
+
+
+def test_sightmap_nexus():
+    import json
+
+    from scraper import sightmap
+
+    plans, units = sightmap.parse(json.loads(read("sightmap_nexus_api.json")), TODAY, read("sightmap_nexus_floorplans.html"))
+    assert [p.name for p in plans] == ["A0", "A1", "A2", "A3", "B1", "B2", "B3", "E1"]  # TEMP placeholder dropped
+    assert len(units) == 9 and sum(p.units_available for p in plans) == 9
+    u = units[0]
+    assert (u.unit_number, u.building, u.price, u.total_price, u.sqft, u.available_date, u.lease_months) == (
+        "546-130", "546", 1824, 1870, 563, "2026-10-19", 14)
+    e1 = next(p for p in plans if p.name == "E1")
+    assert (e1.beds, e1.rent_min, e1.units_available) == (0, 1824, 1)  # studio
+    assert next(p for p in plans if p.name == "B2").sqft == 1239  # from the page; SightMap has no plan sqft
+    assert entrata.parse_property(read("sightmap_nexus_floorplans.html")).phone == "757-663-5564"  # @graph JSON-LD
+
+
+def test_realpage_leasestar_north_hill():
+    import json
+
+    from scraper import realpage_leasestar
+
+    data = json.loads(read("realpage_northhill_api.json"))
+    plans, units = realpage_leasestar.parse(data["floorplans"], data["units"], TODAY)
+    assert len(plans) == 9 and len(units) == 6
+    u = units[0]
+    assert (u.unit_number, u.price, u.total_price, u.sqft, u.floor, u.available_date, u.lease_months) == (
+        "613-201", 1820, 1846, 846, "2", "2026-10-08", 15)
+    # Plan B2 claims 1 bed but its units are 2-bed; plans without units fall back to the unit majority.
+    assert {p.beds for p in plans} == {2}
+    b2 = next(p for p in plans if p.name == "B2")
+    assert (b2.rent_min, b2.units_available) == (1820, 3)
+
+
+def test_g5_columbus_station():
+    import json
+
+    from scraper import g5
+
+    assert g5.location_urn(read("g5_columbus_floorplans.html")) == "g5-cl-1o802dwcee-dragas-companies-virginia-beach-va"
+    data = json.loads(read("g5_columbus_graphql.json"))
+    plans, units = g5.parse(data["complex"]["data"], {k: v["data"] for k, v in data["units"].items()}, TODAY)
+    assert len(plans) == 8 and len(units) == 23 and sum(p.units_available for p in plans) == 23
+    tierra = next(p for p in plans if p.name == "Tierra (Not Pet Friendly)")
+    assert (tierra.beds, tierra.sqft, tierra.rent_min, tierra.units_available) == (1, 675, 1745, 1)
+    santa = next(p for p in plans if p.name.startswith("Santa Maria"))
+    assert (santa.units_available, santa.rent_min) == (0, None)  # rate range shown, but nothing available
+    u = next(x for x in units if x.unit_number == "117I302")
+    assert (u.price, u.sqft, u.available_date, u.building) == (1745, 675, "2026-11-25", None)
+    assert u.apply_url.endswith("apply?siteId=3921390&unitId=132")  # widget tail trimmed
+    assert entrata.parse_property(read("g5_columbus_floorplans.html")).address == "4516 Pinta Ln, Virginia Beach, VA, 23462"
+
+
+def test_rentcafe_indigo_no_prices():
+    from scraper import rentcafe
+
+    plans = rentcafe.parse_floorplans(read("rentcafe_indigo_floorplans.html"), "https://www.indigo19apartments.com/floorplans", TODAY)
+    assert len(plans) == 8 and sum(p.units_available for p in plans) == 13
+    largo = next(p for p in plans if p.name == "Largo")
+    # "Call for Details" cards have no plan link; the URL is derived from the name.
+    assert (largo.rent_min, largo.units_available, largo.details_url) == (
+        None, 7, "https://www.indigo19apartments.com/floorplans/largo")
+    units = rentcafe.parse_units(read("rentcafe_indigo_largo.html"), largo.code, TODAY)
+    assert len(units) == 7 and all(u.price is None for u in units)
+    assert (units[0].unit_number, units[0].sqft) == ("1-327", 1082)
+
+
+def test_rentcafe_card_layout_salt_meadow():
+    from scraper import rentcafe
+
+    plans = rentcafe.parse_floorplans(read("rentcafe_saltmeadow_floorplans.html"), "https://www.saltmeadowbay.com/floorplans", TODAY)
+    assert len(plans) == 16
+    egret = next(p for p in plans if p.name == "Egret")
+    assert (egret.beds, egret.baths, egret.sqft) == (2, 2, 1213)
+    units = rentcafe.parse_units(read("rentcafe_saltmeadow_egret.html"), egret.code, TODAY)
+    assert len(units) == 9
+    u = next(x for x in units if x.unit_number == "0837-210")
+    # "Total Monthly Leasing Price Starting at $2,373" + "Base rent $2,333 · 9-month term"
+    assert (u.price, u.total_price, u.lease_months, u.available_date) == (2333, 2373, 9, TODAY.isoformat())  # "Now"
+    assert next(x for x in units if x.unit_number == "0837-116").available_date == "2026-11-02"  # "Date Available:"
+    plain = next(x for x in units if x.unit_number == "0817-113")  # no fee breakdown: "Starting at" is the rent
+    assert (plain.price, plain.total_price) == (2416, None)
