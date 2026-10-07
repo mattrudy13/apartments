@@ -197,36 +197,57 @@ async function renderOverview() {
     ),
   );
 
-  // Table
+  // Table: sortable; defaults to cheapest first. Price sorts use the net price when specials lower it.
   const bedKeys = sortBedKeys(complexes.flatMap((c) => Object.keys(c.by_beds || {})));
-  const rows = complexes.map((c) =>
-    h("tr", {},
-      h("td", { class: "name-cell" },
-        h("a", { href: `complex.html?c=${encodeURIComponent(c.slug)}` }, c.name),
-        c.stale ? h("span", { class: "badge warn", style: "margin-left:8px", title: c.error || "" }, "stale") : null,
-        h("div", { class: "addr" }, c.address || "")),
-      h("td", { class: "r num" }, c.units ?? "—", deltaEl(c.units_delta)),
-      h("td", { class: "r num" }, priceOrCall(c.min_price, c.units), deltaEl(c.min_price_delta, { isPrice: true }),
-        netEl(c.min_effective, c.min_price), c.price_basis === "total" && c.min_price != null ? h("div", { class: "muted small", title: "This site only shows prices that include required monthly fees" }, "incl. fees") : null),
-      bedKeys.map((k) => {
-        const b = (c.by_beds || {})[k];
-        return h("td", { class: "r num hide-sm" }, b ? [h("span", {}, priceOrCall(b.min_price, b.units), h("span", { class: "muted small" }, ` (${b.units})`)), netEl(b.min_effective, b.min_price)] : h("span", { class: "muted" }, "—"));
-      }),
-      h("td", { class: "hide-sm" }, sparkline((c.history || []).map((p) => p.min_price))),
-      h("td", { class: "muted small" }, fmtDate(c.date)),
-    ),
+  const bestPrice = (x) => (x ? (x.min_effective ?? x.min_price ?? null) : null);
+  const sortValue = {
+    name: (c) => c.name.toLowerCase(),
+    units: (c) => c.units ?? null,
+    price: (c) => bestPrice(c),
+    ...Object.fromEntries(bedKeys.map((k) => [`bed:${k}`, (c) => bestPrice((c.by_beds || {})[k])])),
+  };
+  const tableState = { sort: "price", dir: 1 };
+  const thead = h("thead"), tbody = h("tbody");
+  const sortTh = (key, label, cls = "", title = null) => h("th", {
+    class: `sortable ${cls}`, title,
+    "aria-sort": tableState.sort === key ? (tableState.dir > 0 ? "ascending" : "descending") : null,
+    onclick: () => { tableState.dir = tableState.sort === key ? -tableState.dir : 1; tableState.sort = key; drawTable(); },
+  }, label);
+  const row = (c) => h("tr", {},
+    h("td", { class: "name-cell" },
+      h("a", { href: `complex.html?c=${encodeURIComponent(c.slug)}` }, c.name),
+      c.stale ? h("span", { class: "badge warn", style: "margin-left:8px", title: c.error || "" }, "stale") : null,
+      h("div", { class: "addr" }, c.address || "")),
+    h("td", { class: "r num" }, c.units ?? "—", deltaEl(c.units_delta)),
+    h("td", { class: "r num" }, priceOrCall(c.min_price, c.units), deltaEl(c.min_price_delta, { isPrice: true }),
+      netEl(c.min_effective, c.min_price), c.price_basis === "total" && c.min_price != null ? h("div", { class: "muted small", title: "This site only shows prices that include required monthly fees" }, "incl. fees") : null),
+    bedKeys.map((k) => {
+      const b = (c.by_beds || {})[k];
+      return h("td", { class: "r num hide-sm" }, b ? [h("span", {}, priceOrCall(b.min_price, b.units), h("span", { class: "muted small" }, ` (${b.units})`)), netEl(b.min_effective, b.min_price)] : h("span", { class: "muted" }, "—"));
+    }),
+    h("td", { class: "hide-sm" }, sparkline((c.history || []).map((p) => p.min_price))),
+    h("td", { class: "muted small" }, fmtDate(c.date)),
   );
-  add(root, 
+  const drawTable = () => {
+    const val = sortValue[tableState.sort];
+    const sorted = complexes.slice().sort((a, b) => {
+      const av = val(a), bv = val(b);
+      if (av == null && bv == null) return a.name.localeCompare(b.name);
+      if (av == null) return 1; if (bv == null) return -1;  // no price / no units: always last
+      return (av < bv ? -1 : av > bv ? 1 : 0) * tableState.dir;
+    });
+    thead.replaceChildren(h("tr", {},
+      sortTh("name", "Complex"), sortTh("units", "Units", "r"), sortTh("price", "Lowest price", "r", "Sorted by net price when specials lower it"),
+      bedKeys.map((k) => sortTh(`bed:${k}`, k, "r hide-sm", "Lowest price (units available); sorted by net price when specials lower it")),
+      h("th", { class: "hide-sm" }, "Price trend"), h("th", {}, "Updated")));
+    tbody.replaceChildren(...sorted.map(row));
+  };
+  drawTable();
+  add(root,
     h("div", { class: "card" },
       h("h2", {}, "Availability"),
-      h("div", { class: "table-scroll" },
-        h("table", {},
-          h("thead", {}, h("tr", {},
-            h("th", {}, "Complex"), h("th", { class: "r" }, "Units"), h("th", { class: "r" }, "Lowest price"),
-            bedKeys.map((k) => h("th", { class: "r hide-sm", title: "Lowest price (units available)" }, k)),
-            h("th", { class: "hide-sm" }, "Price trend"), h("th", {}, "Updated"))),
-          h("tbody", {}, rows))),
-      h("p", { class: "note" }, "Prices are base rent where the site shows it. Deltas compare with the previous pull. Bedroom columns show the lowest price with units available in parentheses. “Net” is the effective monthly rent after specials (e.g. months free) spread over the lease. “Call” means the complex lists units but doesn't publish prices."),
+      h("div", { class: "table-scroll" }, h("table", {}, thead, tbody)),
+      h("p", { class: "note" }, "Click a column to sort; price columns sort by net price when specials lower it, and complexes without a price go last. Prices are base rent where the site shows it. Deltas compare with the previous pull. Bedroom columns show the lowest price with units available in parentheses. “Net” is the effective monthly rent after specials (e.g. months free) spread over the lease. “Call” means the complex lists units but doesn't publish prices."),
     ),
   );
 

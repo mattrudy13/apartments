@@ -218,6 +218,9 @@ A random pause between ReNew detail pages is listed in ENHANCEMENTS.md but not d
 - Detail-page charts use the dataviz skill's validated categorical palette (CSS vars
   `--series-1..8`, separate light/dark steps in `site/style.css`), in fixed order.
 - Unpriced complexes/plans/units show "Call"; bedroom columns sort Studio, 1 BR, 2 BR, ...
+- The overview table is sortable (Complex, Units, Lowest price, each bedroom column) and
+  defaults to cheapest first. Price sorts use the net price when specials lower it;
+  complexes with no price (or no units of that size) always sort last.
 - Complex detail page charts **lowest price by bedroom count** (≤4 series) instead of
   one line per floorplan (Attain has 49 plans, which would be unreadable). Per-floorplan
   trends are sparklines in the floorplan table instead.
