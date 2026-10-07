@@ -8,10 +8,11 @@ https://mattrudy13.github.io/apartments/
 - **Overview**: a sortable table (cheapest first) of units available, lowest price and
   lowest price per bedroom count, switchable between **base rent** and **total per month**
   (rent + required fees), with net-of-specials prices and change since the last pull; plus
-  trend charts (one small chart per complex on a shared scale)
+  trend charts (one small chart per complex on a shared scale); and your **shortlist** of
+  starred floorplans/units across complexes, with a share link to move it to another device
 - **Complex page**: current specials and how they were read, floorplans (sortable,
-  filterable by bedrooms), the units in each plan with net rent, days listed and price
-  changes, units no longer listed, and price history by bedroom count
+  filterable by bedrooms or starred only), price per sq ft, the units in each plan with net
+  rent, days listed and price changes, units no longer listed, and price history by bedroom count
 
 "Net" rent spreads specials (e.g. two months free) over the lease, applying caveats such
 as move-in-by dates per unit; see `scraper/specials.py`.

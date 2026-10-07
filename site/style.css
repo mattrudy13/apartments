@@ -118,6 +118,8 @@ footer { margin-top: 32px; font-size: 12px; color: var(--text-3); }
   .hide-sm { display: none; }
   label.toggle { margin-left: 0; }
 }
+.show-sm { display: none; }
+@media (max-width: 640px) { .show-sm { display: inline; } }
 
 /* specials & net rent */
 .net { font-size: 12px; color: var(--down); font-weight: 600; }
@@ -136,3 +138,20 @@ td.specials-cell .badge { white-space: normal; line-height: 1.4; margin: 1px 0; 
 .mini-value { font-weight: 650; white-space: nowrap; }
 .mini-chart { position: relative; height: 120px; margin-top: 4px; }
 .mini-empty { height: 120px; display: flex; align-items: center; justify-content: center; }
+
+/* shortlist */
+button.star { border: 0; background: none; padding: 0; width: 26px; height: 26px; font-size: 17px; line-height: 1; color: var(--text-3); cursor: pointer; border-radius: 6px; vertical-align: middle; margin-right: 4px; }
+button.star:hover { background: var(--surface-2); color: var(--text); }
+button.star[aria-pressed="true"] { color: var(--series-4); }
+button.star:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+td.fp-name { white-space: nowrap; }
+td.unit-cell { white-space: nowrap; }
+.chip:disabled { opacity: 0.5; cursor: default; }
+.card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.card-head h2 { margin: 0; }
+tr.dim td { color: var(--text-3); }
+.share-url { width: 100%; font: inherit; font-size: 13px; padding: 6px 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface-2); color: var(--text); }
+.banner.info { background: var(--surface-2); color: var(--text); }
+@media (max-width: 640px) {
+  button.star { width: 32px; height: 32px; }
+}

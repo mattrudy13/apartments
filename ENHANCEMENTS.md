@@ -11,12 +11,10 @@ Finished items move to **Done** at the bottom.
 ## Comparison
 - [ ] **Cross-complex search page** — one table of all available units, filterable by beds,
       max price (base or total), move-in date and pet-friendly; sortable by price per sq ft.
-- [ ] **Price per sq ft** column and sort (on the search page and floorplan tables).
 - [ ] **Lease-term normalization** — prices are quoted for different terms: Attain 12 mo
       (flat), Nexus 14, North Hill and ReNew 15, Salt Meadow 9–15 per unit, Linkhorn Bay a
       range by term (we store the low end). Show the term next to prices and capture
       per-term prices where a site exposes them (SightMap's leasing price URL, RentCafe ranges).
-- [ ] **Shortlist** — star floorplans/units and see them on the overview (localStorage).
 - [ ] **Commute / distance** — distance or drive time from each complex to places you care
       about (work, beach). Most sites' JSON-LD or SightMap data includes lat/long.
 
@@ -44,6 +42,10 @@ Finished items move to **Done** at the bottom.
       "Not Pet Friendly"); North Beach lists cats/dogs per unit.
 
 ## Done
+- [x] **Price per sq ft** — sortable column in floorplan tables, per unit, and in the shortlist
+      (listed price; net in the tooltip). Add it to the search page when that's built.
+- [x] **Shortlist** — star floorplans/units (localStorage), Shortlist card on the overview,
+      "Starred only" filter on complex pages, share link to copy the list to another device.
 - [x] **Effective rent with specials** — net rent spread over the lease, with move-in-by,
       expiry, minimum-lease and "select units" caveats; stale no-year deadlines read as ended.
 - [x] **Unit-level history** — days listed, price changes, "New" badge, units no longer listed.
