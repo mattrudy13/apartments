@@ -15,15 +15,16 @@ Working end to end:
 - Weekly launchd job on the Mac scrapes and pushes snapshots; the GitHub Action
   (`.github/workflows/deploy.yml`) tests, builds `site/data/` and deploys Pages.
 - Overview page (`site/index.html`) and complex detail page (`site/complex.html?c=<slug>`).
-- Effective (net) rent from specials, and per-unit listing history (see sections below).
-- Real snapshots: `2026-10-04` (setup day; Linkhorn Bay and North Beach added that evening
-  with `--only`) and `2026-10-05` (first scheduled Monday run, 09:00, all four OK and
-  deployed). The scheduled job is confirmed working unattended. Next run: Mon 2026-10-12.
-  The two snapshots are one day apart, so week-over-week trends start being meaningful
-  after 2026-10-12.
+- Effective (net) rent from specials, per-unit listing history, base vs total-per-month
+  pricing, data checks ("check data" badge), sortable overview (see sections below).
+- Real snapshots: `2026-10-04` (setup day), `2026-10-05` (first scheduled Monday run, 09:00,
+  confirmed working unattended) and `2026-10-06` (the five new complexes plus Attain
+  re-scraped from SightMap, all via manual `--only` runs). Next scheduled run: Mon 2026-10-12,
+  the first to cover all nine. Snapshots so far are a day apart, so week-over-week trends
+  and the >15% data checks become meaningful after that run.
 
-Next steps: see ENHANCEMENTS.md (alerts are the top open item). Daily pulls are a one-liner
-(`scripts/install_schedule.sh daily`) if wanted.
+Next steps: see ENHANCEMENTS.md (price-drop / new-unit alerts are the top open item).
+Daily pulls are a one-liner (`scripts/install_schedule.sh daily`) if wanted.
 
 ## Layout
 
@@ -33,7 +34,10 @@ Next steps: see ENHANCEMENTS.md (alerts are the top open item). Daily pulls are 
 - `build.py` — aggregates snapshots into `site/data/summary.json` and `site/data/<slug>.json`
   (gitignored; CI regenerates it).
 - `site/` — static vanilla JS + Chart.js (cdnjs); `app.js` serves both pages via `body[data-page]`.
-- `tests/` — parser tests against saved HTML in `tests/fixtures/`. `pytest.ini` puts the repo
+- `tests/` — parser tests against saved pages/JSON in `tests/fixtures/` (`test_parsers.py`),
+  build logic (`test_build.py`) and specials parsing (`test_specials.py`); 62 tests.
+  Fixtures are scrubbed of site API keys (GitHub push protection rejected a SightMap page
+  with a Mapbox token; don't commit raw embed pages). `pytest.ini` puts the repo
   root on the path (plain `pytest` failed in CI without it).
 - `scripts/` — `scrape_and_push.sh` (pull → scrape → commit/push `data/`) and
   `install_schedule.sh` (launchd job `com.apartments.scraper`, Mondays 9:00).
@@ -260,6 +264,8 @@ A random pause between ReNew detail pages is listed in ENHANCEMENTS.md but not d
   activate with `source .venv/bin/activate`; code stays 3.9-compatible
   via `from __future__ import annotations`). CI uses Python 3.12.
 - Local preview: `python build.py && python -m http.server -d site 8000`.
+- Commits: the user's global rule forbids commits/pushes on weekdays 8am–5pm ET unless
+  asked; outside that window, commit and push finished work without asking.
 - Snapshots/data are committed only from the scheduler's clone (weekly job, or a manual
   `--only` run there); code changes come from this Desktop copy. Scraping in this copy
   is fine for testing, but discard `data/` changes before pulling.

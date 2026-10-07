@@ -5,9 +5,10 @@ Mac scrapes each complex's site and pushes a snapshot to `data/snapshots/`; a Gi
 Action then rebuilds and publishes a static dashboard to GitHub Pages:
 https://mattrudy13.github.io/apartments/
 
-- **Overview**: units available, lowest price (listed and net of specials), change since
-  the last pull, lowest price by bedroom count, and trend charts (one small chart per
-  complex on a shared scale)
+- **Overview**: a sortable table (cheapest first) of units available, lowest price and
+  lowest price per bedroom count, switchable between **base rent** and **total per month**
+  (rent + required fees), with net-of-specials prices and change since the last pull; plus
+  trend charts (one small chart per complex on a shared scale)
 - **Complex page**: current specials and how they were read, floorplans (sortable,
   filterable by bedrooms), the units in each plan with net rent, days listed and price
   changes, units no longer listed, and price history by bedroom count
@@ -15,13 +16,22 @@ https://mattrudy13.github.io/apartments/
 "Net" rent spreads specials (e.g. two months free) over the lease, applying caveats such
 as move-in-by dates per unit; see `scraper/specials.py`.
 
+**Data checks**: the build flags a complex with a "check data" badge (and lists the reasons
+on its page) when its latest data disagrees with itself: floorplan counts vs unit lists,
+units missing prices, a >15% move in the lowest price or a unit's price since the last pull,
+or availability collapsing. When you see it, verify on the complex's official site.
+
+Currently tracked (Virginia Beach): Attain at Chic's Beach, ReNew Marina Shores, Linkhorn
+Bay, North Beach, Nexus, Indigo 19 (no published prices), North Hill, Salt Meadow Bay and
+Columbus Station.
+
 ## Adding a complex
 
 Add an entry to `complexes.yaml`. The `scraper` must match the site's platform:
 
 | scraper          | platform                                     | `url` to use              |
 |------------------|----------------------------------------------|---------------------------|
-| `realpage_craft` | RealPage / Vest sites with embedded unit data | homepage                  |
+| `realpage_craft` | RealPage / Vest sites with embedded unit data (can be stale; prefer `sightmap` if the site has a SightMap) | homepage |
 | `entrata`        | Entrata sites (behind Cloudflare; uses Chrome) | the floorplans listing page |
 | `rentcafe`       | Yardi RentCafe sites                          | the `/floorplans` page    |
 | `appfolio`       | AppFolio listings widget (Duda-built sites)   | the availability page     |
@@ -36,6 +46,9 @@ show "Call" instead of a price.
 Prices are **base rent** wherever a site shows it; a site's "total monthly" price (rent plus
 required monthly fees) is stored as `total_price` and shown beside it. Entrata sites only
 show the total, so those prices are marked "incl. fees".
+
+If a site switches data source and its unit IDs change, set `unit_history_since: "YYYY-MM-DD"`
+on its entry so unit tracking (new/gone/days listed) restarts cleanly from that date.
 
 A site on a different platform needs a new module in `scraper/` exposing
 `scrape(cfg, today) -> (PropertyInfo, [FloorPlan], [Unit])`, registered in `scraper/run.py`,
