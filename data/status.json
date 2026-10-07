@@ -4,9 +4,24 @@
   "last_success": "2026-10-05",
   "ok": true
  },
+ "columbus-station": {
+  "last_attempt": "2026-10-06",
+  "last_success": "2026-10-06",
+  "ok": true
+ },
+ "indigo-19": {
+  "last_attempt": "2026-10-06",
+  "last_success": "2026-10-06",
+  "ok": true
+ },
  "linkhorn-bay": {
   "last_attempt": "2026-10-05",
   "last_success": "2026-10-05",
+  "ok": true
+ },
+ "nexus": {
+  "last_attempt": "2026-10-06",
+  "last_success": "2026-10-06",
   "ok": true
  },
  "north-beach": {
@@ -14,9 +29,19 @@
   "last_success": "2026-10-05",
   "ok": true
  },
+ "north-hill": {
+  "last_attempt": "2026-10-06",
+  "last_success": "2026-10-06",
+  "ok": true
+ },
  "renew-marina-shores": {
   "last_attempt": "2026-10-05",
   "last_success": "2026-10-05",
+  "ok": true
+ },
+ "salt-meadow-bay": {
+  "last_attempt": "2026-10-06",
+  "last_success": "2026-10-06",
   "ok": true
  }
 }
