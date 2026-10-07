@@ -6,6 +6,9 @@
 #   sightmap       - sites embedding an Engrain SightMap; `url` is the page with the embed (plain HTTP)
 #   realpage_leasestar - RealPage LeaseStar sites; `url` is the floor-plans page (uses Chrome)
 #   g5             - G5 Marketing Cloud sites; `url` is the floor-plans page (plain HTTP)
+# Optional `banner:` reads site-wide promo banners (e.g. "Move in by Oct 31 and get $500 off") from a
+# page over plain HTTP: `url` (default: `website`) and an optional CSS `selector` to narrow the search.
+# Only text with an understood discount is kept; it lowers net rent like a floorplan special.
 complexes:
   - slug: attain-chics-beach
     name: Attain at Chic's Beach
@@ -14,6 +17,8 @@ complexes:
     # stale prices and wrong floorplans for some units (e.g. 4705 #104), so it isn't used.
     scraper: sightmap
     unit_history_since: "2026-10-06"  # unit IDs changed with the switch to SightMap
+    banner:
+      url: https://www.attainchicsbeach.com/  # "Fall into savings" block: $ off by bedroom count
 
   - slug: renew-marina-shores
     name: ReNew Marina Shores
@@ -50,6 +55,8 @@ complexes:
     url: https://www.livenorthhillapts.com/floor-plans.aspx
     website: https://www.livenorthhillapts.com/
     scraper: realpage_leasestar
+    banner:
+      url: https://www.livenorthhillapts.com/  # homepage banner (was a stale "move in by May 31" offer)
 
   - slug: salt-meadow-bay
     name: Salt Meadow Bay

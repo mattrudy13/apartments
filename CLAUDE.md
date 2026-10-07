@@ -69,12 +69,14 @@ as too broad. The README documents this setup.
 
 ## Scraping load
 
-Weekly volume is tiny (Attain: 1 request; ReNew: ~7 Chrome page loads over ~50 s; Linkhorn
+Weekly volume is tiny (Attain: 1 request; ReNew: ~7 Chrome page loads over ~80 s; Linkhorn
 Bay: 7 requests; North Beach: 2; Nexus: 3; Indigo 19: ~7; North Hill: 1 Chrome page load;
 Salt Meadow Bay: ~7; Columbus Station: ~6 GraphQL POSTs). Only ReNew and North Hill use
 Chrome. To fill in a newly added complex without re-hitting the others, run
 `scraper.run --only <slug>` in the scheduler's clone and push (see README).
-A random pause between ReNew detail pages is listed in ENHANCEMENTS.md but not done.
+`fetch.Browser` waits a random 5–10 s before each page load after the first in a session
+(`pause=`), so ReNew's detail pages aren't back to back. Attain and North Hill also make one
+plain request each for their homepage banner.
 
 ## Site quirks
 
@@ -187,7 +189,8 @@ A random pause between ReNew detail pages is listed in ENHANCEMENTS.md but not d
 - **Installed Google Chrome via `channel="chrome"` passes, both headed and headless.**
   `fetch.Browser` therefore prefers `channel="chrome"` and only falls back to bundled
   Chromium if Chrome isn't installed. Waits out "Just a moment..." titles (up to ~45s).
-- A full ReNew scrape takes ~50s (listing page + one detail page per available plan).
+- A full ReNew scrape takes ~80s (listing page + one detail page per available plan, with
+  5–10 s random pauses between pages).
 
 ## Price basis
 
@@ -218,6 +221,22 @@ A random pause between ReNew detail pages is listed in ENHANCEMENTS.md but not d
 - ReNew today: "Two Months Free" on 12+ month leases, prices quoted for 15 months →
   net = 13/15 of listed (e.g. $1,944 → $1,685). Attain had no specials when built
   (`propertySpecialsAvailable: false`); its specials format is unverified, parsed defensively.
+
+## Site-wide banners
+
+- `scraper/banners.py` reads promo text from the `banner:` page (plain HTTP) for configured
+  complexes: innermost elements matching free / $ off / move in, kept only if `parse_special`
+  understands a discount (drops "Deposit Free Community", "Free bicycle rentals"). The heading
+  above and a following `*` fine-print line become the description (Attain's says "12+ month
+  leases", so that min-lease condition applies). Stored as `Snapshot.property_specials`; a banner
+  failure logs a warning and never fails the scrape.
+- `build.apply_specials` appends banner terms (tagged `site_wide`) to every floorplan, unless a
+  floorplan special has the same normalized title (no double discount). The detail JSON also
+  has `property_special_terms` so ended banners still show on the page, marked "ended".
+- Per-bedroom amounts: "$500 off 2-bedroom homes or $1,000 off 3-bedroom homes" parses to
+  `beds_off {"2": 500, "3": 1000}`; `effective_rent(beds=)` applies the plan's amount and skips
+  other sizes ("not offered for 1 BR"). Found 2026-10-07: Attain's live banner (move in by Oct
+  31) and North Hill's stale May 31 one. ReNew had dropped "Two Months Free" the same day.
 
 ## Unit history
 
@@ -257,6 +276,10 @@ A random pause between ReNew detail pages is listed in ENHANCEMENTS.md but not d
 - Unit "Listed" age: units already present at the first pull show "—" on day zero and
   "N wk+" afterwards, since their true listing date is unknown.
 - A complex whose latest scrape failed is flagged "stale" and keeps showing its last good data.
+- Details open on **tap**, not hover (hover doesn't exist on phones): special badges, a unit's Net
+  rent breakdown and net $/sq ft use `expander()`. Phones hide the Specials column, so an
+  expanded plan lists its specials above its units. Site-wide badges in the table are compact
+  ("Site-wide: $500 off · move in by Oct 31"); the full banner text is in the expanded view.
 - **$/sq ft** uses the listed price (base, or incl. fees at total-basis sites); net-of-specials
   $/sq ft is in the tooltip. Plans use `rent_min` / plan sqft; units fall back to plan sqft.
   On phones (≤640px) the floorplan table hides that column and shows "$x.xx/sq ft" under the

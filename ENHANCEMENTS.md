@@ -27,13 +27,11 @@ Finished items move to **Done** at the bottom.
 - [ ] **Indigo 19 prices** — its own site says "Rent: Call" and its leasing portal blocks
       plain requests. Check other public sources that list its units with prices (e.g. the
       manager's site or a listing site) before giving up on it.
-- [ ] **Site-wide promo banners** — some specials live only in a page banner (North Hill's
-      "2 Weeks Base Rent Free When You Move In by …"), not in floorplan/unit data. Scrape the
-      banner text per site so net rent can use it (the stale-date rule already guards old ones).
+- [ ] **Banners shown by JavaScript** — site-wide banners are read from static HTML only
+      (Attain, North Hill). Some sites show promos in JS popups (Greystar/Nexus, G5/Columbus
+      Station, North Hill's "Special Offers" pop-up); reading those needs Chrome per site.
 - [ ] **Prefer live sources** — after Attain, check each site for a SightMap (or similar live
       widget) and prefer it over embedded page data; note per complex which source is used.
-- [ ] **Gentler Chrome scraping** — a random 5–10 s pause between ReNew's detail pages
-      (Cloudflare-protected; currently back to back). Not urgent at weekly volume.
 
 ## Polish
 - [ ] **Floorplan image lightbox** — image URLs are scraped; only thumbnails are shown.
@@ -42,6 +40,10 @@ Finished items move to **Done** at the bottom.
       "Not Pet Friendly"); North Beach lists cats/dogs per unit.
 
 ## Done
+- [x] **Site-wide promo banners** — `banner:` in complexes.yaml (Attain, North Hill); discounts
+      read from banner text lower net rent with the usual guards, incl. per-bedroom amounts
+      ("$500 off 2-bedroom or $1,000 off 3-bedroom"). Tap a special for its full text.
+- [x] **Gentler Chrome scraping** — random 5–10 s pause between Chrome page loads (ReNew ~80 s).
 - [x] **Price per sq ft** — sortable column in floorplan tables, per unit, and in the shortlist
       (listed price; net in the tooltip). Add it to the search page when that's built.
 - [x] **Shortlist** — star floorplans/units (localStorage), Shortlist card on the overview,

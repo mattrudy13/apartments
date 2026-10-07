@@ -16,7 +16,7 @@ from pathlib import Path
 
 import yaml
 
-from . import appfolio, entrata, g5, realpage_craft, realpage_leasestar, rentcafe, sightmap
+from . import appfolio, banners, entrata, g5, realpage_craft, realpage_leasestar, rentcafe, sightmap
 from .models import Snapshot
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -42,6 +42,12 @@ def scrape_one(cfg: dict, today: date) -> Snapshot:
     info, floorplans, units = module.scrape(cfg, today)
     if not floorplans:
         raise ValueError("No floorplans parsed")
+    property_specials = []
+    if cfg.get("banner"):
+        try:
+            property_specials = banners.scrape_banners(cfg, today)
+        except Exception as e:  # a missing banner shouldn't fail the whole scrape
+            log.warning("%s: banner check failed: %s", cfg["slug"], e)
     return Snapshot(
         slug=cfg["slug"],
         name=cfg["name"],
@@ -51,6 +57,7 @@ def scrape_one(cfg: dict, today: date) -> Snapshot:
         floorplans=floorplans,
         units=units,
         price_basis=getattr(module, "PRICE_BASIS", "base"),
+        property_specials=property_specials,
     )
 
 

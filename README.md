@@ -40,6 +40,11 @@ Add an entry to `complexes.yaml`. The `scraper` must match the site's platform:
 | `realpage_leasestar` | RealPage LeaseStar sites (uses Chrome)    | the floor-plans page      |
 | `g5`             | G5 Marketing Cloud sites                      | the floor-plans page      |
 
+Optional `banner:` reads a site-wide promo banner ("Move in by Oct 31 and enjoy $500 off
+2-bedroom homes") from a page over plain HTTP: `url` (default: `website`) and an optional CSS
+`selector`. Only text with an understood discount is kept, and it lowers net rent like a
+floorplan special (expired offers are shown as ended). Banners drawn by JavaScript aren't seen.
+
 RentCafe sites come in two unit layouts (table rows or cards); both are handled. Some
 sites publish no prices ("Rent: Call"); they're tracked for units and availability and
 show "Call" instead of a price.

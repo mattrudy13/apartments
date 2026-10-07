@@ -2,10 +2,11 @@
 from __future__ import annotations
 
 import logging
+import random
 import re
 import time
 from datetime import date, datetime
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
 import httpx
 
@@ -27,8 +28,13 @@ class Browser:
     """Playwright session for sites behind a Cloudflare check.
 
     Prefers the installed Google Chrome (passes the check headless); falls back to
-    Playwright's bundled Chromium.
+    Playwright's bundled Chromium. Waits a random `pause` (seconds) before each page load after
+    the first, so multi-page scrapes (ReNew's detail pages) aren't fired back to back.
     """
+
+    def __init__(self, pause: Tuple[float, float] = (5.0, 10.0)) -> None:
+        self.pause = pause
+        self._loads = 0
 
     def __enter__(self) -> "Browser":
         from playwright.sync_api import sync_playwright
@@ -75,7 +81,15 @@ class Browser:
             raise RuntimeError(f"Page never requested {missing}: {url}")
         return found
 
+    def _wait_between_pages(self) -> None:
+        if self._loads and self.pause and self.pause[1] > 0:
+            delay = random.uniform(*self.pause)
+            log.info("pausing %.1fs before the next page", delay)
+            time.sleep(delay)
+        self._loads += 1
+
     def _open(self, url: str, settle_ms: int) -> None:
+        self._wait_between_pages()
         page = self._page
         page.goto(url, wait_until="domcontentloaded", timeout=60000)
         for _ in range(30):

@@ -146,3 +146,33 @@ def test_data_checks_quiet_for_normal_data():
                             "earliest_available": None, "lease_months": None, "specials": []})
     summary, _ = build_complex({"slug": "t", "name": "T", "url": "x"}, history(a, a), {"ok": True})
     assert summary["checks"] == []
+
+
+def test_site_wide_banner_applies_by_beds_and_dedupes():
+    banner = {"title": "Move in by Oct 31 and enjoy $500 off 2-bedroom homes or $1,000 off 3-bedroom homes!",
+              "description": ""}
+    s = snap([unit("101", 1500, lease=12), unit("201", 1800, code="P2", lease=12)])
+    s["floorplans"].append({"code": "P2", "name": "P2", "beds": 2, "rent_min": 1800, "units_available": 1,
+                            "earliest_available": None, "lease_months": 12, "specials": []})
+    s["property_specials"] = [banner]
+    summary, detail = build_complex({"slug": "t", "name": "T", "url": "x"}, history(s), {"ok": True})
+    one, two = detail["floorplans"]
+    assert one["effective_min"] == 1500 and two["effective_min"] == round(1800 - 500 / 12)
+    assert two["special_terms"][-1]["site_wide"] and detail["property_special_terms"][0]["beds_off"] == {"2": 500, "3": 1000}
+    assert summary["by_beds"]["2 BR"]["min_effective"] == round(1800 - 500 / 12)
+
+    # The same offer listed on a floorplan isn't applied twice.
+    s2 = snap([unit("101", 1200, lease=12)], specials=[{"title": "1 Month Free!", "description": ""}], lease=12)
+    s2["property_specials"] = [{"title": "1 month free", "description": ""}]
+    h = history(s2)
+    assert h[0][1]["units"][0]["effective"]["rent"] == 1100 and h[0][1]["property_special_terms"] == []
+
+
+def test_expired_banner_is_skipped_and_old_snapshots_build():
+    s = snap([unit("101", 1820, lease=15)], lease=15)
+    s["property_specials"] = [{"title": "Enjoy 2 Weeks Base Rent Free When You Move In by May 31st!", "description": ""}]
+    h = history(s)
+    e = h[0][1]["units"][0]["effective"]
+    assert e["rent"] == 1820 and "has passed" in e["skipped"][0]
+    old = history(snap([unit("101", 1200)]))  # no property_specials key at all
+    assert old[0][1]["property_special_terms"] == []

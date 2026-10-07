@@ -7,6 +7,7 @@
 from __future__ import annotations
 
 import json
+import re
 from collections import defaultdict
 from datetime import date
 from pathlib import Path
@@ -51,6 +52,10 @@ def normalize_specials(raw) -> List[dict]:
 
 # ---------- effective rent ----------
 
+def _norm_title(title: str) -> str:
+    return re.sub(r"[^a-z0-9$]+", " ", (title or "").lower()).strip()
+
+
 def apply_specials(snap: dict, snap_date: str) -> None:
     """Annotate floorplans/units in place with parsed specials and effective rent."""
     ref = date.fromisoformat(snap_date)
@@ -58,14 +63,26 @@ def apply_specials(snap: dict, snap_date: str) -> None:
     for u in snap["units"]:
         units_by_plan[u["floorplan_code"]].append(u)
 
+    # Site-wide banner specials apply to every floorplan, unless a floorplan already lists the
+    # same offer (applying it twice would double the discount).
     for fp in snap["floorplans"]:
         fp["specials"] = normalize_specials(fp.get("specials"))
-        fp_terms = [parse_special(s["title"], s.get("description", ""), ref) for s in fp["specials"]]
+    fp_titles = {_norm_title(s["title"]) for fp in snap["floorplans"] for s in fp["specials"]}
+    site_terms = []
+    for s in normalize_specials(snap.get("property_specials")):
+        t = parse_special(s["title"], s.get("description", ""), ref)
+        t.site_wide = True
+        if _norm_title(s["title"]) not in fp_titles:
+            site_terms.append(t)
+    snap["property_special_terms"] = [t.to_dict() for t in site_terms]
+
+    for fp in snap["floorplans"]:
+        fp_terms = [parse_special(s["title"], s.get("description", ""), ref) for s in fp["specials"]] + site_terms
         fp["special_terms"] = [t.to_dict() for t in fp_terms]
 
         def compute(price, lease, available, extra_specials=()):
             terms = fp_terms + [parse_special(s["title"], s.get("description", ""), ref) for s in extra_specials]
-            eff = effective_rent(price, terms, lease or DEFAULT_LEASE_MONTHS, available, snap_date)
+            eff = effective_rent(price, terms, lease or DEFAULT_LEASE_MONTHS, available, snap_date, beds=fp.get("beds"))
             return None if eff is None else {
                 "rent": eff.rent, "savings": eff.savings, "applied": eff.applied, "skipped": eff.skipped,
                 "uncertain": eff.uncertain, "lease_months": lease or DEFAULT_LEASE_MONTHS, "lease_assumed": not lease,

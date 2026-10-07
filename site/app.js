@@ -88,6 +88,20 @@ function sparkline(values, { width = 90, height = 26, color = cssVar("--accent")
 /** append() that skips null/false (optional elements) instead of printing "null". */
 const add = (parent, ...kids) => parent.append(...kids.flat().filter((k) => k != null && k !== false));
 
+/**
+ * Tap-to-expand: a button that shows `lines` underneath it (works on phones, unlike hover tooltips).
+ * Stops the click so it doesn't also toggle a floorplan row.
+ */
+function expander(cls, label, lines) {
+  const detail = h("div", { class: "expand-detail", hidden: true }, lines.filter(Boolean).map((l) => h("div", {}, l)));
+  const btn = h("button", {
+    type: "button", class: `expand-btn ${cls}`, "aria-expanded": "false",
+    onclick: (e) => { e.stopPropagation(); detail.hidden = !detail.hidden; btn.setAttribute("aria-expanded", String(!detail.hidden)); },
+    onkeydown: (e) => e.stopPropagation(),
+  }, label);
+  return h("span", { class: "expander" }, btn, detail);
+}
+
 // ---------- price per sq ft ----------
 const ppsf = (price, sqft) => (price != null && sqft ? price / sqft : null);
 const fmtPpsf = (n) => (n == null ? "—" : "$" + n.toFixed(2));
@@ -96,7 +110,7 @@ function ppsfEl(price, net, sqft) {
   const v = ppsf(price, sqft);
   if (v == null) return h("span", { class: "muted" }, "—");
   const n = net != null && net < price ? ppsf(net, sqft) : null;
-  return h("span", { title: n != null ? `Net of specials: ${fmtPpsf(n)}/sq ft` : null }, fmtPpsf(v));
+  return n != null ? expander("net-btn", fmtPpsf(v), [`Net of specials: ${fmtPpsf(n)}/sq ft`]) : h("span", {}, fmtPpsf(v));
 }
 
 // ---------- unit history cells (complex page and shortlist) ----------
@@ -316,7 +330,7 @@ async function shortlistCard() {
       shareBox,
       h("div", { class: "table-scroll" }, h("table", {},
         h("thead", {}, h("tr", {}, h("th", {}, ""), h("th", {}, "Complex / item"), h("th", { class: "hide-sm" }, "Bed / Bath"), h("th", { class: "r hide-sm" }, "Sq ft"),
-          h("th", { class: "r" }, "Price"), h("th", { class: "r", title: "Listed price per square foot; hover for net of specials" }, "$/sq ft"),
+          h("th", { class: "r" }, "Price"), h("th", { class: "r", title: "Listed price per square foot; tap a value for net of specials" }, "$/sq ft"),
           h("th", {}, "Available"), h("th", { class: "hide-sm" }, "Listed"), h("th", { class: "hide-sm" }, "Price change"))),
         h("tbody", {}, rows.map((r) => {
           const e = r.entry, f = r.plan || {};
@@ -510,8 +524,18 @@ function describeTerms(t) {
   if (t.months_free) parts.push(`${+t.months_free.toFixed(2)} month${t.months_free === 1 ? "" : "s"} free`);
   if (t.one_time_off) parts.push(`${money(t.one_time_off)} off once`);
   if (t.monthly_off) parts.push(`${money(t.monthly_off)} off per month`);
-  return `Read as: ${parts.join(" + ")}${t.caveats.length ? " — " + t.caveats.join(", ") : ""}.`;
+  const beds = Object.entries(t.beds_off || {}).sort();
+  if (beds.length) parts.push(beds.map(([k, v]) => `${money(v)} off once for ${k === "0" ? "studios" : k + " BR"}`).join(", "));
+  // The per-bedroom caveat ("$500 off 2 BR, ...") repeats what's spelled out above.
+  const caveats = t.caveats.filter((c) => !(beds.length && c.startsWith("$")));
+  return `Read as: ${parts.join(" + ")}${caveats.length ? " — " + caveats.join(", ") : ""}.`;
 }
+
+/** A site-wide banner whose deadline passed before the pull (it's kept on the page, marked ended). */
+const specialEnded = (t, asOf) => (t.expires && t.expires < asOf) || (t.move_in_by && t.move_in_by < asOf);
+/** Site-wide banners show on a floorplan only while running and offered for its bedroom count. */
+const siteWideShows = (t, f, asOf) => !specialEnded(t, asOf)
+  && (!Object.keys(t.beds_off || {}).length || t.months_free || t.one_time_off || t.monthly_off || String(Math.trunc(f.beds)) in t.beds_off);
 
 async function renderComplex() {
   const slug = new URLSearchParams(location.search).get("c");
@@ -586,7 +610,7 @@ async function renderComplex() {
     { key: "beds", label: "Bed / Bath", r: false },
     { key: "sqft", label: "Sq ft", r: true, hideSm: true },
     { key: "rent_min", label: "From", r: true },
-    { key: "ppsf", label: "$/sq ft", r: true, hideSm: true, title: "Lowest listed price per square foot; hover for net of specials" },
+    { key: "ppsf", label: "$/sq ft", r: true, hideSm: true, title: "Lowest listed price per square foot; tap a value for net of specials" },
     hasNet && { key: "effective_min", label: "Net", r: true },
     { key: "units_available", label: "Units", r: true },
     { key: "earliest_available", label: "Earliest", r: false },
@@ -603,10 +627,23 @@ async function renderComplex() {
   };
 
   const caveatText = (t) => (t.caveats.length ? t.caveats.join(" · ") : "");
-  const specialBadge = (t) => h("span", {
-    class: `badge ${t.parsed ? "special" : ""}`,
-    title: [t.title, t.description, t.parsed ? caveatText(t) : "Terms not understood — not included in net rent"].filter(Boolean).join("\n"),
-  }, t.title, t.parsed ? "" : " ?", t.caveats.length && t.parsed ? h("span", { class: "caveat" }, ` · ${caveatText(t)}`) : null);
+  const specialBadge = (t) => expander(`badge ${t.parsed ? "special" : ""}`,
+    [t.title, t.parsed ? "" : " ?", t.caveats.length && t.parsed ? h("span", { class: "caveat" }, ` · ${caveatText(t)}`) : null],
+    [t.description, t.parsed ? describeTerms(t) : "Terms not understood — not included in net rent"]);
+  /** Compact badge for a site-wide banner: just this plan's discount and deadline; full text on tap. */
+  const siteWideBadge = (t, f) => {
+    const own = (t.beds_off || {})[String(Math.trunc(f.beds))];
+    const parts = [];
+    if (t.months_free) parts.push(`${+t.months_free.toFixed(2)} mo free`);
+    if (t.one_time_off || own) parts.push(`${money((t.one_time_off || 0) + (own || 0))} off`);
+    if (t.monthly_off) parts.push(`${money(t.monthly_off)}/mo off`);
+    const deadline = t.move_in_by ? `move in by ${shortDate(t.move_in_by)}` : t.expires ? `ends ${shortDate(t.expires)}` : null;
+    return expander("badge special",
+      [h("span", { class: "caveat" }, "Site-wide: "), parts.join(" + "), deadline ? h("span", { class: "caveat" }, ` · ${deadline}`) : null],
+      ["Banner on the complex's website:", h("strong", {}, t.title), t.description, describeTerms(t)]);
+  };
+  const planSpecials = (f) => (f.special_terms || []).filter((t) => !t.site_wide || siteWideShows(t, f, today))
+    .map((t) => (t.site_wide ? siteWideBadge(t, f) : specialBadge(t)));
   const unitNetEl = (u) => {
     const e = u.effective;
     if (!e) return h("span", { class: "muted" }, "—");
@@ -616,8 +653,8 @@ async function renderComplex() {
       ...e.skipped.map((x) => `Not applied — ${x}`),
       e.uncertain ? "Special is for select units only; ask whether this unit qualifies." : null,
     ].filter(Boolean);
-    if (!e.applied.length) return h("span", { class: "muted", title: lines.join("\n") }, "n/a");
-    return h("span", { title: lines.join("\n") }, h("strong", {}, money(e.rent)), e.uncertain ? " *" : "");
+    if (!e.applied.length) return expander("net-btn muted", "n/a", lines);
+    return expander("net-btn", [h("strong", {}, money(e.rent)), e.uncertain ? " *" : ""], lines);
   };
   const historyStart = d.history_start || d.dates[0];
   const open = new Set();
@@ -668,10 +705,13 @@ async function renderComplex() {
         h("td", { class: "r num" }, f.units_available || h("span", { class: "muted" }, "0")),
         h("td", {}, f.units_available ? availLabel(f.earliest_available, today) : "—"),
         h("td", { class: "hide-sm" }, sparkline(hist, { width: 70, height: 22 })),
-        h("td", { class: "hide-sm specials-cell" }, (f.special_terms || []).map((t) => specialBadge(t))),
+        h("td", { class: "hide-sm specials-cell" }, planSpecials(f)),
       ));
       if (isOpen) {
+        const specialsSm = planSpecials(f);
         rows.push(h("tr", { class: "units-row" }, h("td", { colspan: columns.length + 2 },
+          // Phones hide the Specials column, so the plan's specials lead its unit list instead.
+          specialsSm.length ? h("div", { class: "show-sm specials-sm" }, specialsSm) : null,
           h("table", {},
             h("thead", {}, h("tr", {}, h("th", {}, "Unit"), hasBuilding && h("th", {}, "Building"), hasFloor && h("th", {}, "Floor"), h("th", { class: "r" }, totalBasis ? "Price (incl. fees)" : "Price"), hasTotal && h("th", { class: "r", title: "Base rent plus required monthly fees" }, "Total/mo"), hasNet && h("th", { class: "r" }, "Net"), h("th", { class: "r" }, "Sq ft"), h("th", { class: "r", title: "Listed price per square foot" }, "$/sq ft"), h("th", {}, "Available"), h("th", {}, "Listed"), h("th", {}, "Price change"), h("th", {}, ""))),
             h("tbody", {}, units.map((u) => h("tr", {},
@@ -693,13 +733,18 @@ async function renderComplex() {
   };
 
   drawFilters(); drawHead(); drawTable();
-  const uniqueSpecials = [...new Map(d.floorplans.flatMap((f) => f.special_terms || []).map((t) => [t.title + t.description, t])).values()];
+  // Site-wide banners first (including ended ones, marked), then floorplan specials.
+  const uniqueSpecials = [...new Map([...(d.property_special_terms || []), ...d.floorplans.flatMap((f) => f.special_terms || [])]
+    .map((t) => [t.title + t.description, t])).values()];
   if (uniqueSpecials.length) {
     const lease = d.floorplans.map((f) => f.lease_months).find(Boolean);
     add(root, h("div", { class: "card stack" },
       h("h2", {}, "Current specials"),
       uniqueSpecials.map((t) => h("div", { class: "special-row" },
-        h("div", {}, h("strong", {}, t.title), t.parsed ? null : h("span", { class: "badge", style: "margin-left:8px" }, "not included in net rent")),
+        h("div", {}, h("strong", {}, t.title),
+          t.site_wide ? h("span", { class: "badge", style: "margin-left:8px", title: "From a banner on the complex's website; applies to every floorplan unless noted" }, "Site-wide banner") : null,
+          t.site_wide && specialEnded(t, d.date) ? h("span", { class: "badge warn", style: "margin-left:6px" }, "ended — not applied") : null,
+          t.parsed ? null : h("span", { class: "badge", style: "margin-left:8px" }, "not included in net rent")),
         t.description ? h("div", { class: "muted small" }, t.description) : null,
         t.parsed ? h("div", { class: "small" }, describeTerms(t)) : null)),
       h("p", { class: "note" }, lease
@@ -710,7 +755,7 @@ async function renderComplex() {
   add(root, h("div", { class: "card stack" },
     h("h2", {}, "Floorplans"), filterRow,
     h("div", { class: "table-scroll" }, h("table", {}, thead, tbody)),
-    h("p", { class: "note" }, "Click a floorplan to see its available units. Star ☆ a floorplan or unit to add it to your shortlist on the overview (saved in this browser). “From” is the lowest listed price; “$/sq ft” is that price per square foot; “Net” is the lowest effective monthly rent after specials. Hover a unit's net rent for how it was calculated (* = the special is for select units only, so confirm the unit qualifies). The trend shows that plan's lowest listed price at each pull."),
+    h("p", { class: "note" }, "Click a floorplan to see its available units. Star ☆ a floorplan or unit to add it to your shortlist on the overview (saved in this browser). “From” is the lowest listed price; “$/sq ft” is that price per square foot; “Net” is the lowest effective monthly rent after specials. Tap a special or a unit's net rent for the details (* = the special is for select units only, so confirm the unit qualifies). The trend shows that plan's lowest listed price at each pull."),
     totalBasis ? h("p", { class: "note" }, "This site only shows a “Total Monthly Leasing Price”, which already includes required monthly fees, so its prices run slightly higher than base rent elsewhere.") : null,
     hasTotal && !totalBasis ? h("p", { class: "note" }, "Prices are base rent. “Total/mo” adds the required monthly fees the site lists (e.g. trash, pest control).") : null,
     d.units.length && d.units.every((u) => u.price == null) ? h("p", { class: "note" }, "This site lists available units but doesn't publish prices (“Call”).") : null,

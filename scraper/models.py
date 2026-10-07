@@ -55,6 +55,8 @@ class Snapshot:
     # "base": `price` is base rent (default). "total": the site only shows a total that
     # already includes required monthly fees (e.g. Entrata's "Total Monthly Leasing Price").
     price_basis: str = "base"
+    # Specials from a site-wide banner (complexes.yaml `banner:`), applied to every floorplan at build.
+    property_specials: List[Dict[str, str]] = field(default_factory=list)
 
     def to_dict(self) -> dict:
         return asdict(self)
