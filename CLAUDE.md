@@ -4,7 +4,7 @@ Tracks availability and pricing for a list of apartment complexes and publishes 
 static dashboard to GitHub Pages: https://mattrudy13.github.io/apartments/
 See README.md for usage commands.
 
-## Status (2026-10-06)
+## Status (2026-10-07)
 
 Working end to end:
 - Nine tracked complexes (`complexes.yaml`): Attain at Chic's Beach (`sightmap`, was
@@ -17,6 +17,10 @@ Working end to end:
 - Overview page (`site/index.html`) and complex detail page (`site/complex.html?c=<slug>`).
 - Effective (net) rent from specials, per-unit listing history, base vs total-per-month
   pricing, data checks ("check data" badge), sortable overview (see sections below).
+- Added 2026-10-07: price per sq ft, a shortlist (starred floorplans/units, per browser, with a
+  share link), site-wide promo banners (Attain, North Hill) feeding net rent, per-bedroom
+  specials, random 5–10 s pauses between Chrome pages, and tap-to-expand details for phones.
+  Banners first reach the live site with the next scrape (none run since the code landed).
 - Real snapshots: `2026-10-04` (setup day), `2026-10-05` (first scheduled Monday run, 09:00,
   confirmed working unattended) and `2026-10-06` (the five new complexes plus Attain
   re-scraped from SightMap, all via manual `--only` runs). Next scheduled run: Mon 2026-10-12,
@@ -35,7 +39,8 @@ Daily pulls are a one-liner (`scripts/install_schedule.sh daily`) if wanted.
   (gitignored; CI regenerates it).
 - `site/` — static vanilla JS + Chart.js (cdnjs); `app.js` serves both pages via `body[data-page]`.
 - `tests/` — parser tests against saved pages/JSON in `tests/fixtures/` (`test_parsers.py`),
-  build logic (`test_build.py`) and specials parsing (`test_specials.py`); 62 tests.
+  build logic (`test_build.py`), specials parsing (`test_specials.py`), banner parsing
+  (`test_banners.py`, small hand-trimmed fixtures) and the Browser pause (`test_fetch.py`); 71 tests.
   Fixtures are scrubbed of site API keys (GitHub push protection rejected a SightMap page
   with a Mapbox token; don't commit raw embed pages). `pytest.ini` puts the repo
   root on the path (plain `pytest` failed in CI without it).
