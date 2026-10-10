@@ -60,6 +60,21 @@ def test_entrata_units_detail():
     assert all(u.lease_months == 15 for u in units)
 
 
+def test_entrata_lease_terms():
+    page = read("renew_detail_douglas.html")
+    assert entrata.unit_space_ids(page) == {
+        ("2221", "207"): "5148564", ("2205", "208"): "5148378", ("2261", "206"): "5148645"}
+    terms = entrata.parse_lease_terms(read("renew_lease_terms.html"))
+    assert [t["months"] for t in terms] == list(range(3, 16))  # sorted, one per term
+    by_term = {t["months"]: t["price"] for t in terms}
+    assert (by_term[11], by_term[12], by_term[15]) == (2744, 3244, 2744)  # 12 months isn't the cheapest
+    assert all(t["total_price"] is None for t in terms)  # Entrata prices already include fees
+    assert entrata.lease_terms_path(
+        "https://www.renewmarinashores.com/virginia-beach/renew-marina-shores/conventional/", "690926", "5148564"
+    ) == ("/virginia-beach/renew-marina-shores/floorplans/?module=property_floorplans&action=view_lease_term"
+          "&property_floorplan[id]=690926&unit_space[id]=5148564&occupancy_type=c")
+
+
 def test_entrata_property_info():
     info = entrata.parse_property(read("renew_floorplans.html"))
     assert info.address == "2257 Willow Oak Cir., Virginia Beach, 23451"

@@ -20,6 +20,7 @@ from .models import FloorPlan, PropertyInfo, Unit
 
 log = logging.getLogger(__name__)
 PRICE_BASIS = "total"  # prices are "Total Monthly Leasing Price" (rent + required fees)
+TERMS_PAUSE = (5.0, 10.0)  # seconds between per-unit lease-term requests (same as page loads)
 
 
 def _text(el: Optional[Tag]) -> str:
@@ -138,9 +139,9 @@ def parse_floorplans(page: str, today: Optional[date] = None) -> List[FloorPlan]
     return plans
 
 
-def parse_units(page: str, floorplan_code: str, today: Optional[date] = None) -> List[Unit]:
+def _unit_rows(page: str, floorplan_code: str, today: Optional[date] = None):
+    """(row element, Unit) for each unit row in the detail page's `.fp-units-table`."""
     soup = BeautifulSoup(page, "html.parser")
-    units = []
     for table in soup.select(".fp-units-table"):
         header = table.select_one(".option-row.title")
         if not header:
@@ -156,22 +157,54 @@ def parse_units(page: str, floorplan_code: str, today: Optional[date] = None) ->
                 continue
             lease_months = _lease_months(row.select_one(".lease-term-name"))
             price = re.search(r"\$[\d,]+", values.get("rent", ""))
-            units.append(
-                Unit(
-                    unit_number=number,
-                    floorplan_code=floorplan_code,
-                    price=to_int(price.group()) if price else None,
-                    sqft=to_int(values.get("sq.ft.")),
-                    building=values.get("building") or None,
-                    available_date=parse_date(values.get("available"), today),
-                    lease_months=lease_months,
-                )
+            yield row, Unit(
+                unit_number=number,
+                floorplan_code=floorplan_code,
+                price=to_int(price.group()) if price else None,
+                sqft=to_int(values.get("sq.ft.")),
+                building=values.get("building") or None,
+                available_date=parse_date(values.get("available"), today),
+                lease_months=lease_months,
             )
-    return units
+
+
+def parse_units(page: str, floorplan_code: str, today: Optional[date] = None) -> List[Unit]:
+    return [u for _, u in _unit_rows(page, floorplan_code, today)]
+
+
+def unit_space_ids(page: str) -> dict:
+    """{(building, unit number): Entrata unit-space id} from each unit row's "See Details" button,
+    which the lease-terms request needs."""
+    out = {}
+    for row, u in _unit_rows(page, ""):
+        btn = row.select_one(".js-show-details[data-unit]")
+        if btn:
+            out[(u.building, u.unit_number)] = btn["data-unit"]
+    return out
+
+
+def parse_lease_terms(page: str) -> List[dict]:
+    """The "See Details" lease-term boxes -> [{months, price}]. Prices are Entrata's total monthly
+    price (PRICE_BASIS "total"), so there's no separate total."""
+    soup = BeautifulSoup(page, "html.parser")
+    out = {}
+    for box in soup.select(".js-select-term[data-term][data-rent]"):
+        months, price = to_int(box["data-term"]), to_int(round(float(box["data-rent"] or 0)))
+        if months and price:
+            out[months] = {"months": months, "price": price, "total_price": None}
+    return [out[m] for m in sorted(out)]
+
+
+def lease_terms_path(listing_url: str, floorplan_id: str, unit_space_id: str) -> str:
+    """The request the "See Details" button makes (relative to the site, under /<city>/<property>/)."""
+    base = re.sub(r"/conventional/?$", "/floorplans/", urlparse(listing_url).path)
+    return (f"{base}?module=property_floorplans&action=view_lease_term"
+            f"&property_floorplan[id]={floorplan_id}&unit_space[id]={unit_space_id}&occupancy_type=c")
 
 
 def scrape(cfg: dict, today: Optional[date] = None) -> Tuple[PropertyInfo, List[FloorPlan], List[Unit]]:
     units: List[Unit] = []
+    terms_ok = True
     with Browser() as browser:
         listing = browser.get(cfg["url"])
         info = parse_property(listing)
@@ -179,10 +212,26 @@ def scrape(cfg: dict, today: Optional[date] = None) -> Tuple[PropertyInfo, List[
         for fp in floorplans:
             if not fp.units_available or not fp.details_url:
                 continue
-            fp_units = parse_units(browser.get(fp.details_url), fp.code, today)
+            detail = browser.get(fp.details_url)
+            fp_units = parse_units(detail, fp.code, today)
             if not fp_units:
                 log.warning("%s: no unit rows on %s", cfg["slug"], fp.details_url)
                 continue
+            # Prices for every lease term: one in-page request per unit, spaced like page loads.
+            # The site rate-limits (429 on 2026-10-10 with 1-3 s gaps, then a Cloudflare challenge),
+            # so the first failure stops term requests for the rest of the run; units keep their quote.
+            space_ids = unit_space_ids(detail) if terms_ok else {}
+            for u in fp_units:
+                space = space_ids.get((u.building, u.unit_number))
+                if not space or not terms_ok:
+                    continue
+                try:
+                    u.lease_options = parse_lease_terms(
+                        browser.fetch(lease_terms_path(cfg["url"], fp.code, space), pause=TERMS_PAUSE))
+                except Exception as e:
+                    terms_ok = False
+                    log.warning("%s: lease terms failed for %s #%s, skipping the rest: %s",
+                                cfg["slug"], u.building, u.unit_number, e)
             fp.units_available = len(fp_units)
             prices = [u.price for u in fp_units if u.price]
             if prices:

@@ -81,6 +81,18 @@ class Browser:
             raise RuntimeError(f"Page never requested {missing}: {url}")
         return found
 
+    def fetch(self, path: str, pause: Tuple[float, float] = (1.0, 3.0)) -> str:
+        """GET `path` from inside the current page, like the site's own scripts do (same cookies,
+        so it passes Cloudflare without another page load). Waits a random `pause` first."""
+        if pause and pause[1] > 0:
+            time.sleep(random.uniform(*pause))
+        status, text = self._page.evaluate(
+            "async (u) => { const r = await fetch(u, {headers: {'X-Requested-With': 'XMLHttpRequest'}});"
+            " return [r.status, await r.text()]; }", path)
+        if status != 200:
+            raise RuntimeError(f"HTTP {status} for {path}")
+        return text
+
     def _wait_between_pages(self) -> None:
         if self._loads and self.pause and self.pause[1] > 0:
             delay = random.uniform(*self.pause)
