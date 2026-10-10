@@ -1,0 +1,11 @@
+# Which units count as "viable": the main page, the complex pages' default view and the weekly
+# email digest show only these. Everything is still scraped and kept; the "All units" page
+# shows it all.
+
+# Bedroom counts (0 = studio).
+beds: [1, 2]
+
+# Monthly cost must be strictly under this: net of specials, with the required monthly fees
+# included where the site lists them. Sites that list no fees use rent after specials,
+# marked "fees not listed".
+max_monthly: 1900

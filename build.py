@@ -3,6 +3,7 @@
     site/data/summary.json   overview: latest numbers, deltas, history per complex
     site/data/<slug>.json    detail: latest floorplans + units (with effective rent and
                              listing history), price history per floorplan
+    site/data/viable.json    every "viable" unit (viable.yaml) across complexes, for the main page
 """
 from __future__ import annotations
 
@@ -22,6 +23,7 @@ ROOT = Path(__file__).resolve().parent
 SNAPSHOTS = ROOT / "data" / "snapshots"
 OUT = ROOT / "site" / "data"
 DEFAULT_LEASE_MONTHS = 12  # used for effective rent when the site doesn't say
+VIABLE_CONFIG = ROOT / "viable.yaml"
 
 
 def bed_sort_key(label: str):
@@ -117,8 +119,57 @@ def unit_totals(snap: dict) -> List[Tuple[dict, int, int]]:
     return out
 
 
+# ---------- viable units ----------
+
+def load_viable_config(path: Path = VIABLE_CONFIG) -> dict:
+    cfg = (yaml.safe_load(path.read_text()) if path.exists() else None) or {}
+    return {"beds": [float(b) for b in cfg.get("beds") or []], "max_monthly": cfg.get("max_monthly")}
+
+
+def unit_monthly(u: dict, total_basis: bool) -> Tuple[Optional[int], bool]:
+    """(monthly cost net of specials, whether required fees are included).
+
+    Same rule as unit_totals: the site's total (or the price at total-only sites) minus specials
+    savings. Sites that list no fees fall back to net rent, flagged, so they can still qualify."""
+    eff = u.get("effective") or {}
+    total = u.get("total_price") or (u.get("price") if total_basis else None)
+    if total:
+        return total - (eff.get("savings") or 0), True
+    rent = eff["rent"] if eff.get("applied") else u.get("price")
+    return rent, False
+
+
+def annotate_viable(snap: dict, criteria: dict) -> None:
+    """Tag units with monthly / fees_known / viable, and floorplans with their viable count
+    (call apply_specials first). Unpriced units and unknown bed counts never qualify."""
+    total_basis = snap.get("price_basis") == "total"
+    beds_of = {fp["code"]: fp.get("beds") for fp in snap["floorplans"]}
+    counts = defaultdict(int)
+    limit = criteria.get("max_monthly")
+    for u in snap["units"]:
+        u["monthly"], u["fees_known"] = unit_monthly(u, total_basis)
+        beds = beds_of.get(u["floorplan_code"])
+        u["viable"] = bool(
+            beds is not None and (not criteria["beds"] or beds in criteria["beds"])
+            and u["monthly"] is not None and (limit is None or u["monthly"] < limit))
+        counts[u["floorplan_code"]] += u["viable"]
+    for fp in snap["floorplans"]:
+        fp["viable_units"] = counts.get(fp["code"], 0)
+
+
+def prepare_history(cfg: dict, history: list, criteria: Optional[dict] = None) -> list:
+    """Fill price_basis for old snapshots and tag viable units; safe to call twice."""
+    basis = getattr(MODULES.get(cfg.get("scraper")), "PRICE_BASIS", "base")
+    criteria = criteria if criteria is not None else load_viable_config()
+    for _, snap in history:
+        # Snapshots from before price_basis existed: use the scraper's declared basis.
+        snap["price_basis"] = snap.get("price_basis") or basis
+        annotate_viable(snap, criteria)
+    return history
+
+
 def metrics(snap: dict) -> dict:
-    """Headline numbers for one snapshot (call apply_specials first)."""
+    """Headline numbers for one snapshot (call apply_specials and annotate_viable first)."""
     available = [fp for fp in snap["floorplans"] if fp["units_available"]]
     prices = [fp["rent_min"] for fp in available if fp["rent_min"]]
     prices += [u["price"] for u in snap["units"] if u["price"]]
@@ -142,7 +193,10 @@ def metrics(snap: dict) -> dict:
         b = by_beds[beds_of.get(u["floorplan_code"], "Other")]
         lower(b, "min_total", total)
         lower(b, "min_total_net", net)
+    viable = [u for u in snap["units"] if u.get("viable")]
     return {
+        "viable_units": len(viable),
+        "viable_min": min(u["monthly"] for u in viable) if viable else None,
         "units": units,
         "min_price": min(prices) if prices else None,
         "min_effective": min(eff) if eff else None,
@@ -270,7 +324,7 @@ def load_history(slug: str, snapshots: Path = SNAPSHOTS) -> list:
     return out
 
 
-def build_complex(cfg: dict, history: list, st: dict) -> Tuple[dict, Optional[dict]]:
+def build_complex(cfg: dict, history: list, st: dict, criteria: Optional[dict] = None) -> Tuple[dict, Optional[dict]]:
     slug = cfg["slug"]
     stale = not st.get("ok", True)
     error = st.get("error") if stale else None
@@ -278,10 +332,7 @@ def build_complex(cfg: dict, history: list, st: dict) -> Tuple[dict, Optional[di
         return {"slug": slug, "name": cfg["name"], "url": cfg.get("website") or cfg["url"],
                 "stale": True, "error": error, "history": []}, None
 
-    # Snapshots from before price_basis existed: use the scraper's declared basis.
-    basis = getattr(MODULES.get(cfg.get("scraper")), "PRICE_BASIS", "base")
-    for _, snap in history:
-        snap["price_basis"] = snap.get("price_basis") or basis
+    prepare_history(cfg, history, criteria)
     series = [{"date": d, **metrics(s)} for d, s in history]
     latest_date, latest = history[-1]
     cur, prev = series[-1], (series[-2] if len(series) > 1 else None)
@@ -301,6 +352,10 @@ def build_complex(cfg: dict, history: list, st: dict) -> Tuple[dict, Optional[di
         "priced": cur["priced"],
         "price_basis": latest["price_basis"],
         "by_beds": cur["by_beds"],
+        "viable_units": cur["viable_units"],
+        "viable_min": cur["viable_min"],
+        "viable_units_delta": delta(cur["viable_units"], prev and prev["viable_units"]),
+        "viable_min_delta": delta(cur["viable_min"], prev and prev["viable_min"]),
         "units_delta": delta(cur["units"], prev and prev["units"]),
         "min_price_delta": delta(cur["min_price"], prev and prev["min_price"]),
         "min_effective_delta": delta(cur["min_effective"], prev and prev["min_effective"]),
@@ -308,7 +363,8 @@ def build_complex(cfg: dict, history: list, st: dict) -> Tuple[dict, Optional[di
         "stale": stale,
         "error": error,
         "history": [{"date": p["date"], "units": p["units"], "min_price": p["min_price"],
-                     "min_effective": p["min_effective"]} for p in series],
+                     "min_effective": p["min_effective"], "viable_units": p["viable_units"],
+                     "viable_min": p["viable_min"]} for p in series],
     }
 
     fp_history = defaultdict(list)
@@ -344,21 +400,49 @@ def build_complex(cfg: dict, history: list, st: dict) -> Tuple[dict, Optional[di
     return summary, detail
 
 
+def viable_rows(summary: dict, detail: Optional[dict]) -> List[dict]:
+    """Viable units of one complex for viable.json. A stale complex's last good data could list
+    units that are long gone, so it contributes none (its row on the page says why)."""
+    if not detail or summary.get("stale"):
+        return []
+    plans = {fp["code"]: fp for fp in detail["floorplans"]}
+    rows = []
+    for u in detail["units"]:
+        if not u.get("viable"):
+            continue
+        fp = plans.get(u["floorplan_code"], {})
+        rows.append({
+            "slug": summary["slug"], "complex": summary["name"], "date": detail["date"],
+            "unit_number": u["unit_number"], "building": u.get("building"), "floor": u.get("floor"),
+            "floorplan_code": u["floorplan_code"], "plan": fp.get("name"), "beds": fp.get("beds"),
+            "baths": fp.get("baths"), "sqft": u.get("sqft") or fp.get("sqft"),
+            "available_date": u.get("available_date"), "apply_url": u.get("apply_url"),
+            "price": u.get("price"), "total_price": u.get("total_price"), "effective": u.get("effective"),
+            "monthly": u["monthly"], "fees_known": u["fees_known"],
+            "incl_fees": detail.get("price_basis") == "total", "history": u.get("history"),
+        })
+    return rows
+
+
 def build() -> None:
     complexes = yaml.safe_load((ROOT / "complexes.yaml").read_text())["complexes"]
     status_path = ROOT / "data" / "status.json"
     status = json.loads(status_path.read_text()) if status_path.exists() else {}
+    criteria = load_viable_config()
     OUT.mkdir(parents=True, exist_ok=True)
 
-    summary = []
+    summary, viable = [], []
     for cfg in complexes:
-        s, detail = build_complex(cfg, load_history(cfg["slug"]), status.get(cfg["slug"], {}))
+        s, detail = build_complex(cfg, load_history(cfg["slug"]), status.get(cfg["slug"], {}), criteria)
         summary.append(s)
+        viable += viable_rows(s, detail)
         if detail:
             (OUT / f"{cfg['slug']}.json").write_text(json.dumps(detail, separators=(",", ":")))
 
-    (OUT / "summary.json").write_text(json.dumps({"complexes": summary}, indent=1))
-    print(f"Built {len(summary)} complexes -> {OUT.relative_to(ROOT)}")
+    (OUT / "summary.json").write_text(json.dumps({"complexes": summary, "viable_criteria": criteria}, indent=1))
+    viable.sort(key=lambda r: r["monthly"])
+    (OUT / "viable.json").write_text(json.dumps({"criteria": criteria, "units": viable}, separators=(",", ":")))
+    print(f"Built {len(summary)} complexes, {len(viable)} viable units -> {OUT.relative_to(ROOT)}")
 
 
 if __name__ == "__main__":

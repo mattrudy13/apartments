@@ -1,4 +1,4 @@
-from build import apply_specials, build_complex, unit_histories
+from build import apply_specials, build_complex, unit_histories, viable_rows
 
 
 def unit(num, price, building="A", code="P1", avail="2026-10-01", lease=None):
@@ -176,3 +176,59 @@ def test_expired_banner_is_skipped_and_old_snapshots_build():
     assert e["rent"] == 1820 and "has passed" in e["skipped"][0]
     old = history(snap([unit("101", 1200)]))  # no property_specials key at all
     assert old[0][1]["property_special_terms"] == []
+
+
+# ---------- viable units ----------
+
+CRITERIA = {"beds": [1.0, 2.0], "max_monthly": 1900}
+
+
+def viable_snap(units, beds=1, basis="base", specials=()):
+    s = snap(units, specials=specials)
+    s["floorplans"][0]["beds"] = beds
+    s["price_basis"] = basis
+    return s
+
+
+def built(s, slug="t"):
+    return build_complex({"slug": slug, "name": "Test", "url": "x"}, history(s), {"ok": True}, CRITERIA)
+
+
+def test_viable_uses_total_with_fees_net_of_specials():
+    u1, u2 = unit("1", 1800), unit("2", 1700)
+    u1["total_price"], u2["total_price"] = 1950, 1850  # fees push 101 over the limit
+    summary, detail = built(viable_snap([u1, u2]))
+    assert [(u["monthly"], u["fees_known"], u["viable"]) for u in detail["units"]] == [(1950, True, False), (1850, True, True)]
+    assert summary["viable_units"] == 1 and summary["viable_min"] == 1850
+    assert detail["floorplans"][0]["viable_units"] == 1
+
+
+def test_viable_special_brings_total_under():
+    special = {"title": "$100 Off Monthly Rent", "description": ""}
+    u = unit("1", 1850)
+    u["total_price"] = 1950
+    _, detail = built(viable_snap([u], specials=[special]))
+    assert detail["units"][0]["monthly"] == 1850 and detail["units"][0]["viable"]
+
+
+def test_viable_total_basis_and_fees_not_listed():
+    _, detail = built(viable_snap([unit("1", 1850)], basis="total"))
+    assert (detail["units"][0]["monthly"], detail["units"][0]["fees_known"]) == (1850, True)
+    _, detail = built(viable_snap([unit("1", 1850)]))  # no fees listed: net rent, flagged
+    assert (detail["units"][0]["monthly"], detail["units"][0]["fees_known"], detail["units"][0]["viable"]) == (1850, False, True)
+
+
+def test_not_viable_studio_3br_call_and_exact_limit():
+    assert not built(viable_snap([unit("1", 1500)], beds=0))[1]["units"][0]["viable"]
+    assert not built(viable_snap([unit("1", 1500)], beds=3))[1]["units"][0]["viable"]
+    assert not built(viable_snap([unit("1", 1900)]))[1]["units"][0]["viable"]  # strictly under
+    call = viable_snap([unit("1", 1)])
+    call["units"][0]["price"] = None
+    assert not built(call)[1]["units"][0]["viable"]
+
+
+def test_viable_rows_skip_stale_complexes():
+    summary, detail = built(viable_snap([unit("1", 1500)]))
+    rows = viable_rows(summary, detail)
+    assert [(r["unit_number"], r["monthly"], r["plan"]) for r in rows] == [("1", 1500, "P1")]
+    assert viable_rows({**summary, "stale": True}, detail) == []
