@@ -26,8 +26,11 @@ Working end to end:
   re-scraped from SightMap, all via manual `--only` runs). Next scheduled run: Mon 2026-10-12,
   the first to cover all nine. Snapshots so far are a day apart, so week-over-week trends
   and the >15% data checks become meaningful after that run.
+- Added 2026-10-09: weekly email digest (`alerts.py`, run at the end of `scrape_and_push.sh`).
+  It needs `~/.config/apartments/alerts.env` in place on this Mac before Monday's run;
+  without it the step prints "not sending" and the job carries on.
 
-Next steps: see ENHANCEMENTS.md (price-drop / new-unit alerts are the top open item).
+Next steps: see ENHANCEMENTS.md.
 Daily pulls are a one-liner (`scripts/install_schedule.sh daily`) if wanted.
 
 ## Layout
@@ -39,12 +42,14 @@ Daily pulls are a one-liner (`scripts/install_schedule.sh daily`) if wanted.
   (gitignored; CI regenerates it).
 - `site/` — static vanilla JS + Chart.js (cdnjs); `app.js` serves both pages via `body[data-page]`.
 - `tests/` — parser tests against saved pages/JSON in `tests/fixtures/` (`test_parsers.py`),
-  build logic (`test_build.py`), specials parsing (`test_specials.py`), banner parsing
-  (`test_banners.py`, small hand-trimmed fixtures) and the Browser pause (`test_fetch.py`); 71 tests.
+  build logic (`test_build.py`), the email digest (`test_alerts.py`), specials parsing (`test_specials.py`), banner parsing
+  (`test_banners.py`, small hand-trimmed fixtures) and the Browser pause (`test_fetch.py`); 81 tests.
   Fixtures are scrubbed of site API keys (GitHub push protection rejected a SightMap page
   with a Mapbox token; don't commit raw embed pages). `pytest.ini` puts the repo
   root on the path (plain `pytest` failed in CI without it).
-- `scripts/` — `scrape_and_push.sh` (pull → scrape → commit/push `data/`) and
+- `alerts.py` — weekly email digest (see "Email digest" below); `alerts.yaml` holds what to
+  watch, `alerts.env.example` the SMTP settings template. Tests in `tests/test_alerts.py`.
+- `scripts/` — `scrape_and_push.sh` (pull → scrape → commit/push `data/` → email digest) and
   `install_schedule.sh` (launchd job `com.apartments.scraper`, Mondays 9:00).
 
 ## Why scraping runs on the Mac, not GitHub Actions
@@ -295,6 +300,24 @@ plain request each for their homepage banner.
   `build.unit_key`) and `<slug>|fp|<code>`. Entries store a label and last price so units that
   stop being listed still show as "No longer listed (last $X)". Storage failures fall back to
   memory. Attain-style source switches change unit keys, which would orphan starred units.
+
+## Email digest
+
+- `alerts.py` reuses `build.load_history` / `metrics` / `data_checks`, so net rent and data
+  checks match the site. Sent by `scrape_and_push.sh` after the push (a mail failure is
+  logged, never fails the job). A failed `git pull` sends a short `--failure` notice; a failed
+  push adds a `--problem` line to the digest.
+- **Baseline**: per complex, the newest pull at least 6 days before the run (else the oldest
+  earlier one). Why: manual `--only` runs mid-week (like 2026-10-06) would otherwise hide most
+  of a week's changes. Unit diffs only use pulls on/after `unit_history_since`.
+- "Newly under target" lists only units that crossed under (new, or price/specials brought
+  them under); units already under are counted, not listed, so the email doesn't repeat them
+  weekly. Targets compare net rent (after specials), not total with fees.
+- The shortlist lives in the browser, so `alerts.yaml` takes a pasted share link instead.
+- Sent every week, even with no changes: a missing email is the "Mac didn't run" signal.
+- SMTP creds in `~/.config/apartments/alerts.env` (not TCC-protected, so launchd can read
+  it); env vars `SMTP_*`/`MAIL_*` override. Uses stdlib `smtplib`; no new dependencies.
+- Email HTML uses inline styles and three-column unit tables so it fits a phone.
 
 ## Dev notes
 

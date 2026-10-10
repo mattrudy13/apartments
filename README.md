@@ -26,6 +26,36 @@ Currently tracked (Virginia Beach): Attain at Chic's Beach, ReNew Marina Shores,
 Bay, North Beach, Nexus, Indigo 19 (no published prices), North Hill, Salt Meadow Bay and
 Columbus Station.
 
+## Weekly email digest
+
+After each weekly run, `alerts.py` emails a digest comparing each complex with its pull
+about a week earlier: **new units**, **price drops**, units **newly under your target
+price** (net of specials), your **starred floorplans/units** (opened up, price changed, no
+longer listed), **specials** that started or ended, and anything that **needs attention**
+(failed scrapes, data checks, a failed git push). An email arrives every week even when
+nothing changed, so a missing one means the Mac didn't run the job.
+
+What to watch is in `alerts.yaml`: `targets` (max net rent by bedroom count), `beds` (limit
+the new-unit and price-drop lists) and `shortlist` (paste the overview's "Copy share link";
+re-paste after starring more). Push changes to it like any other file.
+
+Mail goes out over SMTP with credentials kept **outside the repo**:
+
+```sh
+mkdir -p ~/.config/apartments
+cp alerts.env.example ~/.config/apartments/alerts.env
+chmod 600 ~/.config/apartments/alerts.env   # then fill in SMTP_USER / SMTP_PASSWORD
+```
+
+For Gmail, `SMTP_PASSWORD` is an [app password](https://myaccount.google.com/apppasswords)
+(needs 2-Step Verification), not your normal password. Until the file exists the step is
+skipped. To check it:
+
+```sh
+python alerts.py --preview /tmp/digest.html   # look at it in a browser, no email
+python alerts.py --send                       # send the digest for the latest pull now
+```
+
 ## Adding a complex
 
 Add an entry to `complexes.yaml`. The `scraper` must match the site's platform:
@@ -123,4 +153,5 @@ the tests, rebuilds `site/data/` and deploys Pages
 (https://mattrudy13.github.io/apartments/).
 
 If a site fails to scrape, the run still pushes; that complex is marked **stale** and
-keeps showing its last good data. Errors are recorded in `data/status.json`.
+keeps showing its last good data. Errors are recorded in `data/status.json` and listed at
+the top of the weekly email.

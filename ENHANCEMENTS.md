@@ -3,11 +3,6 @@
 Ideas for the site, roughly in priority order within each section. `[~]` = partly done.
 Finished items move to **Done** at the bottom.
 
-## High value
-- [ ] **Price-drop / new-unit alerts** — the weekly job already diffs snapshots; notify
-      (ntfy.sh / Pushover / email) when a unit drops below a target price, a watched floorplan
-      opens up, or a scrape fails. Could run as a step at the end of `scrape_and_push.sh`.
-
 ## Comparison
 - [ ] **Cross-complex search page** — one table of all available units, filterable by beds,
       max price (base or total), move-in date and pet-friendly; sortable by price per sq ft.
@@ -40,6 +35,10 @@ Finished items move to **Done** at the bottom.
       "Not Pet Friendly"); North Beach lists cats/dogs per unit.
 
 ## Done
+- [x] **Price-drop / new-unit alerts** — weekly email digest (`alerts.py`, last step of
+      `scrape_and_push.sh`): new units, price drops, units newly under target prices, starred
+      floorplans/units via a pasted shortlist link, specials started/ended, failed scrapes and
+      data checks. Configured in `alerts.yaml`; SMTP creds in `~/.config/apartments/alerts.env`.
 - [x] **Site-wide promo banners** — `banner:` in complexes.yaml (Attain, North Hill); discounts
       read from banner text lower net rent with the usual guards, incl. per-bedroom amounts
       ("$500 off 2-bedroom or $1,000 off 3-bedroom"). Tap a special for its full text.
