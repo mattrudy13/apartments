@@ -5,14 +5,25 @@ Mac scrapes each complex's site and pushes a snapshot to `data/snapshots/`; a Gi
 Action then rebuilds and publishes a static dashboard to GitHub Pages:
 https://mattrudy13.github.io/apartments/
 
-- **Overview**: a sortable table (cheapest first) of units available, lowest price and
-  lowest price per bedroom count, switchable between **base rent** and **total per month**
-  (rent + required fees), with net-of-specials prices and change since the last pull; plus
-  trend charts (one small chart per complex on a shared scale); and your **shortlist** of
-  starred floorplans/units across complexes, with a share link to move it to another device
+- **Viable units** (main page): every unit across complexes that fits `viable.yaml`
+  (currently 1 or 2 BR under $1,900 a month), cheapest first, with what you'd pay per month
+  (tap it for rent, fees and specials), $/sq ft, availability, days listed and price changes;
+  viable count and cheapest per complex; viable-unit trends; and your **shortlist** of starred
+  floorplans/units, with a share link to move it to another device
+- **All units**: everything still tracked: a sortable table of units available, lowest price
+  and lowest price per bedroom count, switchable between **base rent** and **total per month**
+  (rent + required fees), with net-of-specials prices and change since the last pull, plus trend
+  charts (one small chart per complex on a shared scale)
 - **Complex page**: current specials and how they were read, floorplans (sortable,
-  filterable by bedrooms or starred only), price per sq ft, the units in each plan with net
-  rent, days listed and price changes, units no longer listed, and price history by bedroom count
+  filterable by bedrooms, starred only, or **viable only**, which is on by default), price per
+  sq ft, the units in each plan with net rent, days listed and price changes, units no longer
+  listed, and price history by bedroom count
+
+**Viable units** are set in `viable.yaml`: bedroom counts and a monthly limit. Monthly cost is
+rent after specials plus the required monthly fees the site lists. Sites that don't list fees
+(Linkhorn Bay, Columbus Station, North Beach) use rent after specials and are marked "fees not
+listed", so their real cost is somewhat higher. Unpriced ("Call") units never count. Scraping
+is unaffected: every unit is still pulled and kept.
 
 "Net" rent spreads specials (e.g. two months free) over the lease, applying caveats such
 as move-in-by dates per unit; see `scraper/specials.py`.
@@ -28,16 +39,17 @@ Columbus Station.
 
 ## Weekly email digest
 
-After each weekly run, `alerts.py` emails a digest comparing each complex with its pull
-about a week earlier: **new units**, **price drops**, units **newly under your target
-price** (net of specials), your **starred floorplans/units** (opened up, price changed, no
-longer listed), **specials** that started or ended, and anything that **needs attention**
+After each weekly run, `alerts.py` emails a digest of **viable units** (same `viable.yaml`
+as the site), comparing each complex with its pull about a week earlier: **new viable units**,
+units that became **newly viable** (a price cut or special brought them under the limit),
+**price drops** in monthly cost, viable units that left or now cost too much, your **starred
+floorplans/units** (opened up, price changed, no longer listed; starred items are reported
+viable or not), **specials** that started or ended, and anything that **needs attention**
 (failed scrapes, data checks, a failed git push). An email arrives every week even when
 nothing changed, so a missing one means the Mac didn't run the job.
 
-What to watch is in `alerts.yaml`: `targets` (max net rent by bedroom count), `beds` (limit
-the new-unit and price-drop lists) and `shortlist` (paste the overview's "Copy share link";
-re-paste after starring more). Push changes to it like any other file.
+`alerts.yaml` holds the `shortlist` (paste the "Copy share link" from the shortlist card;
+re-paste after starring more). Push changes to it, or to `viable.yaml`, like any other file.
 
 Mail goes out over SMTP with credentials kept **outside the repo**:
 

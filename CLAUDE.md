@@ -28,7 +28,10 @@ Working end to end:
   and the >15% data checks become meaningful after that run.
 - Added 2026-10-09: weekly email digest (`alerts.py`, run at the end of `scrape_and_push.sh`).
   It needs `~/.config/apartments/alerts.env` in place on this Mac before Monday's run;
-  without it the step prints "not sending" and the job carries on.
+  without it the step prints "not sending" and the job carries on (setup tracked in issue #2).
+- Added 2026-10-09: **viable units** (`viable.yaml`: 1–2 BR under $1,900/mo). The main page
+  (`index.html`) lists only those; the old overview is now `all.html`; complex pages default to
+  "Viable only"; the digest reports only viable units. Scraping is unchanged.
 
 Next steps: see ENHANCEMENTS.md.
 Daily pulls are a one-liner (`scripts/install_schedule.sh daily`) if wanted.
@@ -38,17 +41,19 @@ Daily pulls are a one-liner (`scripts/install_schedule.sh daily`) if wanted.
 - `scraper/` — `models.py` (normalized schema), `fetch.py` (httpx + Playwright `Browser`,
   parse helpers), one module per platform exposing `scrape(cfg, today)`, `run.py` (CLI,
   writes `data/snapshots/<date>/<slug>.json` and `data/status.json`).
-- `build.py` — aggregates snapshots into `site/data/summary.json` and `site/data/<slug>.json`
-  (gitignored; CI regenerates it).
-- `site/` — static vanilla JS + Chart.js (cdnjs); `app.js` serves both pages via `body[data-page]`.
+- `build.py` — aggregates snapshots into `site/data/summary.json`, `site/data/<slug>.json` and
+  `site/data/viable.json` (gitignored; CI regenerates it).
+- `viable.yaml` — what counts as a viable unit (see "Viable units" below).
+- `site/` — static vanilla JS + Chart.js (cdnjs); `app.js` serves all three pages via `body[data-page]`:
+  `viable` (index.html, `renderViable`), `all` (all.html, `renderAll`), `complex` (complex.html).
 - `tests/` — parser tests against saved pages/JSON in `tests/fixtures/` (`test_parsers.py`),
   build logic (`test_build.py`), the email digest (`test_alerts.py`), specials parsing (`test_specials.py`), banner parsing
-  (`test_banners.py`, small hand-trimmed fixtures) and the Browser pause (`test_fetch.py`); 81 tests.
+  (`test_banners.py`, small hand-trimmed fixtures) and the Browser pause (`test_fetch.py`); 86 tests.
   Fixtures are scrubbed of site API keys (GitHub push protection rejected a SightMap page
   with a Mapbox token; don't commit raw embed pages). `pytest.ini` puts the repo
   root on the path (plain `pytest` failed in CI without it).
-- `alerts.py` — weekly email digest (see "Email digest" below); `alerts.yaml` holds what to
-  watch, `alerts.env.example` the SMTP settings template. Tests in `tests/test_alerts.py`.
+- `alerts.py` — weekly email digest (see "Email digest" below); `alerts.yaml` holds the site
+  URL and shortlist link, `alerts.env.example` the SMTP settings template. Tests in `tests/test_alerts.py`.
 - `scripts/` — `scrape_and_push.sh` (pull → scrape → commit/push `data/` → email digest) and
   `install_schedule.sh` (launchd job `com.apartments.scraper`, Mondays 9:00).
 
@@ -301,6 +306,25 @@ plain request each for their homepage banner.
   stop being listed still show as "No longer listed (last $X)". Storage failures fall back to
   memory. Attain-style source switches change unit keys, which would orphan starred units.
 
+## Viable units
+
+- Defined in `viable.yaml` (`beds`, `max_monthly`; strictly under). Computed once in
+  `build.annotate_viable`, via `prepare_history` (which also fills `price_basis` for old
+  snapshots), so the site and the digest agree. The JS only reads the flags.
+- `monthly` = the site's total (or the price at total-basis sites like ReNew) minus specials
+  savings, same as `unit_totals`. Sites without listed fees (Linkhorn Bay, Columbus Station,
+  North Beach) fall back to rent after specials with `fees_known: false`, shown "fees not
+  listed". The user chose this over excluding them or adding an estimated fee (2026-10-09).
+- Unpriced ("Call") units and unknown bed counts are never viable. Viability is per unit; a
+  plan's availability without unit rows doesn't count (no current site does that).
+- `viable.json` skips stale complexes (their last good data may list leased units); the main
+  page names them in a banner instead.
+- Complex page: "Viable only" and "Starred only" are mutually exclusive, so a starred unit
+  that doesn't fit is never hidden by both filters.
+- The main page's unit table drops to three columns on phones (plan and size fold into the
+  unit line, the date goes under the price). The complex page's floorplan table was already
+  wider than a phone before this change (it scrolls inside its card).
+
 ## Email digest
 
 - `alerts.py` reuses `build.load_history` / `metrics` / `data_checks`, so net rent and data
@@ -310,9 +334,11 @@ plain request each for their homepage banner.
 - **Baseline**: per complex, the newest pull at least 6 days before the run (else the oldest
   earlier one). Why: manual `--only` runs mid-week (like 2026-10-06) would otherwise hide most
   of a week's changes. Unit diffs only use pulls on/after `unit_history_since`.
-- "Newly under target" lists only units that crossed under (new, or price/specials brought
-  them under); units already under are counted, not listed, so the email doesn't repeat them
-  weekly. Targets compare net rent (after specials), not total with fees.
+- Reports **viable units only**: new viable (not listed at baseline), newly viable (listed but
+  not viable then), price drops in `monthly` (so a new special counts), and per complex the
+  viable units that left (leased) or went over the limit. Units already viable and unchanged
+  aren't listed, so the email doesn't repeat them weekly. The shortlist section still covers
+  every starred item.
 - The shortlist lives in the browser, so `alerts.yaml` takes a pasted share link instead.
 - Sent every week, even with no changes: a missing email is the "Mac didn't run" signal.
 - SMTP creds in `~/.config/apartments/alerts.env` (not TCC-protected, so launchd can read

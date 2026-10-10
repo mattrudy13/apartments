@@ -4,8 +4,9 @@ Ideas for the site, roughly in priority order within each section. `[~]` = partl
 Finished items move to **Done** at the bottom.
 
 ## Comparison
-- [ ] **Cross-complex search page** — one table of all available units, filterable by beds,
-      max price (base or total), move-in date and pet-friendly; sortable by price per sq ft.
+- [~] **Cross-complex search page** — done: the main page lists every viable unit across
+      complexes (viable.yaml), sortable incl. $/sq ft, with a bedroom filter. Open: move-in
+      date and pet-friendly filters, and an on-page way to adjust the limit.
 - [ ] **Lease-term normalization** — prices are quoted for different terms: Attain 12 mo
       (flat), Nexus 14, North Hill and ReNew 15, Salt Meadow 9–15 per unit, Linkhorn Bay a
       range by term (we store the low end). Show the term next to prices and capture
@@ -35,6 +36,9 @@ Finished items move to **Done** at the bottom.
       "Not Pet Friendly"); North Beach lists cats/dogs per unit.
 
 ## Done
+- [x] **Viable-units focus** — `viable.yaml` (1–2 BR under $1,900/mo incl. listed fees, net of
+      specials) drives the main page, complex pages' default filter and the email digest; the
+      full overview moved to an "All units" page.
 - [x] **Price-drop / new-unit alerts** — weekly email digest (`alerts.py`, last step of
       `scrape_and_push.sh`): new units, price drops, units newly under target prices, starred
       floorplans/units via a pasted shortlist link, specials started/ended, failed scrapes and
