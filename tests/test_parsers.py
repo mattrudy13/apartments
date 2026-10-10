@@ -180,6 +180,23 @@ def test_sightmap_add_lease_options(monkeypatch):
     assert units[1].lease_options == [] and units[1].price
 
 
+def test_sightmap_north_hill_overrides():
+    import json
+
+    from scraper import sightmap
+
+    cfg = {"lease_months": 15, "omit_building": True, "plan_sqft": {"B1P": 846, "B1S": 882}}
+    plans, units = sightmap.parse(json.loads(read("sightmap_northhill_api.json")), TODAY, "", cfg)
+    assert len(plans) == 9 and all(p.beds == 2 for p in plans)
+    assert all(u.building is None and u.lease_months == 15 for u in units)
+    assert all(u.unit_number[:3].isdigit() and "-" in u.unit_number for u in units)  # "605-304"
+    sizes = {p.name: p.sqft for p in plans}
+    assert sizes["B1P"] == 846 and sizes["B1S"] == 882
+    # Without overrides: SightMap's own building and "flat 12 months".
+    _, raw = sightmap.parse(json.loads(read("sightmap_northhill_api.json")), TODAY)
+    assert raw[0].building and raw[0].lease_months == 12
+
+
 def test_realpage_leasestar_north_hill():
     import json
 

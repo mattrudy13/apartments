@@ -1,0 +1,217 @@
+{
+ "data": {
+  "pricing_strategy": "flat_pricing",
+  "flat_pricing_lease_term_months": 12,
+  "floor_plans": [
+   {
+    "id": "586139",
+    "name": "{\"name\":\"B3S\",\"provider_id\":\"16\"}",
+    "bedroom_count": 2,
+    "bathroom_count": 1,
+    "image_url": "https://cdn.sightmap.com/assets/rk/wn/rkwnqq4zwd2/7f/88/7f883e9c24dc2aef4432c32b6754c7ca.jpg"
+   },
+   {
+    "id": "586142",
+    "name": "{\"name\":\"B2S\",\"provider_id\":\"14\"}",
+    "bedroom_count": 2,
+    "bathroom_count": 1,
+    "image_url": "https://cdn.sightmap.com/assets/rk/wn/rkwnqq4zwd2/17/ff/17ff1b3f9816331405e1eda4f25e433e.jpg"
+   },
+   {
+    "id": "586145",
+    "name": "{\"name\":\"B1S\",\"provider_id\":\"12\"}",
+    "bedroom_count": 2,
+    "bathroom_count": 1,
+    "image_url": "https://cdn.sightmap.com/assets/rk/wn/rkwnqq4zwd2/83/a4/83a4daaf3a93d7c4ea2210c0ae0fe9b0.jpg"
+   },
+   {
+    "id": "586148",
+    "name": "{\"name\":\"B3\",\"provider_id\":\"15\"}",
+    "bedroom_count": 2,
+    "bathroom_count": 1,
+    "image_url": "https://cdn.sightmap.com/assets/rk/wn/rkwnqq4zwd2/b0/b3/b0b311af13dbd9797081b7932accb1dd.jpg"
+   },
+   {
+    "id": "586150",
+    "name": "{\"name\":\"B3P\",\"provider_id\":\"19\"}",
+    "bedroom_count": 2,
+    "bathroom_count": 1,
+    "image_url": "https://cdn.sightmap.com/assets/rk/wn/rkwnqq4zwd2/15/52/1552090af56a7ab1ab4f229be10f5fd7.jpg"
+   },
+   {
+    "id": "586151",
+    "name": "{\"name\":\"B2\",\"provider_id\":\"13\"}",
+    "bedroom_count": 2,
+    "bathroom_count": 1,
+    "image_url": "https://cdn.sightmap.com/assets/rk/wn/rkwnqq4zwd2/26/ee/26ee52195474eed9308756d23f680966.jpg"
+   },
+   {
+    "id": "586155",
+    "name": "{\"name\":\"B1P\",\"provider_id\":\"17\"}",
+    "bedroom_count": 2,
+    "bathroom_count": 1,
+    "image_url": "https://cdn.sightmap.com/assets/rk/wn/rkwnqq4zwd2/88/b8/88b85c56e3afb1181c4e329c287dfaa8.jpg"
+   },
+   {
+    "id": "586157",
+    "name": "{\"name\":\"B1\",\"provider_id\":\"11\"}",
+    "bedroom_count": 2,
+    "bathroom_count": 1,
+    "image_url": "https://cdn.sightmap.com/assets/rk/wn/rkwnqq4zwd2/da/34/da343e824b59cafcaa2a022ed4fcce62.jpg"
+   },
+   {
+    "id": "586159",
+    "name": "{\"name\":\"B2P\",\"provider_id\":\"18\"}",
+    "bedroom_count": 2,
+    "bathroom_count": 1,
+    "image_url": "https://cdn.sightmap.com/assets/rk/wn/rkwnqq4zwd2/26/66/266688d4568481303ac30abef695889a.jpg"
+   }
+  ],
+  "units": [
+   {
+    "id": "10429778",
+    "floor_plan_id": "586139",
+    "unit_number": "605-304",
+    "label": "605-304",
+    "area": 882,
+    "price": 1925,
+    "total_price": [
+     1950.78,
+     1950.78
+    ],
+    "total_display_price": "$1,950.78",
+    "display_lease_term": "12 Months",
+    "available_on": "2026-10-10",
+    "building": "605",
+    "specials_description": null,
+    "leasing_price_url": "https://sightmap.com/app/api/v1/leasing/d7p1od88vkx/unit/10429778?sightmap_id=93035&currency_code=USD"
+   },
+   {
+    "id": "10429788",
+    "floor_plan_id": "586151",
+    "unit_number": "608-302",
+    "label": "608-302",
+    "area": 846,
+    "price": 1825,
+    "total_price": [
+     1850.78,
+     1850.78
+    ],
+    "total_display_price": "$1,850.78",
+    "display_lease_term": "12 Months",
+    "available_on": "2026-10-10",
+    "building": "608",
+    "specials_description": null,
+    "leasing_price_url": "https://sightmap.com/app/api/v1/leasing/d7p1od88vkx/unit/10429788?sightmap_id=93035&currency_code=USD"
+   },
+   {
+    "id": "10429801",
+    "floor_plan_id": "586142",
+    "unit_number": "609-303",
+    "label": "609-303",
+    "area": 882,
+    "price": 1860,
+    "total_price": [
+     1885.78,
+     1885.78
+    ],
+    "total_display_price": "$1,885.78",
+    "display_lease_term": "12 Months",
+    "available_on": "2026-11-08",
+    "building": "609",
+    "specials_description": null,
+    "leasing_price_url": "https://sightmap.com/app/api/v1/leasing/d7p1od88vkx/unit/10429801?sightmap_id=93035&currency_code=USD"
+   },
+   {
+    "id": "10429809",
+    "floor_plan_id": "586139",
+    "unit_number": "612-203",
+    "label": "612-203",
+    "area": 882,
+    "price": 1920,
+    "total_price": [
+     1945.78,
+     1945.78
+    ],
+    "total_display_price": "$1,945.78",
+    "display_lease_term": "12 Months",
+    "available_on": "2026-10-10",
+    "building": "612",
+    "specials_description": null,
+    "leasing_price_url": "https://sightmap.com/app/api/v1/leasing/d7p1od88vkx/unit/10429809?sightmap_id=93035&currency_code=USD"
+   },
+   {
+    "id": "10429819",
+    "floor_plan_id": "586151",
+    "unit_number": "613-201",
+    "label": "613-201",
+    "area": 846,
+    "price": 1820,
+    "total_price": [
+     1845.78,
+     1845.78
+    ],
+    "total_display_price": "$1,845.78",
+    "display_lease_term": "12 Months",
+    "available_on": "2026-10-10",
+    "building": "613",
+    "specials_description": null,
+    "leasing_price_url": "https://sightmap.com/app/api/v1/leasing/d7p1od88vkx/unit/10429819?sightmap_id=93035&currency_code=USD"
+   },
+   {
+    "id": "10429847",
+    "floor_plan_id": "586151",
+    "unit_number": "617-301",
+    "label": "617-301",
+    "area": 846,
+    "price": 1825,
+    "total_price": [
+     1850.78,
+     1850.78
+    ],
+    "total_display_price": "$1,850.78",
+    "display_lease_term": "12 Months",
+    "available_on": "2026-10-16",
+    "building": "617",
+    "specials_description": null,
+    "leasing_price_url": "https://sightmap.com/app/api/v1/leasing/d7p1od88vkx/unit/10429847?sightmap_id=93035&currency_code=USD"
+   },
+   {
+    "id": "10429856",
+    "floor_plan_id": "586151",
+    "unit_number": "620-202",
+    "label": "620-202",
+    "area": 846,
+    "price": 1820,
+    "total_price": [
+     1845.78,
+     1845.78
+    ],
+    "total_display_price": "$1,845.78",
+    "display_lease_term": "12 Months",
+    "available_on": "2026-12-03",
+    "building": "620",
+    "specials_description": null,
+    "leasing_price_url": "https://sightmap.com/app/api/v1/leasing/d7p1od88vkx/unit/10429856?sightmap_id=93035&currency_code=USD"
+   },
+   {
+    "id": "10429859",
+    "floor_plan_id": "586157",
+    "unit_number": "620-301",
+    "label": "620-301",
+    "area": 846,
+    "price": 1785,
+    "total_price": [
+     1810.78,
+     1810.78
+    ],
+    "total_display_price": "$1,810.78",
+    "display_lease_term": "12 Months",
+    "available_on": "2026-11-08",
+    "building": "620",
+    "specials_description": null,
+    "leasing_price_url": "https://sightmap.com/app/api/v1/leasing/d7p1od88vkx/unit/10429859?sightmap_id=93035&currency_code=USD"
+   }
+  ]
+ }
+}

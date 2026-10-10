@@ -3,7 +3,8 @@
 #   entrata        - Entrata sites; `url` must be the floorplans listing page (uses Chrome)
 #   rentcafe       - Yardi RentCafe sites; `url` is the /floorplans page (plain HTTP)
 #   appfolio       - AppFolio listings widget; `url` is the availability page (plain HTTP)
-#   sightmap       - sites embedding an Engrain SightMap; `url` is the page with the embed (plain HTTP)
+#   sightmap       - sites embedding an Engrain SightMap; `url` is the page with the embed (plain HTTP).
+#                    Preferred whenever a site has one: it's the live data, incl. prices for each lease term.
 #   realpage_leasestar - RealPage LeaseStar sites; `url` is the floor-plans page (uses Chrome)
 #   g5             - G5 Marketing Cloud sites; `url` is the floor-plans page (plain HTTP)
 # Optional `banner:` reads site-wide promo banners (e.g. "Move in by Oct 31 and get $500 off") from a
@@ -54,7 +55,12 @@ complexes:
     name: North Hill
     url: https://www.livenorthhillapts.com/floor-plans.aspx
     website: https://www.livenorthhillapts.com/
-    scraper: realpage_leasestar
+    # The page embeds a SightMap with the same prices as RealPage's API, readable over plain HTTP,
+    # so Chrome isn't needed (realpage_leasestar was used until 2026-10-10).
+    scraper: sightmap
+    lease_months: 15     # SightMap says "flat 12 months"; RealPage (the leasing system) says 15 minimum
+    omit_building: true  # building is already in the unit number (605-304); keeps unit keys unchanged
+    plan_sqft: {B1: 846, B2: 846, B3: 846, B1P: 846, B2P: 846, B3P: 846, B1S: 882, B2S: 882, B3S: 882}
     banner:
       url: https://www.livenorthhillapts.com/  # homepage banner (was a stale "move in by May 31" offer)
 
