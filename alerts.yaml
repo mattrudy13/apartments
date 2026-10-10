@@ -1,17 +1,10 @@
-# What the weekly email digest (alerts.py) watches. SMTP settings are NOT here: they live
-# outside the repo in ~/.config/apartments/alerts.env (see alerts.env.example).
+# Settings for the weekly email digest (alerts.py). Which units it reports on is set in
+# viable.yaml, shared with the site. SMTP settings are NOT here: they live outside the repo
+# in ~/.config/apartments/alerts.env (see alerts.env.example).
 
 site_url: https://mattrudy13.github.io/apartments/
 
-# Bedroom counts to include in "New units" and "Price drops" (0 = studio). Omit for all.
-# beds: [1, 2]
-
-# Flag units whose net rent (after specials; the listed price when none apply) is at or
-# below these, by bedroom count. Omit to skip the "Under your target" section.
-# targets:
-#   1: 1600
-#   2: 2000
-
-# Starred floorplans/units to report on: paste the overview's "Copy share link" here.
-# Re-paste it after starring more; the digest can't read your browser's shortlist.
+# Starred floorplans/units to report on (viable or not): paste the "Copy share link" from the
+# shortlist card on the main page. Re-paste it after starring more; the digest can't read your
+# browser's shortlist.
 # shortlist: https://mattrudy13.github.io/apartments/?shortlist=...

@@ -1,13 +1,14 @@
-"""Weekly email digest: new units, price drops, units under your target prices, starred
-floorplans/units, specials that started or ended, and scrape problems.
+"""Weekly email digest of viable units (viable.yaml): new ones, ones that became viable,
+price drops, starred floorplans/units, specials that started or ended, and scrape problems.
 
     python alerts.py --preview digest.html   # write the email to a file instead of sending
     python alerts.py --send                  # email it (SMTP settings from alerts.env)
     python alerts.py --send --failure "git pull failed"   # short failure notice only
 
-Runs at the end of scripts/scrape_and_push.sh. What to watch is in alerts.yaml (committed);
-SMTP credentials live outside the repo in ~/.config/apartments/alerts.env (see
-alerts.env.example), or the file named by $APARTMENTS_ALERTS_ENV.
+Runs at the end of scripts/scrape_and_push.sh. Which units count is in viable.yaml (shared
+with the site); the shortlist link is in alerts.yaml. SMTP credentials live outside the repo
+in ~/.config/apartments/alerts.env (see alerts.env.example), or the file named by
+$APARTMENTS_ALERTS_ENV.
 """
 from __future__ import annotations
 
@@ -26,7 +27,8 @@ from urllib.parse import parse_qs, urlparse
 
 import yaml
 
-from build import SNAPSHOTS, bed_label, data_checks, load_history, metrics, normalize_specials, unit_key
+from build import (SNAPSHOTS, bed_label, data_checks, load_history, load_viable_config, metrics,
+                   normalize_specials, prepare_history, unit_key)
 
 ROOT = Path(__file__).resolve().parent
 DEFAULT_ENV = Path.home() / ".config" / "apartments" / "alerts.env"
@@ -41,8 +43,6 @@ MAX_ROWS = 25  # per section; the rest are counted and left to the site
 
 def load_config(path: Path = ROOT / "alerts.yaml") -> dict:
     cfg = (yaml.safe_load(path.read_text()) if path.exists() else None) or {}
-    cfg["beds"] = [float(b) for b in cfg.get("beds") or []]
-    cfg["targets"] = {float(k): int(v) for k, v in (cfg.get("targets") or {}).items()}
     cfg["shortlist"] = parse_shortlist(cfg.get("shortlist") or "")
     cfg["site_url"] = (cfg.get("site_url") or DEFAULT_SITE).rstrip("/") + "/"
     return cfg
@@ -99,7 +99,7 @@ def unit_row(u: dict, plan: dict, info: dict) -> dict:
         "plan": plan.get("name") or u["floorplan_code"], "beds": plan.get("beds"),
         "beds_label": bed_label(plan.get("beds")), "sqft": u.get("sqft") or plan.get("sqft"),
         "price": u.get("price"), "net": net_rent(u), "available": u.get("available_date"),
-        "incl_fees": info["price_basis"] == "total",
+        "monthly": u.get("monthly"), "fees_known": u.get("fees_known"), "viable": u.get("viable"),
     }
 
 
@@ -113,27 +113,26 @@ def special_titles(snap: dict) -> Dict[str, str]:
 
 
 def complex_changes(cfg: dict, history: list, run_date: str, st: dict) -> dict:
-    """What changed at one complex between its baseline pull and run_date."""
+    """What changed at one complex between its baseline pull and run_date, for viable units
+    (call prepare_history first so units carry monthly/viable)."""
     slug = cfg["slug"]
     dates = [d for d, _ in history]
     snaps = dict(history)
     out = {"slug": slug, "name": cfg["name"], "refreshed": run_date in snaps,
            "error": None if st.get("ok", True) else st.get("error"), "baseline": None,
-           "new_units": [], "price_drops": [], "price_rises": 0, "gone": 0,
+           "new_units": [], "newly_viable": [], "price_drops": [], "leased": 0, "priced_out": 0,
            "specials_started": [], "specials_ended": [], "checks": [], "units": [], "plans": {}}
     if not out["refreshed"]:
         return out
     latest = snaps[run_date]
-    info = {"slug": slug, "name": latest.get("name") or cfg["name"],
-            "price_basis": latest.get("price_basis") or "base"}
+    info = {"slug": slug, "name": latest.get("name") or cfg["name"]}
     out["name"] = info["name"]
     plans = {fp["code"]: fp for fp in latest["floorplans"]}
     out["units"] = [unit_row(u, plans.get(u["floorplan_code"], {}), info) for u in latest["units"]]
     out["unit_keys"] = {unit_key(u): row for u, row in zip(latest["units"], out["units"])}
     out["plans"] = plans
     cur = metrics(latest)
-    out.update(units_now=cur["units"], min_price=cur["min_price"], min_effective=cur["min_effective"],
-               incl_fees=info["price_basis"] == "total")
+    out.update(viable_now=cur["viable_units"], viable_min=cur["viable_min"])
 
     # Data checks use the same window as the site, so the digest and the badge agree.
     since = str(cfg.get("unit_history_since") or "")
@@ -145,7 +144,7 @@ def complex_changes(cfg: dict, history: list, run_date: str, st: dict) -> dict:
         return out
     base = snaps[base_date]
     prev = metrics(base)
-    out.update(baseline=base_date, units_before=prev["units"], min_price_before=prev["min_price"],
+    out.update(baseline=base_date, viable_before=prev["viable_units"], viable_min_before=prev["viable_min"],
                base_plans={fp["code"]: fp for fp in base["floorplans"]})
 
     now_t, before_t = special_titles(latest), special_titles(base)
@@ -159,29 +158,34 @@ def complex_changes(cfg: dict, history: list, run_date: str, st: dict) -> dict:
     out["unit_baseline"] = unit_base_date
     before = {unit_key(u): u for u in snaps[unit_base_date]["units"]}
     out["base_unit_prices"] = {k: u.get("price") for k, u in before.items()}
-    out["base_unit_net"] = {k: net_rent(u) for k, u in before.items()}
-    now_keys = set()
-    for u, row in zip(latest["units"], out["units"]):
-        k = unit_key(u)
-        now_keys.add(k)
+    for k, row in out["unit_keys"].items():
         old = before.get(k)
+        if not row["viable"]:
+            continue
         if old is None:
             row["is_new"] = True
             out["new_units"].append(row)
-        elif old.get("price") and u.get("price") and u["price"] != old["price"]:
-            if u["price"] < old["price"]:
-                row["old_price"] = old["price"]
-                out["price_drops"].append(row)
-            else:
-                out["price_rises"] += 1
-    out["gone"] = sum(1 for k in before if k not in now_keys)
+        elif not old.get("viable"):
+            row["old_monthly"] = old.get("monthly")
+            out["newly_viable"].append(row)
+        # Monthly, not listed price, so a new special or a fee change counts too.
+        elif old.get("monthly") and row["monthly"] < old["monthly"]:
+            row["old_monthly"] = old["monthly"]
+            out["price_drops"].append(row)
+    for k, old in before.items():
+        if old.get("viable"):
+            now = out["unit_keys"].get(k)
+            if now is None:
+                out["leased"] += 1
+            elif not now["viable"]:
+                out["priced_out"] += 1
     return out
 
 
 # ---------- digest ----------
 
 def shortlist_status(entries: List[dict], by_slug: Dict[str, dict]) -> List[dict]:
-    """One line per starred floorplan/unit: what it looks like now vs the baseline."""
+    """One line per starred floorplan/unit (viable or not): what it looks like now vs the baseline."""
     rows = []
     for e in entries:
         c = by_slug.get(e["slug"])
@@ -222,30 +226,12 @@ def shortlist_status(entries: List[dict], by_slug: Dict[str, dict]) -> List[dict
 
 
 def build_digest(cfg: dict, complexes: List[dict], status: dict, run_date: Optional[str] = None,
-                 snapshots: Path = SNAPSHOTS, problems: List[str] = ()) -> dict:
-    histories = {c["slug"]: load_history(c["slug"], snapshots) for c in complexes}
+                 snapshots: Path = SNAPSHOTS, problems: List[str] = (), criteria: Optional[dict] = None) -> dict:
+    criteria = criteria if criteria is not None else load_viable_config()
+    histories = {c["slug"]: prepare_history(c, load_history(c["slug"], snapshots), criteria) for c in complexes}
     run_date = run_date or max((h[-1][0] for h in histories.values() if h), default=date.today().isoformat())
     changes = [complex_changes(c, histories[c["slug"]], run_date, status.get(c["slug"], {})) for c in complexes]
     by_slug = {c["slug"]: c for c in changes}
-
-    def beds_ok(row):
-        return not cfg["beds"] or row["beds"] in cfg["beds"]
-
-    # Only units that crossed under target since the baseline (new listings, or a price cut or
-    # special that brought them under); the rest are counted, since they'd repeat every week.
-    under, still_under = [], 0
-    for c in changes:
-        base_net = c.get("base_unit_net")
-        for k, row in c.get("unit_keys", {}).items():
-            target = cfg["targets"].get(row["beds"])
-            if not (target and row["net"] and row["net"] <= target):
-                continue
-            was = base_net.get(k) if base_net is not None else None
-            if base_net is None or was is None or was > target:
-                under.append({**row, "target": target})
-            else:
-                still_under += 1
-    under.sort(key=lambda r: r["net"])
 
     issues = list(problems)
     for c in changes:
@@ -254,26 +240,33 @@ def build_digest(cfg: dict, complexes: List[dict], status: dict, run_date: Optio
                           else f"{c['name']}: not scraped in this run")
         issues += [f"{c['name']}: {r}" for r in c["checks"]]
 
-    new_units = sorted((r for c in changes for r in c["new_units"] if beds_ok(r)),
-                       key=lambda r: (r["complex"], r["net"] is None, r["net"] or 0))
-    drops = sorted((r for c in changes for r in c["price_drops"] if beds_ok(r)),
-                   key=lambda r: r["price"] - r["old_price"])
+    by_monthly = lambda r: r["monthly"]
     return {
-        "run_date": run_date, "site_url": cfg["site_url"], "problems": issues,
+        "run_date": run_date, "site_url": cfg["site_url"], "problems": issues, "criteria": criteria,
         "shortlist": shortlist_status(cfg["shortlist"], by_slug),
-        "under_target": under, "still_under": still_under, "targets": cfg["targets"], "beds": cfg["beds"],
-        "new_units": new_units, "price_drops": drops,
+        "new_units": sorted((r for c in changes for r in c["new_units"]), key=by_monthly),
+        "newly_viable": sorted((r for c in changes for r in c["newly_viable"]), key=by_monthly),
+        "price_drops": sorted((r for c in changes for r in c["price_drops"]), key=lambda r: r["monthly"] - r["old_monthly"]),
+        "viable_now": sum(c.get("viable_now") or 0 for c in changes),
         "specials": [(c["name"], c["specials_started"], c["specials_ended"]) for c in changes
                      if c["specials_started"] or c["specials_ended"]],
         "complexes": changes,
     }
 
 
+def criteria_text(c: dict) -> str:
+    beds = [bed_label(b) for b in c.get("beds") or []]
+    text = (", ".join(beds[:-1]) + " or " + beds[-1]) if len(beds) > 1 else (beds[0] if beds else "Any size")
+    return text + (f" under {money(c['max_monthly'])}/mo" if c.get("max_monthly") else "")
+
+
 def subject(d: dict) -> str:
     when = date.fromisoformat(d["run_date"]).strftime("%b %-d")
-    parts = [f"{len(d['new_units'])} new", f"{len(d['price_drops'])} price drop{'s' if len(d['price_drops']) != 1 else ''}"]
-    if d["targets"]:
-        parts.append(f"{len(d['under_target'])} newly under target")
+    drops = len(d["price_drops"])
+    parts = [f"{len(d['new_units'])} new viable"]
+    if d["newly_viable"]:
+        parts.append(f"{len(d['newly_viable'])} newly viable")
+    parts.append(f"{drops} price drop{'s' if drops != 1 else ''}")
     failed = sum(1 for c in d["complexes"] if not c["refreshed"] and c["error"])
     if failed:
         parts.append(f"{failed} scrape{'s' if failed != 1 else ''} failed")
@@ -324,22 +317,30 @@ def render_html(d: dict) -> str:
     site = d["site_url"]
     link = lambda slug, text: f'<a href="{site}complex.html?c={slug}" style="color:inherit">{escape(text)}</a>'
     color = lambda flag, text: f'<span style="color:{GOOD if flag == "good" else BAD}">{text}</span>' if flag else text
+    small = lambda text, c=MUTED: f'<br><span style="color:{c};font-size:12px">{text}</span>'
 
-    def price_cell(r):
-        s = money(r["price"])
-        if r["net"] != r["price"]:
-            s += f'<br><span style="color:{MUTED};font-size:12px">net {money(r["net"])}</span>'
-        return s
+    def monthly_cell(r, was=False):
+        s = f"{money(r['old_monthly'])} → {money(r['monthly'])}" if was and r.get("old_monthly") else money(r["monthly"])
+        if was and r.get("old_monthly"):
+            s += small(signed(r["monthly"] - r["old_monthly"]), GOOD)
+        return s + ("" if r["fees_known"] else small("fees not listed"))
 
     # Three columns, so the tables still fit a phone screen without sideways scrolling.
     def unit_cells(r):
         sub = " · ".join(x for x in (f"{r['sqft']:,} sq ft" if r["sqft"] else "",
                                      f"avail. {short_date(r['available'])}" if r["available"] else "") if x)
         return [link(r["slug"], r["complex"]) + f'<br><span style="font-size:13px">{escape(r["unit"])}</span>',
-                escape(f"{r['plan']} · {r['beds_label']}") + (f'<br><span style="color:{MUTED};font-size:12px">{sub}</span>' if sub else "")]
+                escape(f"{r['plan']} · {r['beds_label']}") + (small(sub) if sub else "")]
+
+    def unit_section(title, rows_in, empty, note, was=False):
+        rows = [unit_cells(r) + [monthly_cell(r, was)] for r in rows_in[:MAX_ROWS]]
+        body = (_table(["Unit", "Plan", "Per month"], rows, right=(2,)) if rows
+                else f'<p style="margin:0;color:{MUTED}">{empty}</p>') + _more(len(rows_in) - MAX_ROWS, site)
+        return _section(f"{title} ({len(rows_in)})", body, note)
 
     parts = [f'<h1 style="font-size:20px;margin:0 0 4px">Apartments weekly digest</h1>'
-             f'<p style="color:{MUTED};margin:0">Pull of {d["run_date"]} · <a href="{site}">open the site</a></p>']
+             f'<p style="color:{MUTED};margin:0">Pull of {d["run_date"]} · {d["viable_now"]} viable units '
+             f'({escape(criteria_text(d["criteria"]))}) · <a href="{site}">open the site</a></p>']
 
     if d["problems"]:
         items = "".join(f'<li style="margin:2px 0">{escape(p)}</li>' for p in d["problems"])
@@ -351,30 +352,13 @@ def render_html(d: dict) -> str:
                  color(r["flag"], escape(r["status"]))] for r in d["shortlist"]]
         parts.append(_section("Your shortlist", _table(["Complex", "Starred", "Now"], rows)))
 
-    if d["targets"]:
-        goals = ", ".join(f"{bed_label(b)} ≤ {money(v)}" for b, v in sorted(d["targets"].items()))
-        rows = [unit_cells(r) + [price_cell(r) + ("<br><b style='font-size:12px'>NEW</b>" if r.get("is_new") else "")
-                                 + (f"<br><span style='color:{GOOD};font-size:12px'>was {money(r['old_price'])}</span>" if r.get("old_price") else "")]
-                for r in d["under_target"][:MAX_ROWS]]
-        body = _table(["Unit", "Plan", "Price"], rows, right=(2,)) if rows else \
-            f'<p style="margin:0;color:{MUTED}">Nothing new at or under target this week.</p>'
-        still = f" {d['still_under']} other unit{'s' if d['still_under'] != 1 else ''} were already under target and still are." if d["still_under"] else ""
-        parts.append(_section(f"Newly under your target ({len(d['under_target'])})", body + _more(len(d["under_target"]) - MAX_ROWS, site),
-                              f"Targets: {goals}, compared with net rent after specials. Units that are new, or whose price or specials brought them under.{still}"))
-
-    beds_note = f" Showing {', '.join(bed_label(b) for b in d['beds'])} only." if d["beds"] else ""
-    rows = [unit_cells(r) + [price_cell(r)] for r in d["new_units"][:MAX_ROWS]]
-    parts.append(_section(f"New units ({len(d['new_units'])})",
-                          (_table(["Unit", "Plan", "Price"], rows, right=(2,)) if rows
-                           else f'<p style="margin:0;color:{MUTED}">No new units.</p>') + _more(len(d["new_units"]) - MAX_ROWS, site),
-                          "Listed now but not at the comparison pull." + beds_note))
-
-    rows = [unit_cells(r) + [f"{money(r['old_price'])} → {money(r['price'])}<br><span style='color:{GOOD};font-size:12px'>{signed(r['price'] - r['old_price'])}</span>"]
-            for r in d["price_drops"][:MAX_ROWS]]
-    parts.append(_section(f"Price drops ({len(d['price_drops'])})",
-                          (_table(["Unit", "Plan", "Listed price"], rows, right=(2,)) if rows
-                           else f'<p style="margin:0;color:{MUTED}">No unit prices dropped.</p>') + _more(len(d["price_drops"]) - MAX_ROWS, site),
-                          "Biggest drops first." + beds_note))
+    parts.append(unit_section("New viable units", d["new_units"], "No new viable units.",
+                              "Listed now but not at the comparison pull. Cheapest first."))
+    if d["newly_viable"]:
+        parts.append(unit_section("Newly viable", d["newly_viable"], "",
+                                  "Already listed, but a price cut or special brought them under the limit.", was=True))
+    parts.append(unit_section("Price drops", d["price_drops"], "No viable units got cheaper.",
+                              "Viable units whose monthly cost (after specials, with listed fees) fell. Biggest drops first.", was=True))
 
     if d["specials"]:
         items = ""
@@ -384,45 +368,44 @@ def render_html(d: dict) -> str:
         parts.append(_section("Specials", f'<ul style="margin:0;padding-left:20px">{items}</ul>'))
 
     rows = []
-    for c in sorted(d["complexes"], key=lambda c: (c.get("min_effective") or c.get("min_price") or 10**9)):
+    for c in sorted(d["complexes"], key=lambda c: (c.get("viable_min") or 10**9, c["name"])):
         if not c["refreshed"]:
-            rows.append([link(c["slug"], c["name"]), f"<span style='color:{BAD}'>{'failed' if c['error'] else 'not scraped'}</span>", "", "", ""])
+            rows.append([link(c["slug"], c["name"]), f"<span style='color:{BAD}'>{'failed' if c['error'] else 'not scraped'}</span>", "", ""])
             continue
-        units_d = c["units_now"] - c["units_before"] if c.get("baseline") else 0
-        price_d = (c["min_price"] - c["min_price_before"]) if c.get("baseline") and c["min_price"] and c["min_price_before"] else 0
-        low = money(c["min_price"]) + (" incl. fees" if c["incl_fees"] and c["min_price"] else "")
-        if price_d:
-            low += f" <span style='color:{GOOD if price_d < 0 else BAD};font-size:12px'>{signed(price_d)}</span>"
-        net = money(c["min_effective"]) if c["min_effective"] and c["min_effective"] != c["min_price"] else "—"
-        units = f"{c['units_now']}" + (f" <span style='color:{MUTED};font-size:12px'>{signed(units_d, '')}</span>" if units_d else "")
-        churn = f"+{len(c['new_units'])} / −{c['gone']}" if c.get("unit_baseline") else "first pull"
-        rows.append([link(c["slug"], c["name"]), units, low, net, churn])
-    parts.append(_section("All complexes", _table(["Complex", "Units", "Lowest", "Net", "New / gone"], rows, right=(1, 2, 3, 4)),
-                          "Cheapest first. Changes compare with each complex's pull about a week earlier."))
+        n_d = c["viable_now"] - c["viable_before"] if c.get("baseline") else 0
+        low_d = (c["viable_min"] - c["viable_min_before"]) if c.get("baseline") and c["viable_min"] and c["viable_min_before"] else 0
+        count = f"{c['viable_now']}" + (f" <span style='color:{MUTED};font-size:12px'>{signed(n_d, '')}</span>" if n_d else "")
+        low = money(c["viable_min"]) if c["viable_min"] else "—"
+        if low_d:
+            low += f" <span style='color:{GOOD if low_d < 0 else BAD};font-size:12px'>{signed(low_d)}</span>"
+        left = (f"{c['leased']} / {c['priced_out']}" if c["leased"] or c["priced_out"] else "—") if c.get("unit_baseline") else "first pull"
+        rows.append([link(c["slug"], c["name"]), count, low, left])
+    parts.append(_section("All complexes", _table(["Complex", "Viable", "Cheapest", "Left / over"], rows, right=(1, 2, 3)),
+                          "Cheapest viable first. “Left / over”: viable units that are no longer listed (likely leased) / now cost too much. "
+                          "Changes compare with each complex's pull about a week earlier."))
 
     return (f'<!doctype html><html><body style="margin:0;padding:16px;background:#fff;color:#1a1a1a;{FONT}">'
             f'<div style="max-width:720px;margin:0 auto">{"".join(parts)}</div></body></html>')
 
 
 def render_text(d: dict) -> str:
-    def unit_line(r, extra=""):
-        net = f" (net {money(r['net'])})" if r["net"] != r["price"] else ""
+    def unit_line(r, was=False):
+        cost = f"{money(r['old_monthly'])} -> {money(r['monthly'])}" if was and r.get("old_monthly") else money(r["monthly"])
+        fees = "" if r["fees_known"] else " (fees not listed)"
         when = f", available {r['available']}" if r["available"] else ""
-        return f"- {r['complex']} {r['unit']} · {r['plan']} {r['beds_label']}: {money(r['price'])}{net}{extra}{when}"
+        return f"- {r['complex']} {r['unit']} · {r['plan']} {r['beds_label']}: {cost}/mo{fees}{when}"
 
-    lines = [f"Apartments weekly digest, pull of {d['run_date']}", d["site_url"], ""]
+    lines = [f"Apartments weekly digest, pull of {d['run_date']}",
+             f"{d['viable_now']} viable units ({criteria_text(d['criteria'])})", d["site_url"], ""]
     if d["problems"]:
         lines += ["NEEDS ATTENTION"] + [f"- {p}" for p in d["problems"]] + [""]
     if d["shortlist"]:
         lines += ["YOUR SHORTLIST"] + [f"- {r['complex']} {r['label']}: {r['status']}" for r in d["shortlist"]] + [""]
-    if d["targets"]:
-        lines += [f"NEWLY UNDER YOUR TARGET ({len(d['under_target'])}; {d['still_under']} others still under)"]
-        lines += [unit_line(r, " NEW" if r.get("is_new") else (f", was {money(r['old_price'])}" if r.get("old_price") else ""))
-                  for r in d["under_target"][:MAX_ROWS]] or ["- none"]
-        lines += [""]
-    lines += [f"NEW UNITS ({len(d['new_units'])})"] + ([unit_line(r) for r in d["new_units"][:MAX_ROWS]] or ["- none"]) + [""]
+    lines += [f"NEW VIABLE UNITS ({len(d['new_units'])})"] + ([unit_line(r) for r in d["new_units"][:MAX_ROWS]] or ["- none"]) + [""]
+    if d["newly_viable"]:
+        lines += [f"NEWLY VIABLE ({len(d['newly_viable'])})"] + [unit_line(r, True) for r in d["newly_viable"][:MAX_ROWS]] + [""]
     lines += [f"PRICE DROPS ({len(d['price_drops'])})"]
-    lines += [unit_line(r, f", was {money(r['old_price'])}") for r in d["price_drops"][:MAX_ROWS]] or ["- none"]
+    lines += [unit_line(r, True) for r in d["price_drops"][:MAX_ROWS]] or ["- none"]
     if d["specials"]:
         lines += ["", "SPECIALS"]
     for name, started, ended in d["specials"]:

@@ -26,14 +26,16 @@ def write(tmp_path, slug, by_date):
         (tmp_path / d / f"{slug}.json").write_text(json.dumps(s))
 
 
-def config(targets=None, beds=None, shortlist=""):
-    return {"targets": targets or {}, "beds": beds or [], "shortlist": alerts.parse_shortlist(shortlist),
-            "site_url": "https://example.com/"}
+def config(shortlist=""):
+    return {"shortlist": alerts.parse_shortlist(shortlist), "site_url": "https://example.com/"}
+
+
+CRITERIA = {"beds": [1.0, 2.0], "max_monthly": 1900}
 
 
 def digest(tmp_path, cfg, complexes=None, status=None, run_date=None):
     complexes = complexes or [{"slug": "t", "name": "Test"}]
-    return alerts.build_digest(cfg, complexes, status or {}, run_date, snapshots=tmp_path)
+    return alerts.build_digest(cfg, complexes, status or {}, run_date, snapshots=tmp_path, criteria=CRITERIA)
 
 
 def test_baseline_is_about_a_week_back_not_the_mid_week_manual_run():
@@ -45,47 +47,49 @@ def test_baseline_is_about_a_week_back_not_the_mid_week_manual_run():
     assert alerts.pick_baseline(["2026-10-12"], "2026-10-12") is None
 
 
-def test_new_units_price_drops_and_gone(tmp_path):
+def test_new_viable_units_price_drops_and_leased(tmp_path):
     write(tmp_path, "t", {
         "2026-10-05": snap([unit("101", 1600), unit("102", 1700), unit("103", 1800)]),
-        "2026-10-12": snap([unit("101", 1550), unit("102", 1750), unit("104", 1650)]),
+        "2026-10-12": snap([unit("101", 1550), unit("102", 1750), unit("104", 1650), unit("105", 2100)]),
     })
     d = digest(tmp_path, config())
-    assert [r["unit"] for r in d["new_units"]] == ["#104 · Bldg A"]
-    assert [(r["unit"], r["old_price"], r["price"]) for r in d["price_drops"]] == [("#101 · Bldg A", 1600, 1550)]
+    assert [r["unit"] for r in d["new_units"]] == ["#104 · Bldg A"]  # 105 is new but over the limit
+    assert [(r["unit"], r["old_monthly"], r["monthly"]) for r in d["price_drops"]] == [("#101 · Bldg A", 1600, 1550)]
     c = d["complexes"][0]
-    assert c["gone"] == 1 and c["price_rises"] == 1
-    assert alerts.subject(d) == "Apartments Oct 12: 1 new, 1 price drop"
+    assert (c["leased"], c["priced_out"], c["viable_now"], c["viable_before"]) == (1, 0, 3, 3)
+    assert alerts.subject(d) == "Apartments Oct 12: 1 new viable, 1 price drop"
 
 
-def test_target_reports_only_units_that_crossed_under(tmp_path):
+def test_newly_viable_and_priced_out(tmp_path):
     write(tmp_path, "t", {
-        "2026-10-05": snap([unit("101", 1600), unit("102", 1450), unit("103", 1700)]),
-        "2026-10-12": snap([unit("101", 1490), unit("102", 1450), unit("103", 1700), unit("104", 1400)]),
+        "2026-10-05": snap([unit("101", 1950), unit("102", 1800), unit("103", 1850)]),
+        "2026-10-12": snap([unit("101", 1850), unit("102", 1950), unit("103", 1850)]),
     })
-    d = digest(tmp_path, config(targets={1.0: 1500}))
-    assert sorted(r["unit"] for r in d["under_target"]) == ["#101 · Bldg A", "#104 · Bldg A"]
-    assert d["still_under"] == 1  # 102 was already under target
+    d = digest(tmp_path, config())
+    assert [(r["unit"], r["old_monthly"]) for r in d["newly_viable"]] == [("#101 · Bldg A", 1950)]
+    assert d["price_drops"] == [] and d["complexes"][0]["priced_out"] == 1
+    assert "1 newly viable" in alerts.subject(d)
 
 
-def test_new_special_counts_toward_target_and_is_reported(tmp_path):
-    special = {"title": "$200 Off Monthly Rent", "description": ""}
+def test_new_special_makes_unit_viable_and_is_reported(tmp_path):
+    special = {"title": "$100 Off Monthly Rent", "description": ""}
     write(tmp_path, "t", {
-        "2026-10-05": snap([unit("101", 1600)]),
-        "2026-10-12": snap([unit("101", 1600)], specials=[special]),
+        "2026-10-05": snap([unit("101", 1950)]),
+        "2026-10-12": snap([unit("101", 1950)], specials=[special]),
     })
-    d = digest(tmp_path, config(targets={1.0: 1500}))
-    assert [r["net"] for r in d["under_target"]] == [1400]
-    assert d["specials"] == [("Test", ["$200 Off Monthly Rent"], [])]
+    d = digest(tmp_path, config())
+    assert [r["monthly"] for r in d["newly_viable"]] == [1850]
+    assert d["specials"] == [("Test", ["$100 Off Monthly Rent"], [])]
 
 
-def test_beds_filter_limits_new_units(tmp_path):
-    plans = [{"code": "P1", "name": "Ash", "beds": 1}, {"code": "P2", "name": "Oak", "beds": 2}]
+def test_studios_and_3br_are_left_out(tmp_path):
+    plans = [{"code": "P0", "name": "Loft", "beds": 0}, {"code": "P2", "name": "Oak", "beds": 2},
+             {"code": "P3", "name": "Elm", "beds": 3}]
     write(tmp_path, "t", {
         "2026-10-05": snap([], plans),
-        "2026-10-12": snap([unit("101", 1500, "P1"), unit("201", 1900, "P2")], plans),
+        "2026-10-12": snap([unit("001", 1200, "P0"), unit("201", 1800, "P2"), unit("301", 1850, "P3")], plans),
     })
-    d = digest(tmp_path, config(beds=[2.0]))
+    d = digest(tmp_path, config())
     assert [r["plan"] for r in d["new_units"]] == ["Oak"]
 
 
@@ -122,7 +126,7 @@ def test_render_escapes_and_links(tmp_path):
     html = alerts.render_html(d)
     assert "&lt;b&gt;1" in html and "<b>1" not in html
     assert 'href="https://example.com/complex.html?c=t"' in html
-    assert "NEW UNITS (1)" in alerts.render_text(d)
+    assert "NEW VIABLE UNITS (1)" in alerts.render_text(d)
 
 
 def test_load_env_reads_file_and_env_wins(tmp_path, monkeypatch):
