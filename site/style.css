@@ -179,3 +179,10 @@ nav.tabs a:hover { color: var(--text); text-decoration: none; }
 nav.tabs a[aria-current="page"] { color: var(--text); border-bottom-color: var(--accent); }
 .badge.ok { background: color-mix(in srgb, var(--down) 18%, transparent); color: var(--text); }
 td.wrap-cell { white-space: normal; min-width: 90px; }
+
+/* Lease terms: the term under a price, and the per-term list in a unit's expanded details. */
+.term.short { color: var(--warn-text); }
+.term-head { margin-top: 6px; font-weight: 600; }
+.term-line { font-variant-numeric: tabular-nums; }
+.term-line.chosen { font-weight: 600; }
+.term-line.off { color: var(--text-2); }

@@ -537,8 +537,31 @@ function criteriaText(c) {
   return `${bedsText}${c.max_monthly ? ` under ${money(c.max_monthly)}/mo` : ""}`;
 }
 
-/** Monthly cost cell: the amount, with how it was worked out on tap. */
-function monthlyEl(u) {
+/** The lease term a price is for ("12 mo"), flagged when it's shorter than the minimum you'd sign. */
+function termEl(u, minLease) {
+  if (!u.lease_months) return null;
+  const short = u.short_term && minLease;
+  return h("div", { class: `muted small term${short ? " short" : ""}` },
+    short ? `${u.lease_months} mo (under ${minLease})` : `${u.lease_months} mo`);
+}
+
+/** Every lease term the site prices, for a unit's tap-to-expand details. `perMonth` lists the
+ *  all-in monthly cost (fees and specials) instead of the listed price. */
+function termLines(u, { perMonth = false, minLease } = {}) {
+  const opts = u.lease_options || [];
+  if (opts.length < 2) return [];
+  return [
+    h("div", { class: "term-head" }, perMonth ? "Per month by lease term:" : "Price by lease term:"),
+    ...opts.map((o) => h("div", { class: `term-line${o.chosen ? " chosen" : ""}${o.allowed ? "" : " off"}` },
+      `${o.months} mo: ${money(perMonth ? o.monthly : o.price)}`,
+      o.chosen ? " ← cheapest, used here" : !o.allowed && minLease ? ` (under ${minLease} mo)` : "")),
+    u.quoted && u.quoted.lease_months && u.quoted.lease_months !== u.lease_months
+      ? `The site's default quote is ${money(u.quoted.price)} for ${u.quoted.lease_months} months.` : null,
+  ];
+}
+
+/** Monthly cost cell: the amount and its lease term, with how it was worked out on tap. */
+function monthlyEl(u, minLease) {
   const e = u.effective || {};
   const lines = [
     u.incl_fees ? `Listed price (includes required fees): ${money(u.price)}` : `Base rent: ${money(u.price)}`,
@@ -546,8 +569,9 @@ function monthlyEl(u) {
     e.savings ? `Specials: −${money(e.savings)}/mo (${e.applied.join(", ")}, over a ${e.lease_months}-month lease${e.lease_assumed ? ", assumed" : ""})` : null,
     e.uncertain ? "Special is for select units only; ask whether this unit qualifies." : null,
     u.fees_known ? null : "This site doesn't list its required monthly fees, so they aren't included.",
+    ...termLines(u, { perMonth: true, minLease }),
   ];
-  return [expander("net-btn", h("strong", {}, money(u.monthly)), lines),
+  return [expander("net-btn", h("strong", {}, money(u.monthly)), lines), termEl(u, minLease),
     u.fees_known ? null : h("div", { class: "muted small" }, "fees not listed")];
 }
 
@@ -622,7 +646,7 @@ async function renderViable() {
           h("span", { class: "show-sm" }, ` · ${u.plan} · ${bedLabel(u.beds)}${u.sqft ? ` · ${u.sqft.toLocaleString()} sq ft` : ""}`))),
       h("td", { class: "wrap-cell hide-sm" }, `${u.plan} · ${bedLabel(u.beds)}`),
       h("td", { class: "r num hide-sm" }, u.sqft ? u.sqft.toLocaleString() : "—"),
-      h("td", { class: "r num" }, monthlyEl(u),
+      h("td", { class: "r num" }, monthlyEl(u, crit.min_lease_months),
         h("div", { class: "muted small show-sm" }, u.available_date ? (u.available_date <= u.date ? "Now" : shortDate(u.available_date)) : "",
           u.history && u.history.is_new ? [" ", h("span", { class: "badge new" }, "New")] : null)),
       h("td", { class: "r num hide-sm" }, fmtPpsf(u.ppsf)),
@@ -639,7 +663,7 @@ async function renderViable() {
   add(root, h("div", { class: "card stack" },
     h("h2", {}, "Viable units"), filterRow,
     h("div", { class: "table-scroll" }, h("table", {}, thead, tbody)),
-    h("p", { class: "note" }, "“Per month” is what you'd pay each month: rent after specials (spread over the lease) plus the required monthly fees the site lists. Tap an amount to see how it adds up. “Fees not listed” means the site doesn't publish its fees, so the real total is higher. $/sq ft uses the monthly amount. Star ☆ a unit to add it to your shortlist."),
+    h("p", { class: "note" }, "“Per month” is what you'd pay each month: rent after specials (spread over the lease) plus the required monthly fees the site lists. Tap an amount to see how it adds up. “Fees not listed” means the site doesn't publish its fees, so the real total is higher. Where a site prices several lease terms, each unit uses its cheapest term of ${crit.min_lease_months || 1}+ months (ties go to the shorter lease); the term shows under the amount. $/sq ft uses the monthly amount. Star ☆ a unit to add it to your shortlist."),
   ));
 
   // Per complex: how many fit and the cheapest, with the same stale / check-data flags as All units.
@@ -701,7 +725,8 @@ async function renderComplex() {
   add(root, 
     h("div", { class: "muted" },
       [d.property.address, d.property.phone].filter(Boolean).join(" · "), " · ",
-      h("a", { href: d.url, target: "_blank", rel: "noopener" }, "Official site ↗")),
+      h("a", { href: d.url, target: "_blank", rel: "noopener" }, "Official site ↗"),
+      d.source ? ` · Data: ${d.source}` : null),
     d.stale ? h("div", { class: "banner" }, `The latest pull failed (${d.error || "unknown error"}). Showing data from ${fmtDate(d.date)}.`) : null,
     d.checks && d.checks.length ? h("div", { class: "banner" },
       h("strong", {}, "Data looks off — double-check on the official site:"),
@@ -858,6 +883,7 @@ async function renderComplex() {
         h("td", { class: "r num hide-sm" }, f.sqft ? f.sqft.toLocaleString() : "—"),
         h("td", { class: "r num" }, f.units_available ? priceOrCall(f.rent_min, f.units_available) : "—",
           f.units_available && f.rent_max && f.rent_max !== f.rent_min ? h("span", { class: "muted small hide-sm" }, ` – ${money(f.rent_max)}`) : null,
+          f.units_available && f.rent_min && f.lease_months ? h("div", { class: "muted small" }, `${f.lease_months} mo`) : null,
           f.units_available && f.total_min && !totalBasis ? h("div", { class: "muted small", title: "Base rent plus required monthly fees" }, `${money(f.total_min)} total`) : null,
           // Phones hide the $/sq ft column, so show it under the price instead.
           f.ppsf != null ? h("div", { class: "muted small show-sm" }, `${fmtPpsf(f.ppsf)}/sq ft`) : null),
@@ -879,7 +905,9 @@ async function renderComplex() {
             h("tbody", {}, units.map((u) => h("tr", {},
               h("td", { class: "num unit-cell" }, starBtn(unitEntry(d, u, f), onStar), u.unit_number,
                 u.viable && !viableOnly ? h("span", { class: "badge ok", style: "margin-left:6px" }, "Viable") : null), hasBuilding && h("td", {}, u.building || "—"), hasFloor && h("td", {}, u.floor || "—"),
-              h("td", { class: "r num" }, priceOrCall(u.price, 1)),
+              h("td", { class: "r num" }, (u.lease_options || []).length > 1
+                ? expander("net-btn", money(u.price), termLines(u, { minLease: crit.min_lease_months })) : priceOrCall(u.price, 1),
+                termEl(u, crit.min_lease_months)),
               hasTotal && h("td", { class: "r num muted" }, u.total_price ? money(u.total_price) : "—"),
               hasNet && h("td", { class: "r num" }, unitNetEl(u)),
               h("td", { class: "r num" }, u.sqft ? u.sqft.toLocaleString() : "—"),
@@ -913,7 +941,9 @@ async function renderComplex() {
           t.parsed ? null : h("span", { class: "badge", style: "margin-left:8px" }, "not included in net rent")),
         t.description ? h("div", { class: "muted small" }, t.description) : null,
         t.parsed ? h("div", { class: "small" }, describeTerms(t)) : null)),
-      h("p", { class: "note" }, lease
+      h("p", { class: "note" }, d.units.some((u) => (u.lease_options || []).length > 1)
+        ? "Each unit uses its cheapest lease term, and net rent spreads a discount over that unit's term (so a one-time discount can make a shorter lease the cheaper one)."
+        : lease
         ? `Prices are quoted for a ${lease}-month lease, so net rent spreads the discount over ${lease} months.`
         : "The site doesn't say which lease term prices are for; net rent assumes 12 months."),
     ));
@@ -921,7 +951,7 @@ async function renderComplex() {
   add(root, h("div", { class: "card stack" },
     h("h2", {}, "Floorplans"), filterRow, filterNote,
     h("div", { class: "table-scroll" }, h("table", {}, thead, tbody)),
-    h("p", { class: "note" }, "Click a floorplan to see its available units. Star ☆ a floorplan or unit to add it to your shortlist on the overview (saved in this browser). “From” is the lowest listed price; “$/sq ft” is that price per square foot; “Net” is the lowest effective monthly rent after specials. Tap a special or a unit's net rent for the details (* = the special is for select units only, so confirm the unit qualifies). The trend shows that plan's lowest listed price at each pull."),
+    h("p", { class: "note" }, "Click a floorplan to see its available units. Star ☆ a floorplan or unit to add it to your shortlist on the overview (saved in this browser). “From” is the lowest listed price, with its lease term under it (where the site prices several terms, each unit uses its cheapest one; tap a unit's price to compare terms); “$/sq ft” is that price per square foot; “Net” is the lowest effective monthly rent after specials. Tap a special or a unit's net rent for the details (* = the special is for select units only, so confirm the unit qualifies). The trend shows that plan's lowest listed price at each pull."),
     totalBasis ? h("p", { class: "note" }, "This site only shows a “Total Monthly Leasing Price”, which already includes required monthly fees, so its prices run slightly higher than base rent elsewhere.") : null,
     hasTotal && !totalBasis ? h("p", { class: "note" }, "Prices are base rent. “Total/mo” adds the required monthly fees the site lists (e.g. trash, pest control).") : null,
     d.units.length && d.units.every((u) => u.price == null) ? h("p", { class: "note" }, "This site lists available units but doesn't publish prices (“Call”).") : null,
