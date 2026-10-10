@@ -171,3 +171,11 @@ tr.dim td { color: var(--text-3); }
 .expand-detail > div + div { margin-top: 3px; }
 .specials-sm { margin-bottom: 8px; flex-direction: column; align-items: flex-start; gap: 4px; white-space: normal; }
 @media (max-width: 640px) { div.show-sm.specials-sm { display: flex; } }
+
+/* page tabs (Viable units / All units) */
+nav.tabs { display: flex; gap: 4px; margin-bottom: 12px; border-bottom: 1px solid var(--border); }
+nav.tabs a { padding: 8px 12px; font-size: 14px; font-weight: 600; color: var(--text-2); border-bottom: 2px solid transparent; margin-bottom: -1px; }
+nav.tabs a:hover { color: var(--text); text-decoration: none; }
+nav.tabs a[aria-current="page"] { color: var(--text); border-bottom-color: var(--accent); }
+.badge.ok { background: color-mix(in srgb, var(--down) 18%, transparent); color: var(--text); }
+td.wrap-cell { white-space: normal; min-width: 90px; }

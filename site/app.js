@@ -360,8 +360,58 @@ async function shortlistCard() {
   return card;
 }
 
-// ---------- overview page ----------
-async function renderOverview() {
+// ---------- small multiples (both overview pages) ----------
+/**
+ * Trends as small multiples: one mini chart per complex on a shared scale (no per-complex colors
+ * needed). `modes`: [{id, label, key, fallback?, money?, emptyText?}], one chip each, reading
+ * `key` from each complex's history. Call draw() once the card is in the page (Chart.js sizes
+ * charts from their container).
+ */
+function trendsCard(complexes, modes) {
+  const dates = [...new Set(complexes.flatMap((c) => (c.history || []).map((p) => p.date)))].sort();
+  const trend = { mode: modes[0].id };
+  const chips = h("div", { class: "filters" });
+  const grid = h("div", { class: "multiples" });
+  const draw = () => {
+    const m = modes.find((x) => x.id === trend.mode);
+    const isMoney = !!m.money;
+    chips.replaceChildren(...modes.map((x) =>
+      h("button", { class: "chip", "aria-pressed": String(trend.mode === x.id), onclick: () => { trend.mode = x.id; draw(); } }, x.label)));
+    const seriesOf = (c) => {
+      const byDate = Object.fromEntries((c.history || []).map((p) => [p.date, p[m.key] ?? (m.fallback ? p[m.fallback] : null)]));
+      return dates.map((d) => byDate[d] ?? null);
+    };
+    const all = complexes.flatMap(seriesOf).filter((v) => v != null);
+    const lo = Math.min(...all), hi = Math.max(...all), pad = Math.max((hi - lo) * 0.08, isMoney ? 25 : 1);
+    const yMin = all.length ? Math.max(0, Math.floor((lo - pad) / (isMoney ? 50 : 1)) * (isMoney ? 50 : 1)) : undefined;
+    const yMax = all.length ? Math.ceil((hi + pad) / (isMoney ? 50 : 1)) * (isMoney ? 50 : 1) : undefined;
+    const pending = [];
+    grid.replaceChildren(...complexes.map((c) => {
+      const data = seriesOf(c);
+      const latest = [...data].reverse().find((v) => v != null);
+      const unpriced = isMoney && !m.emptyText && latest == null && c.units;
+      const canvas = h("canvas", { role: "img", "aria-label": `${c.name}: ${m.label.toLowerCase()} over time` });
+      if (!unpriced && latest != null) pending.push(() => lineChart(canvas, dates, [{ label: c.name, colorIndex: 0, data }], { money: isMoney, yMin, yMax, compact: true }));
+      return h("div", { class: "mini" },
+        h("div", { class: "mini-head" },
+          h("a", { href: `complex.html?c=${encodeURIComponent(c.slug)}` }, c.name),
+          h("span", { class: "num mini-value" }, unpriced ? "Call" : latest == null ? "—" : isMoney ? money(latest) : latest)),
+        unpriced ? h("div", { class: "mini-empty muted small" }, "Prices not published")
+          : latest == null ? h("div", { class: "mini-empty muted small" }, m.emptyText && (c.history || []).length ? m.emptyText : "No data yet")
+          : h("div", { class: "mini-chart" }, canvas));
+    }));
+    pending.forEach((f) => f());
+  };
+  const card = h("div", { class: "card stack" },
+    h("h2", {}, "Trends"), chips, grid,
+    h("p", { class: "note" }, dates.length < 2
+      ? "History builds up with each scheduled pull — trend lines appear after the second one. All cards share one scale."
+      : "All cards share one scale, so heights compare directly across complexes."));
+  return { card, draw };
+}
+
+// ---------- all units page ----------
+async function renderAll() {
   const imported = importSharedShortlist();
   const { complexes } = await getJSON("data/summary.json");
   const root = document.getElementById("app");
@@ -394,7 +444,6 @@ async function renderOverview() {
     ),
   );
 
-  add(root, await shortlistCard());
 
   // Table: sortable; defaults to cheapest first. Price sorts use the net price when specials lower it.
   const bedKeys = sortBedKeys(complexes.flatMap((c) => Object.keys(c.by_beds || {})));
@@ -471,51 +520,152 @@ async function renderOverview() {
     ),
   );
 
-  // Trends as small multiples: one mini chart per complex on a shared scale (no per-complex colors needed).
-  const dates = [...new Set(complexes.flatMap((c) => (c.history || []).map((p) => p.date)))].sort();
-  const trend = { mode: "listed" };
-  const modes = [["listed", "Lowest price"], ["net", "Net of specials"], ["units", "Units available"]];
-  const chips = h("div", { class: "filters" });
-  const grid = h("div", { class: "multiples" });
-  const drawTrends = () => {
-    const key = { listed: "min_price", net: "min_effective", units: "units" }[trend.mode];
-    const isMoney = trend.mode !== "units";
-    chips.replaceChildren(...modes.map(([k, label]) =>
-      h("button", { class: "chip", "aria-pressed": String(trend.mode === k), onclick: () => { trend.mode = k; drawTrends(); } }, label)));
-    const seriesOf = (c) => {
-      const byDate = Object.fromEntries((c.history || []).map((p) => [p.date, p[key] ?? (key === "min_effective" ? p.min_price : null)]));
-      return dates.map((d) => byDate[d] ?? null);
-    };
-    const all = complexes.flatMap(seriesOf).filter((v) => v != null);
-    const lo = Math.min(...all), hi = Math.max(...all), pad = Math.max((hi - lo) * 0.08, isMoney ? 25 : 1);
-    const yMin = all.length ? Math.max(0, Math.floor((lo - pad) / (isMoney ? 50 : 1)) * (isMoney ? 50 : 1)) : undefined;
-    const yMax = all.length ? Math.ceil((hi + pad) / (isMoney ? 50 : 1)) * (isMoney ? 50 : 1) : undefined;
-    const pending = [];
-    grid.replaceChildren(...complexes.map((c) => {
-      const data = seriesOf(c);
-      const latest = [...data].reverse().find((v) => v != null);
-      const unpriced = isMoney && latest == null && c.units;
-      const canvas = h("canvas", { role: "img", "aria-label": `${c.name}: ${modes.find((m) => m[0] === trend.mode)[1].toLowerCase()} over time` });
-      if (!unpriced && latest != null) pending.push(() => lineChart(canvas, dates, [{ label: c.name, colorIndex: 0, data }], { money: isMoney, yMin, yMax, compact: true }));
-      return h("div", { class: "mini" },
-        h("div", { class: "mini-head" },
-          h("a", { href: `complex.html?c=${encodeURIComponent(c.slug)}` }, c.name),
-          h("span", { class: "num mini-value" }, unpriced ? "Call" : latest == null ? "—" : isMoney ? money(latest) : latest)),
-        unpriced ? h("div", { class: "mini-empty muted small" }, "Prices not published")
-          : latest == null ? h("div", { class: "mini-empty muted small" }, "No data yet")
-          : h("div", { class: "mini-chart" }, canvas));
-    }));
-    pending.forEach((f) => f());
-  };
+  const trends = trendsCard(complexes, [
+    { id: "listed", label: "Lowest price", key: "min_price", money: true },
+    { id: "net", label: "Net of specials", key: "min_effective", fallback: "min_price", money: true },
+    { id: "units", label: "Units available", key: "units" },
+  ]);
+  add(root, trends.card);
+  trends.draw();
+}
+
+// ---------- viable units page (main page) ----------
+/** "1 or 2 BR under $1,900/mo" from the criteria in viable.yaml (written into the JSON by build.py). */
+function criteriaText(c) {
+  const beds = (c.beds || []).map((b) => bedLabel(b));
+  const bedsText = beds.length > 1 ? `${beds.slice(0, -1).join(", ")} or ${beds[beds.length - 1]}` : beds[0] || "Any size";
+  return `${bedsText}${c.max_monthly ? ` under ${money(c.max_monthly)}/mo` : ""}`;
+}
+
+/** Monthly cost cell: the amount, with how it was worked out on tap. */
+function monthlyEl(u) {
+  const e = u.effective || {};
+  const lines = [
+    u.incl_fees ? `Listed price (includes required fees): ${money(u.price)}` : `Base rent: ${money(u.price)}`,
+    u.total_price && !u.incl_fees ? `Required monthly fees: ${money(u.total_price - u.price)}` : null,
+    e.savings ? `Specials: −${money(e.savings)}/mo (${e.applied.join(", ")}, over a ${e.lease_months}-month lease${e.lease_assumed ? ", assumed" : ""})` : null,
+    e.uncertain ? "Special is for select units only; ask whether this unit qualifies." : null,
+    u.fees_known ? null : "This site doesn't list its required monthly fees, so they aren't included.",
+  ];
+  return [expander("net-btn", h("strong", {}, money(u.monthly)), lines),
+    u.fees_known ? null : h("div", { class: "muted small" }, "fees not listed")];
+}
+
+async function renderViable() {
+  const imported = importSharedShortlist();
+  const [{ complexes, viable_criteria: crit = {} }, { units }] = await Promise.all([getJSON("data/summary.json"), getJSON("data/viable.json")]);
+  const root = document.getElementById("app");
+  if (imported != null) {
+    add(root, h("div", { class: "banner info" }, imported
+      ? `Added ${imported} item${imported === 1 ? "" : "s"} to your shortlist from a shared link.`
+      : "Everything in that shared link is already on your shortlist."));
+  }
+  const lastDate = complexes.map((c) => c.date).filter(Boolean).sort().pop();
+  document.getElementById("updated").textContent = lastDate ? `Last pull ${fmtDate(lastDate)}` : "";
+  const stale = complexes.filter((c) => c.stale);
   add(root,
-    h("div", { class: "card stack" },
-      h("h2", {}, "Trends"), chips, grid,
-      h("p", { class: "note" }, dates.length < 2
-        ? "History builds up with each scheduled pull — trend lines appear after the second one. All cards share one scale."
-        : "All cards share one scale, so heights compare directly across complexes."),
-    ),
-  );
-  drawTrends();
+    h("p", { class: "muted", style: "margin:0" }, `Showing units that fit: ${criteriaText(crit)}, after specials and with required fees where the site lists them. `,
+      h("a", { href: "all.html" }, "All units →")),
+    stale.length ? h("div", { class: "banner" }, `Not updated in the latest pull: ${stale.map((c) => c.name).join(", ")}. Their units aren't listed here until a pull succeeds.`) : null);
+
+  // Tiles
+  const deltas = complexes.filter((c) => !c.stale).map((c) => c.viable_units_delta).filter((v) => v != null);
+  const cheapest = units[0];
+  const withViable = new Set(units.map((u) => u.slug)).size;
+  add(root, h("div", { class: "tiles" },
+    h("div", { class: "card tile" }, h("div", { class: "label" }, "Viable units"), h("div", { class: "value num" }, units.length),
+      h("div", { class: "sub" }, deltas.length ? deltaEl(deltas.reduce((a, b) => a + b, 0)) : "")),
+    h("div", { class: "card tile" }, h("div", { class: "label" }, "Cheapest per month"), h("div", { class: "value num" }, cheapest ? money(cheapest.monthly) : "—"),
+      h("div", { class: "sub" }, cheapest ? `${cheapest.complex} #${cheapest.unit_number}` : "")),
+    h("div", { class: "card tile" }, h("div", { class: "label" }, "Complexes with viable units"), h("div", { class: "value num" }, `${withViable} / ${complexes.length}`)),
+  ));
+
+  add(root, await shortlistCard());
+
+  // Viable units, one row per unit, cheapest first.
+  const state = { beds: null, sort: "monthly", dir: 1 };
+  const bedOptions = [...new Set(units.map((u) => u.beds))].sort((a, b) => a - b);
+  const filterRow = h("div", { class: "filters" }), thead = h("thead"), tbody = h("tbody");
+  const columns = [
+    { key: "complex", label: "Complex / unit" },
+    { key: "plan", label: "Plan", hideSm: true },
+    { key: "sqft", label: "Sq ft", r: true, hideSm: true },
+    { key: "monthly", label: "Per month", r: true },
+    { key: "ppsf", label: "$/sq ft", r: true, hideSm: true },
+    { key: "available_date", label: "Available", hideSm: true },
+    { key: "days", label: "Listed", hideSm: true },
+  ];
+  for (const u of units) { u.ppsf = ppsf(u.monthly, u.sqft); u.days = u.history ? u.history.days_listed : null; }
+  const drawFilters = () => filterRow.replaceChildren(...[null, ...bedOptions].map((b) =>
+    h("button", { class: "chip", "aria-pressed": String(state.beds === b), onclick: () => { state.beds = b; drawFilters(); drawTable(); } },
+      b === null ? `All (${units.length})` : `${bedLabel(b)} (${units.filter((u) => u.beds === b).length})`)));
+  const drawHead = () => thead.replaceChildren(h("tr", {}, h("th", {}, ""),
+    columns.map((c) => h("th", {
+      class: `sortable ${c.r ? "r" : ""} ${c.hideSm ? "hide-sm" : ""}`,
+      "aria-sort": state.sort === c.key ? (state.dir > 0 ? "ascending" : "descending") : null,
+      onclick: () => { state.dir = state.sort === c.key ? -state.dir : 1; state.sort = c.key; drawHead(); drawTable(); },
+    }, c.label)),
+    h("th", { class: "hide-sm" }, "Price change")));
+  const drawTable = () => {
+    const rows = units.filter((u) => state.beds === null || u.beds === state.beds).sort((a, b) => {
+      const av = a[state.sort], bv = b[state.sort];
+      if (av == null && bv == null) return a.monthly - b.monthly;
+      if (av == null) return 1; if (bv == null) return -1;
+      return (av < bv ? -1 : av > bv ? 1 : a.monthly - b.monthly) * (av === bv ? 1 : state.dir);
+    });
+    tbody.replaceChildren(...(rows.length ? rows.map((u) => h("tr", {},
+      h("td", {}, starBtn(unitEntry({ slug: u.slug, name: u.complex }, u, { name: u.plan }), drawShortlist)),
+      // Phones show three columns: plan and size fold into the unit line, the date under the price.
+      h("td", { class: "name-cell wrap-cell" },
+        h("a", { href: `complex.html?c=${encodeURIComponent(u.slug)}` }, u.complex),
+        h("div", { class: "addr" }, `#${u.unit_number}${u.building ? ` · Bldg ${u.building}` : ""}${u.floor ? ` · Floor ${u.floor}` : ""}`,
+          h("span", { class: "show-sm" }, ` · ${u.plan} · ${bedLabel(u.beds)}${u.sqft ? ` · ${u.sqft.toLocaleString()} sq ft` : ""}`))),
+      h("td", { class: "wrap-cell hide-sm" }, `${u.plan} · ${bedLabel(u.beds)}`),
+      h("td", { class: "r num hide-sm" }, u.sqft ? u.sqft.toLocaleString() : "—"),
+      h("td", { class: "r num" }, monthlyEl(u),
+        h("div", { class: "muted small show-sm" }, u.available_date ? (u.available_date <= u.date ? "Now" : shortDate(u.available_date)) : "",
+          u.history && u.history.is_new ? [" ", h("span", { class: "badge new" }, "New")] : null)),
+      h("td", { class: "r num hide-sm" }, fmtPpsf(u.ppsf)),
+      h("td", { class: "hide-sm" }, availLabel(u.available_date, u.date)),
+      h("td", { class: "hide-sm" }, listedEl(u.history, u.history_start)),
+      h("td", { class: "hide-sm" }, priceChangeEl(u.history)),
+    )) : [h("tr", {}, h("td", { colspan: columns.length + 2, class: "muted" }, "No units fit right now."))]));
+  };
+  // Starring re-renders the shortlist card in place (it's rebuilt from storage).
+  let slCard = null;
+  const drawShortlist = async () => { const fresh = await shortlistCard(); if (slCard) slCard.replaceWith(fresh); slCard = fresh; drawTable(); };
+  slCard = root.lastElementChild;
+  drawFilters(); drawHead(); drawTable();
+  add(root, h("div", { class: "card stack" },
+    h("h2", {}, "Viable units"), filterRow,
+    h("div", { class: "table-scroll" }, h("table", {}, thead, tbody)),
+    h("p", { class: "note" }, "“Per month” is what you'd pay each month: rent after specials (spread over the lease) plus the required monthly fees the site lists. Tap an amount to see how it adds up. “Fees not listed” means the site doesn't publish its fees, so the real total is higher. $/sq ft uses the monthly amount. Star ☆ a unit to add it to your shortlist."),
+  ));
+
+  // Per complex: how many fit and the cheapest, with the same stale / check-data flags as All units.
+  const byComplex = complexes.slice().sort((a, b) => (a.viable_min ?? 1e9) - (b.viable_min ?? 1e9) || a.name.localeCompare(b.name));
+  add(root, h("div", { class: "card stack" },
+    h("h2", {}, "By complex"),
+    h("div", { class: "table-scroll" }, h("table", {},
+      h("thead", {}, h("tr", {}, h("th", {}, "Complex"), h("th", { class: "r" }, "Viable"), h("th", { class: "r" }, "Cheapest/mo"), h("th", { class: "r hide-sm" }, "All units"))),
+      h("tbody", {}, byComplex.map((c) => h("tr", { class: c.viable_units ? "" : "dim" },
+        h("td", { class: "name-cell wrap-cell" }, h("a", { href: `complex.html?c=${encodeURIComponent(c.slug)}` }, c.name),
+          c.stale ? h("span", { class: "badge warn", style: "margin-left:8px" }, "stale") : null,
+          c.checks && c.checks.length ? h("span", { class: "badge warn", style: "margin-left:8px" }, "check data") : null,
+          c.priced === false ? h("div", { class: "addr" }, "Doesn't publish prices") : null),
+        // Unchanged deltas are left out here (no "no change"), so the table fits a phone.
+        h("td", { class: "r num" }, c.stale ? "—" : (c.viable_units ?? 0), c.stale ? null : deltaEl(c.viable_units_delta || null)),
+        h("td", { class: "r num" }, c.stale || c.viable_min == null ? "—" : money(c.viable_min), c.stale ? null : deltaEl(c.viable_min_delta || null, { isPrice: true })),
+        h("td", { class: "r num hide-sm muted" }, c.units ?? "—")))))),
+    h("p", { class: "note" }, "Deltas compare with the previous pull. “Check data” means the complex's latest data disagrees with itself; see its page, or All units."),
+  ));
+
+  const trends = trendsCard(complexes, [
+    { id: "count", label: "Viable units", key: "viable_units" },
+    { id: "min", label: "Cheapest per month", key: "viable_min", money: true, emptyText: "None fit" },
+  ]);
+  add(root, trends.card);
+  trends.draw();
 }
 
 // ---------- complex detail page ----------
@@ -540,8 +690,8 @@ const siteWideShows = (t, f, asOf) => !specialEnded(t, asOf)
 async function renderComplex() {
   const slug = new URLSearchParams(location.search).get("c");
   const root = document.getElementById("app");
-  if (!slug) { add(root, h("p", {}, "No complex selected. ", h("a", { href: "./" }, "Back to overview"))); return; }
-  const [d, { complexes }] = await Promise.all([getJSON(`data/${encodeURIComponent(slug)}.json`), getJSON("data/summary.json")]);
+  if (!slug) { add(root, h("p", {}, "No complex selected. ", h("a", { href: "./" }, "Back to viable units"))); return; }
+  const [d, { complexes, viable_criteria: crit = {} }] = await Promise.all([getJSON(`data/${encodeURIComponent(slug)}.json`), getJSON("data/summary.json")]);
   const s = complexes.find((c) => c.slug === slug) || {};
   document.title = `${d.name} · Apartments`;
   document.getElementById("title").textContent = d.name;
@@ -570,6 +720,8 @@ async function renderComplex() {
   const availPlans = d.floorplans.filter((f) => f.units_available > 0);
   add(root, 
     h("div", { class: "tiles" },
+      h("div", { class: "card tile" }, h("div", { class: "label" }, "Viable units"), h("div", { class: "value num" }, s.viable_units ?? 0),
+        h("div", { class: "sub" }, s.viable_min != null ? `from ${money(s.viable_min)}/mo` : criteriaText(crit))),
       h("div", { class: "card tile" }, h("div", { class: "label" }, "Units available"), h("div", { class: "value num" }, s.units ?? "—"), h("div", { class: "sub" }, deltaEl(s.units_delta) || "")),
       h("div", { class: "card tile" }, h("div", { class: "label" }, totalBasis ? "Lowest price (incl. fees)" : "Lowest price"),
         h("div", { class: "value num" }, s.priced === false ? "Call" : money(s.min_price)),
@@ -581,24 +733,32 @@ async function renderComplex() {
 
   // Filters
   const bedOptions = [...new Set(d.floorplans.map((f) => f.beds))].sort((a, b) => (a ?? 99) - (b ?? 99));
-  const state = { beds: null, showAll: false, starredOnly: false, sort: "rent_min", dir: 1 };
+  // Viable only by default; it and "Starred only" are exclusive, so a starred unit that doesn't
+  // fit is never hidden by the other filter.
+  const viableCount = d.units.filter((u) => u.viable).length;
+  const state = { beds: null, showAll: false, starredOnly: false, viableOnly: viableCount > 0, sort: "rent_min", dir: 1 };
   const filterRow = h("div", { class: "filters" });
   const tbody = h("tbody");
+  const filterNote = h("p", { class: "note", style: "margin-top:8px" });
   const closed = new Set();  // plans the user collapsed while "Starred only" auto-opens them
   const starredCount = () => shortlist.all().filter((e) => e.slug === d.slug).length;
   const drawFilters = () => {
     const n = starredCount();
     if (!n) state.starredOnly = false;
     filterRow.replaceChildren(
+      h("button", {
+        class: "chip", "aria-pressed": String(state.viableOnly), disabled: !viableCount,
+        onclick: () => { state.viableOnly = !state.viableOnly; if (state.viableOnly) state.starredOnly = false; drawFilters(); drawTable(); },
+      }, `Viable only (${viableCount} of ${d.units.length})`),
       ...[null, ...bedOptions].map((b) =>
         h("button", { class: "chip", "aria-pressed": String(state.beds === b), onclick: () => { state.beds = b; drawFilters(); drawTable(); } }, b === null ? "All" : bedLabel(b))),
       h("button", {
         class: "chip star-chip", "aria-pressed": String(state.starredOnly), disabled: !n,
         title: n ? "Show only starred floorplans and units" : "Star ☆ a floorplan or unit to use this filter",
-        onclick: () => { state.starredOnly = !state.starredOnly; closed.clear(); drawFilters(); drawTable(); },
+        onclick: () => { state.starredOnly = !state.starredOnly; if (state.starredOnly) state.viableOnly = false; closed.clear(); drawFilters(); drawTable(); },
       }, `★ Starred only${n ? ` (${n})` : ""}`),
       h("label", { class: "toggle" },
-        h("input", { type: "checkbox", checked: state.showAll, disabled: state.starredOnly, onchange: (e) => { state.showAll = e.target.checked; drawTable(); } }),
+        h("input", { type: "checkbox", checked: state.showAll, disabled: state.starredOnly || state.viableOnly, onchange: (e) => { state.showAll = e.target.checked; drawTable(); } }),
         "Show plans with no availability"),
     );
   };
@@ -663,9 +823,10 @@ async function renderComplex() {
   const onStar = () => { drawFilters(); drawTable(); };
   const drawTable = () => {
     const starredOnly = state.starredOnly && starredCount() > 0;
+    const viableOnly = state.viableOnly && !starredOnly;
     let plans = d.floorplans.filter((f) => (state.beds === null || f.beds === state.beds) && (starredOnly
       ? planStarred(f) || (unitsByPlan[f.code] || []).some(unitStarred)
-      : state.showAll || f.units_available > 0));
+      : viableOnly ? f.viable_units > 0 : state.showAll || f.units_available > 0));
     plans.sort((a, b) => {
       const av = a[state.sort], bv = b[state.sort];
       if (av == null && bv == null) return 0;
@@ -678,6 +839,7 @@ async function renderComplex() {
       // Starred only: show just the starred units, unless the whole plan is starred; open plans with starred units.
       const hasStarredUnits = starredOnly && units.some(unitStarred);
       if (hasStarredUnits && !planStarred(f)) units = units.filter(unitStarred);
+      if (viableOnly) units = units.filter((u) => u.viable);
       const hist = (d.floorplan_history[f.code] || []).map((p) => p.rent_min);
       const isOpen = open.has(f.code) || (hasStarredUnits && !closed.has(f.code));
       const toggle = () => {
@@ -702,7 +864,7 @@ async function renderComplex() {
         h("td", { class: "r num hide-sm" }, f.units_available ? ppsfEl(f.rent_min, f.effective_min, f.sqft) : h("span", { class: "muted" }, "—")),
         hasNet && h("td", { class: "r num" }, f.units_available && f.effective_min != null && f.effective_min < f.rent_min
           ? h("strong", { title: "Lowest effective monthly rent after specials" }, money(f.effective_min)) : h("span", { class: "muted" }, "—")),
-        h("td", { class: "r num" }, f.units_available || h("span", { class: "muted" }, "0")),
+        h("td", { class: "r num" }, viableOnly ? [f.viable_units, h("span", { class: "muted small hide-sm" }, ` of ${f.units_available}`)] : f.units_available || h("span", { class: "muted" }, "0")),
         h("td", {}, f.units_available ? availLabel(f.earliest_available, today) : "—"),
         h("td", { class: "hide-sm" }, sparkline(hist, { width: 70, height: 22 })),
         h("td", { class: "hide-sm specials-cell" }, planSpecials(f)),
@@ -715,7 +877,8 @@ async function renderComplex() {
           h("table", {},
             h("thead", {}, h("tr", {}, h("th", {}, "Unit"), hasBuilding && h("th", {}, "Building"), hasFloor && h("th", {}, "Floor"), h("th", { class: "r" }, totalBasis ? "Price (incl. fees)" : "Price"), hasTotal && h("th", { class: "r", title: "Base rent plus required monthly fees" }, "Total/mo"), hasNet && h("th", { class: "r" }, "Net"), h("th", { class: "r" }, "Sq ft"), h("th", { class: "r", title: "Listed price per square foot" }, "$/sq ft"), h("th", {}, "Available"), h("th", {}, "Listed"), h("th", {}, "Price change"), h("th", {}, ""))),
             h("tbody", {}, units.map((u) => h("tr", {},
-              h("td", { class: "num unit-cell" }, starBtn(unitEntry(d, u, f), onStar), u.unit_number), hasBuilding && h("td", {}, u.building || "—"), hasFloor && h("td", {}, u.floor || "—"),
+              h("td", { class: "num unit-cell" }, starBtn(unitEntry(d, u, f), onStar), u.unit_number,
+                u.viable && !viableOnly ? h("span", { class: "badge ok", style: "margin-left:6px" }, "Viable") : null), hasBuilding && h("td", {}, u.building || "—"), hasFloor && h("td", {}, u.floor || "—"),
               h("td", { class: "r num" }, priceOrCall(u.price, 1)),
               hasTotal && h("td", { class: "r num muted" }, u.total_price ? money(u.total_price) : "—"),
               hasNet && h("td", { class: "r num" }, unitNetEl(u)),
@@ -729,6 +892,9 @@ async function renderComplex() {
       }
     }
     if (!rows.length) rows.push(h("tr", {}, h("td", { colspan: columns.length + 2, class: "muted" }, "No floorplans match.")));
+    filterNote.textContent = viableOnly ? `Showing floorplans with units that fit (${criteriaText(crit)}); units listed are only those. Turn off “Viable only” to see everything.`
+      : !viableCount ? `No units here fit right now (${criteriaText(crit)}).` : "";
+    filterNote.hidden = !filterNote.textContent;
     tbody.replaceChildren(...rows);
   };
 
@@ -753,7 +919,7 @@ async function renderComplex() {
     ));
   }
   add(root, h("div", { class: "card stack" },
-    h("h2", {}, "Floorplans"), filterRow,
+    h("h2", {}, "Floorplans"), filterRow, filterNote,
     h("div", { class: "table-scroll" }, h("table", {}, thead, tbody)),
     h("p", { class: "note" }, "Click a floorplan to see its available units. Star ☆ a floorplan or unit to add it to your shortlist on the overview (saved in this browser). “From” is the lowest listed price; “$/sq ft” is that price per square foot; “Net” is the lowest effective monthly rent after specials. Tap a special or a unit's net rent for the details (* = the special is for select units only, so confirm the unit qualifies). The trend shows that plan's lowest listed price at each pull."),
     totalBasis ? h("p", { class: "note" }, "This site only shows a “Total Monthly Leasing Price”, which already includes required monthly fees, so its prices run slightly higher than base rent elsewhere.") : null,
@@ -784,7 +950,7 @@ async function renderComplex() {
 
 // ---------- boot ----------
 const page = document.body.dataset.page;
-(page === "complex" ? renderComplex() : renderOverview()).catch((err) => {
+(page === "complex" ? renderComplex() : page === "all" ? renderAll() : renderViable()).catch((err) => {
   console.error(err);
   document.getElementById("app").append(h("div", { class: "banner" }, `Couldn't load data: ${err.message}`));
 });

@@ -420,6 +420,7 @@ def viable_rows(summary: dict, detail: Optional[dict]) -> List[dict]:
             "price": u.get("price"), "total_price": u.get("total_price"), "effective": u.get("effective"),
             "monthly": u["monthly"], "fees_known": u["fees_known"],
             "incl_fees": detail.get("price_basis") == "total", "history": u.get("history"),
+            "history_start": detail.get("history_start"),
         })
     return rows
 
