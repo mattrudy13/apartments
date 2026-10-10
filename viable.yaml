@@ -9,3 +9,8 @@ beds: [1, 2]
 # included where the site lists them. Sites that list no fees use rent after specials,
 # marked "fees not listed".
 max_monthly: 1900
+
+# Shortest lease you'd sign. Where a site prices several terms (SightMap, Entrata), each unit
+# uses its cheapest term of at least this many months (ties go to the shorter lease). Units the
+# site quotes only for a shorter term stay listed, flagged.
+min_lease_months: 11

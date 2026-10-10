@@ -228,7 +228,7 @@ def shortlist_status(entries: List[dict], by_slug: Dict[str, dict]) -> List[dict
 def build_digest(cfg: dict, complexes: List[dict], status: dict, run_date: Optional[str] = None,
                  snapshots: Path = SNAPSHOTS, problems: List[str] = (), criteria: Optional[dict] = None) -> dict:
     criteria = criteria if criteria is not None else load_viable_config()
-    histories = {c["slug"]: prepare_history(c, load_history(c["slug"], snapshots), criteria) for c in complexes}
+    histories = {c["slug"]: prepare_history(c, load_history(c["slug"], snapshots, criteria), criteria) for c in complexes}
     run_date = run_date or max((h[-1][0] for h in histories.values() if h), default=date.today().isoformat())
     changes = [complex_changes(c, histories[c["slug"]], run_date, status.get(c["slug"], {})) for c in complexes]
     by_slug = {c["slug"]: c for c in changes}

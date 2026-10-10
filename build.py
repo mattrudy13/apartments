@@ -23,6 +23,16 @@ ROOT = Path(__file__).resolve().parent
 SNAPSHOTS = ROOT / "data" / "snapshots"
 OUT = ROOT / "site" / "data"
 DEFAULT_LEASE_MONTHS = 12  # used for effective rent when the site doesn't say
+# Where each scraper's data comes from, shown on complex pages ("prefer live sources").
+SOURCE_LABELS = {
+    "sightmap": "SightMap (live unit map)",
+    "entrata": "Entrata floor plan pages",
+    "rentcafe": "RentCafe floor plan pages",
+    "appfolio": "AppFolio listings",
+    "g5": "G5 inventory API",
+    "realpage_leasestar": "RealPage API",
+    "realpage_craft": "RealPage page data",
+}
 VIABLE_CONFIG = ROOT / "viable.yaml"
 
 
@@ -58,9 +68,36 @@ def _norm_title(title: str) -> str:
     return re.sub(r"[^a-z0-9$]+", " ", (title or "").lower()).strip()
 
 
-def apply_specials(snap: dict, snap_date: str) -> None:
-    """Annotate floorplans/units in place with parsed specials and effective rent."""
+def choose_lease_term(u: dict, compute, total_basis: bool, min_lease: Optional[int]) -> None:
+    """Pick the unit's cheapest lease term: lowest monthly cost after fees and specials (worked out
+    per term, since specials like "2 months free on 12+" depend on it), ties going to the shorter
+    lease. Terms under `min_lease` are ignored. The unit's price/total/lease become the pick; the
+    site's own quote is kept as `quoted`, and every term (with its monthly) stays in `lease_options`."""
+    quoted = u.get("quoted") or {"price": u.get("price"), "total_price": u.get("total_price"),
+                                  "lease_months": u.get("lease_months")}
+    rows = []
+    for o in u["lease_options"]:
+        option = {"price": o["price"], "total_price": o.get("total_price"),
+                  "effective": compute(o["price"], o["months"], u.get("available_date"), u["specials"])}
+        monthly, _ = unit_monthly(option, total_basis)
+        rows.append({"months": o["months"], "price": o["price"], "total_price": o.get("total_price"),
+                     "monthly": monthly, "allowed": not min_lease or o["months"] >= min_lease})
+    u["lease_options"] = rows
+    allowed = [r for r in rows if r["allowed"] and r["monthly"] is not None]
+    if not allowed:
+        u["short_term"] = True  # only shorter terms offered; keep the site's quote
+        return
+    best = min(allowed, key=lambda r: (r["monthly"], r["months"]))
+    best["chosen"] = True
+    u["quoted"] = quoted
+    u["price"], u["total_price"], u["lease_months"] = best["price"], best["total_price"], best["months"]
+
+
+def apply_specials(snap: dict, snap_date: str, min_lease: Optional[int] = None) -> None:
+    """Annotate floorplans/units in place with parsed specials and effective rent, after picking
+    each unit's cheapest lease term of at least `min_lease` months where the site lists several."""
     ref = date.fromisoformat(snap_date)
+    total_basis = snap.get("price_basis") == "total"
     units_by_plan = defaultdict(list)
     for u in snap["units"]:
         units_by_plan[u["floorplan_code"]].append(u)
@@ -93,10 +130,20 @@ def apply_specials(snap: dict, snap_date: str) -> None:
         effs = []
         for u in units_by_plan.get(fp["code"], []):
             u["specials"] = normalize_specials(u.get("specials"))
+            if u.get("lease_options"):
+                choose_lease_term(u, compute, total_basis, min_lease)
+            elif min_lease:
+                lease = u.get("lease_months") or fp.get("lease_months")
+                u["short_term"] = bool(lease and lease < min_lease)  # e.g. Salt Meadow's 9-month quotes
             u["effective"] = compute(u["price"], u.get("lease_months") or fp.get("lease_months"),
                                      u.get("available_date"), u["specials"])
             if u["price"]:
                 effs.append(u["effective"]["rent"] if u["effective"] else u["price"])
+        priced = [u for u in units_by_plan.get(fp["code"], []) if u["price"]]
+        if any(u.get("quoted") for u in priced):  # the plan's "from" price follows its units' picked terms
+            cheapest = min(priced, key=lambda u: (u["price"], u.get("lease_months") or 99))
+            fp["rent_min"], fp["lease_months"] = cheapest["price"], cheapest.get("lease_months")
+            fp["rent_max"] = max(u["price"] for u in priced)
         if not effs and fp["units_available"] and fp["rent_min"]:
             fp_eff = compute(fp["rent_min"], fp.get("lease_months"), fp.get("earliest_available"))
             effs.append(fp_eff["rent"] if fp_eff else fp["rent_min"])
@@ -123,7 +170,8 @@ def unit_totals(snap: dict) -> List[Tuple[dict, int, int]]:
 
 def load_viable_config(path: Path = VIABLE_CONFIG) -> dict:
     cfg = (yaml.safe_load(path.read_text()) if path.exists() else None) or {}
-    return {"beds": [float(b) for b in cfg.get("beds") or []], "max_monthly": cfg.get("max_monthly")}
+    return {"beds": [float(b) for b in cfg.get("beds") or []], "max_monthly": cfg.get("max_monthly"),
+            "min_lease_months": cfg.get("min_lease_months")}
 
 
 def unit_monthly(u: dict, total_basis: bool) -> Tuple[Optional[int], bool]:
@@ -314,12 +362,13 @@ def delta(cur, prev):
     return None if cur is None or prev is None else cur - prev
 
 
-def load_history(slug: str, snapshots: Path = SNAPSHOTS) -> list:
-    """[(date, snapshot), ...] oldest first, with specials/effective rent applied."""
+def load_history(slug: str, snapshots: Path = SNAPSHOTS, criteria: Optional[dict] = None) -> list:
+    """[(date, snapshot), ...] oldest first, with lease terms picked and specials/effective rent applied."""
+    criteria = criteria if criteria is not None else load_viable_config()
     out = []
     for path in sorted(snapshots.glob(f"*/{slug}.json")):
         snap = json.loads(path.read_text())
-        apply_specials(snap, path.parent.name)
+        apply_specials(snap, path.parent.name, criteria.get("min_lease_months"))
         out.append((path.parent.name, snap))
     return out
 
@@ -351,6 +400,7 @@ def build_complex(cfg: dict, history: list, st: dict, criteria: Optional[dict] =
         "total_known": cur["total_known"],
         "priced": cur["priced"],
         "price_basis": latest["price_basis"],
+        "source": SOURCE_LABELS.get(cfg.get("scraper")),
         "by_beds": cur["by_beds"],
         "viable_units": cur["viable_units"],
         "viable_min": cur["viable_min"],
@@ -394,6 +444,7 @@ def build_complex(cfg: dict, history: list, st: dict, criteria: Optional[dict] =
         "gone_units": gone,
         "history_start": unit_window[0][0],
         "checks": checks,
+        "source": summary["source"],
         "stale": stale,
         "error": error,
     }
@@ -418,7 +469,8 @@ def viable_rows(summary: dict, detail: Optional[dict]) -> List[dict]:
             "baths": fp.get("baths"), "sqft": u.get("sqft") or fp.get("sqft"),
             "available_date": u.get("available_date"), "apply_url": u.get("apply_url"),
             "price": u.get("price"), "total_price": u.get("total_price"), "effective": u.get("effective"),
-            "monthly": u["monthly"], "fees_known": u["fees_known"],
+            "monthly": u["monthly"], "fees_known": u["fees_known"], "lease_months": u.get("lease_months"),
+            "short_term": u.get("short_term"), "lease_options": u.get("lease_options"), "quoted": u.get("quoted"),
             "incl_fees": detail.get("price_basis") == "total", "history": u.get("history"),
             "history_start": detail.get("history_start"),
         })
@@ -434,7 +486,7 @@ def build() -> None:
 
     summary, viable = [], []
     for cfg in complexes:
-        s, detail = build_complex(cfg, load_history(cfg["slug"]), status.get(cfg["slug"], {}), criteria)
+        s, detail = build_complex(cfg, load_history(cfg["slug"], criteria=criteria), status.get(cfg["slug"], {}), criteria)
         summary.append(s)
         viable += viable_rows(s, detail)
         if detail:
