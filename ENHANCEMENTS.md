@@ -7,10 +7,6 @@ Finished items move to **Done** at the bottom.
 - [~] **Cross-complex search page** — done: the main page lists every viable unit across
       complexes (viable.yaml), sortable incl. $/sq ft, with a bedroom filter. Open: move-in
       date and pet-friendly filters, and an on-page way to adjust the limit.
-- [ ] **Lease-term normalization** — prices are quoted for different terms: Attain 12 mo
-      (flat), Nexus 14, North Hill and ReNew 15, Salt Meadow 9–15 per unit, Linkhorn Bay a
-      range by term (we store the low end). Show the term next to prices and capture
-      per-term prices where a site exposes them (SightMap's leasing price URL, RentCafe ranges).
 - [ ] **Commute / distance** — distance or drive time from each complex to places you care
       about (work, beach). Most sites' JSON-LD or SightMap data includes lat/long.
 
@@ -26,8 +22,6 @@ Finished items move to **Done** at the bottom.
 - [ ] **Banners shown by JavaScript** — site-wide banners are read from static HTML only
       (Attain, North Hill). Some sites show promos in JS popups (Greystar/Nexus, G5/Columbus
       Station, North Hill's "Special Offers" pop-up); reading those needs Chrome per site.
-- [ ] **Prefer live sources** — after Attain, check each site for a SightMap (or similar live
-      widget) and prefer it over embedded page data; note per complex which source is used.
 
 ## Polish
 - [ ] **Floorplan image lightbox** — image URLs are scraped; only thumbnails are shown.
@@ -36,6 +30,13 @@ Finished items move to **Done** at the bottom.
       "Not Pet Friendly"); North Beach lists cats/dogs per unit.
 
 ## Done
+- [x] **Lease-term normalization** — SightMap and Entrata (ReNew) prices for every term are
+      scraped; each unit uses its cheapest term of 11+ months (`viable.yaml`), ties to the
+      shorter lease, with all terms on tap. Not possible yet: RentCafe (Linkhorn Bay's range,
+      Salt Meadow's single terms), AppFolio, G5 publish no per-term prices.
+- [x] **Prefer live sources** — checked every site (2026-10-10): North Hill moved to its
+      SightMap; Columbus Station's G5 page has an empty SightMap slot; RentCafe sites and ReNew
+      have none. Complex pages show their data source.
 - [x] **Viable-units focus** — `viable.yaml` (1–2 BR under $1,900/mo incl. listed fees, net of
       specials) drives the main page, complex pages' default filter and the email digest; the
       full overview moved to an "All units" page.

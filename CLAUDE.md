@@ -11,7 +11,8 @@ Working end to end:
   `realpage_craft` until 2026-10-06),
   ReNew Marina Shores (`entrata`), Linkhorn Bay (`rentcafe`), North Beach (`appfolio`), and
   added 2026-10-06: Nexus (`sightmap`), Indigo 19 (`rentcafe`, no prices), North Hill
-  (`realpage_leasestar`), Salt Meadow Bay (`rentcafe`, card layout) and Columbus Station (`g5`).
+  (`sightmap`, was `realpage_leasestar` until 2026-10-10), Salt Meadow Bay (`rentcafe`, card
+  layout) and Columbus Station (`g5`).
 - Weekly launchd job on the Mac scrapes and pushes snapshots; the GitHub Action
   (`.github/workflows/deploy.yml`) tests, builds `site/data/` and deploys Pages.
 - Overview page (`site/index.html`) and complex detail page (`site/complex.html?c=<slug>`).
@@ -32,6 +33,10 @@ Working end to end:
 - Added 2026-10-09: **viable units** (`viable.yaml`: 1–2 BR under $1,900/mo). The main page
   (`index.html`) lists only those; the old overview is now `all.html`; complex pages default to
   "Viable only"; the digest reports only viable units. Scraping is unchanged.
+- Added 2026-10-10: **lease terms**. SightMap (Attain, Nexus, North Hill) and Entrata (ReNew)
+  scrapers store every term's price (`Unit.lease_options`); the build prices each unit at its
+  cheapest term of `min_lease_months` (11) or more. North Hill moved to its SightMap (no Chrome).
+  Complex pages name their data source. Not yet run by the scheduler (first: Mon 2026-10-12).
 
 Next steps: see ENHANCEMENTS.md.
 Daily pulls are a one-liner (`scripts/install_schedule.sh daily`) if wanted.
@@ -48,7 +53,7 @@ Daily pulls are a one-liner (`scripts/install_schedule.sh daily`) if wanted.
   `viable` (index.html, `renderViable`), `all` (all.html, `renderAll`), `complex` (complex.html).
 - `tests/` — parser tests against saved pages/JSON in `tests/fixtures/` (`test_parsers.py`),
   build logic (`test_build.py`), the email digest (`test_alerts.py`), specials parsing (`test_specials.py`), banner parsing
-  (`test_banners.py`, small hand-trimmed fixtures) and the Browser pause (`test_fetch.py`); 86 tests.
+  (`test_banners.py`, small hand-trimmed fixtures) and the Browser pause (`test_fetch.py`); 96 tests.
   Fixtures are scrubbed of site API keys (GitHub push protection rejected a SightMap page
   with a Mapbox token; don't commit raw embed pages). `pytest.ini` puts the repo
   root on the path (plain `pytest` failed in CI without it).
@@ -84,10 +89,11 @@ as too broad. The README documents this setup.
 
 ## Scraping load
 
-Weekly volume is tiny (Attain: 1 request; ReNew: ~7 Chrome page loads over ~80 s; Linkhorn
-Bay: 7 requests; North Beach: 2; Nexus: 3; Indigo 19: ~7; North Hill: 1 Chrome page load;
-Salt Meadow Bay: ~7; Columbus Station: ~6 GraphQL POSTs). Only ReNew and North Hill use
-Chrome. To fill in a newly added complex without re-hitting the others, run
+Weekly volume is small (Attain: 3 requests + 1 per unit (~29) for lease terms; ReNew: ~7
+Chrome page loads + 1 in-page request per unit (~28), all 5–10 s apart, ~5 min; Linkhorn
+Bay: 7 requests; North Beach: 2; Nexus: 3 + ~11; Indigo 19: ~7; North Hill: 3 + ~8;
+Salt Meadow Bay: ~7; Columbus Station: ~6 GraphQL POSTs). SightMap term requests are 1–3 s
+apart. Only ReNew uses Chrome. To fill in a newly added complex without re-hitting the others, run
 `scraper.run --only <slug>` in the scheduler's clone and push (see README).
 `fetch.Browser` waits a random 5–10 s before each page load after the first in a session
 (`pause=`), so ReNew's detail pages aren't back to back. Attain and North Hill also make one
@@ -98,8 +104,8 @@ plain request each for their homepage banner.
 **Attain (RealPage / Vest Craft template + Engrain SightMap)** — plain HTTP, scraper `sightmap`
 - Since 2026-10-06 Attain is read from its **SightMap** (embed id `gow32268p2m`, JSON-escaped
   in the page data as `"sightmapEmbedUrl":"https:\/\/sightmap.com\/embed\/gow32268p2m"`).
-  SightMap holds the live prices: base rent + total with required fees (~$135/mo), flat
-  12-month pricing.
+  SightMap holds the live prices: base rent + total with required fees (~$135/mo). It was
+  flat 12-month pricing until ~2026-10-09; now prices vary by term (3–15 mo, quoted at 15).
 - Why: the page's embedded Vue `:units` data (the old `realpage_craft` source) was stale or
   wrong. 10 of 26 available units had different prices, and 4705 #104 was filed as a 1BR A3
   at $1,692 when SightMap (and the site's map) shows a 2BR B2.1 at $1,515 base / $1,650
@@ -173,7 +179,15 @@ plain request each for their homepage banner.
   leasing site returns 403 to plain requests. Tracked for units/availability; price None,
   `priced: False`, shown as "Call".
 
-**North Hill (RealPage LeaseStar, Greystar)** — Chrome
+**North Hill (RealPage LeaseStar site + Engrain SightMap, Greystar)** — plain HTTP, scraper `sightmap`
+- Since 2026-10-10 read from the SightMap on `floor-plans.aspx` (embed `dqw97x0gvo9`); prices
+  matched the RealPage API exactly. SightMap says "flat 12-month pricing" and has no term
+  choices, but RealPage's `minLeaseTermInMonth` is 15, so `complexes.yaml` sets
+  `lease_months: 15`. `omit_building: true` (SightMap's building "605" is already in unit
+  "605-304") keeps unit keys as before; `plan_sqft` fills sizes for plans without units (the
+  page lists none). Floorplan codes changed (SightMap ids), so plan sparklines restart and
+  starred North Hill floorplans (not units) need re-starring.
+- The notes below describe the old `realpage_leasestar` source, kept for other sites:
 - Data API `api.ws.realpage.com/v2/property/8871769/{floorplans,units?available=true...}`
   returns 401 without a token the page's JS gets, so `realpage_leasestar` loads the page
   with `Browser.get_json_responses` and reads those responses.
@@ -215,6 +229,29 @@ plain request each for their homepage banner.
   `PRICE_BASIS = "total"`, saved as `Snapshot.price_basis`; snapshots from before that
   field existed get the basis from the scraper module at build time. The UI labels those
   prices "incl. fees".
+
+## Lease terms
+
+- Prices vary by lease length (and move-in date). SightMap's per-unit `leasing_price_url`
+  plus `&date=<move-in>` lists every term (Attain 3–15 mo, Nexus 12–14); flat-pricing maps
+  return one option with `lease_term: null` (no choice). ReNew's "See Details" button calls
+  `.../floorplans/?module=property_floorplans&action=view_lease_term&property_floorplan[id]=..
+  &unit_space[id]=..`; `Browser.fetch` runs it inside the Chrome page (same cookies). Prices
+  there are Entrata totals. 12 months is sometimes $500 dearer than 11 or 15.
+- ReNew rate-limits: on 2026-10-10, term requests 1–3 s apart got a 429 and the next page load
+  hung on Cloudflare's challenge. Now 5–10 s apart, and the first failure stops term requests
+  for the rest of the run (units keep the default quote).
+- Scrapers store all terms unfiltered in `Unit.lease_options` (`price`/`total_price`/
+  `lease_months` stay the site's default quote). `build.choose_lease_term` (inside
+  `apply_specials`, because specials depend on the term) works out each term's monthly cost
+  the same way as `unit_monthly`, ignores terms under `viable.yaml` `min_lease_months` (11,
+  the user's choice), and picks the lowest, ties to the shorter lease. The pick replaces the
+  unit's price/total/lease; the quote is kept as `quoted`. Plan "from" prices follow.
+  A one-time discount can make a shorter lease cheapest (Attain's $500 banner: 12 over 15).
+- Units with only shorter terms, or quoted for one shorter term (Salt Meadow's 9-month
+  cards), keep their price and get `short_term`, shown "9 mo (under 11)"; the user chose to
+  keep them viable rather than drop them. Unknown terms aren't flagged.
+- No per-term data: RentCafe (range or single term; SecureCafe blocks scripts), AppFolio, G5.
 
 ## Specials and effective rent
 

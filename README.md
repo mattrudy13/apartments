@@ -28,6 +28,11 @@ is unaffected: every unit is still pulled and kept.
 "Net" rent spreads specials (e.g. two months free) over the lease, applying caveats such
 as move-in-by dates per unit; see `scraper/specials.py`.
 
+**Lease terms**: where a site prices several lease lengths (SightMap sites, Entrata), each unit
+is priced at its cheapest term of at least `min_lease_months` (`viable.yaml`, 11), ties going to
+the shorter lease. Tap a unit's price to compare terms. Units quoted only for a shorter term
+are kept and flagged ("9 mo (under 11)").
+
 **Data checks**: the build flags a complex with a "check data" badge (and lists the reasons
 on its page) when its latest data disagrees with itself: floorplan counts vs unit lists,
 units missing prices, a >15% move in the lowest price or a unit's price since the last pull,
@@ -78,8 +83,8 @@ Add an entry to `complexes.yaml`. The `scraper` must match the site's platform:
 | `entrata`        | Entrata sites (behind Cloudflare; uses Chrome) | the floorplans listing page |
 | `rentcafe`       | Yardi RentCafe sites                          | the `/floorplans` page    |
 | `appfolio`       | AppFolio listings widget (Duda-built sites)   | the availability page     |
-| `sightmap`       | sites embedding an Engrain SightMap           | the page with the embed (e.g. `/floorplans/`) |
-| `realpage_leasestar` | RealPage LeaseStar sites (uses Chrome)    | the floor-plans page      |
+| `sightmap`       | sites embedding an Engrain SightMap (live data, prices per lease term; preferred) | the page with the embed (e.g. `/floorplans/`) |
+| `realpage_leasestar` | RealPage LeaseStar sites (uses Chrome; prefer `sightmap` if the site has one) | the floor-plans page |
 | `g5`             | G5 Marketing Cloud sites                      | the floor-plans page      |
 
 Optional `banner:` reads a site-wide promo banner ("Move in by Oct 31 and enjoy $500 off
