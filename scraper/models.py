@@ -35,6 +35,9 @@ class Unit:
     total_price: Optional[int] = None  # base rent + required monthly fees, when the site shows it
     lease_months: Optional[int] = None
     specials: List[Dict[str, str]] = field(default_factory=list)  # unit-specific specials
+    # Every lease term the site prices, [{months, price, total_price}], unfiltered. price/total_price/
+    # lease_months above stay the site's default quote; build.py picks the cheapest allowed term.
+    lease_options: List[Dict[str, int]] = field(default_factory=list)
 
 
 @dataclass

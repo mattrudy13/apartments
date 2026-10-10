@@ -1,0 +1,31 @@
+{
+ "data": {
+  "default_option": 2,
+  "options": [
+   {
+    "lease_term": 12,
+    "display_lease_term": "12 Months",
+    "price": 1861,
+    "total_display_price": "$1,907.06",
+    "display_price": "$1,861.00",
+    "apply_url": "https://liveatnexus.securecafe.com/onlineleasing/nexus0/rentaloptions.aspx?UnitID=47363699&FloorPlanID=6293276&myOlePropertyid=2286232&MoveInDate=2026-10-21&sLeaseTerm=12"
+   },
+   {
+    "lease_term": 13,
+    "display_lease_term": "13 Months",
+    "price": 1834,
+    "total_display_price": "$1,880.06",
+    "display_price": "$1,834.00",
+    "apply_url": "https://liveatnexus.securecafe.com/onlineleasing/nexus0/rentaloptions.aspx?UnitID=47363699&FloorPlanID=6293276&myOlePropertyid=2286232&MoveInDate=2026-10-21&sLeaseTerm=13"
+   },
+   {
+    "lease_term": 14,
+    "display_lease_term": "14 Months",
+    "price": 1812,
+    "total_display_price": "$1,858.06",
+    "display_price": "$1,812.00",
+    "apply_url": "https://liveatnexus.securecafe.com/onlineleasing/nexus0/rentaloptions.aspx?UnitID=47363699&FloorPlanID=6293276&myOlePropertyid=2286232&MoveInDate=2026-10-21&sLeaseTerm=14"
+   }
+  ]
+ }
+}

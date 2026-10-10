@@ -8,7 +8,10 @@ term, available date) and the floor plans. Plain HTTP works.
 from __future__ import annotations
 
 import json
+import logging
+import random
 import re
+import time
 from collections import defaultdict
 from datetime import date
 from typing import List, Optional, Tuple
@@ -18,6 +21,11 @@ from bs4 import BeautifulSoup
 from .entrata import parse_property  # schema.org ApartmentComplex JSON-LD, if present
 from .fetch import http_get, parse_date, to_float, to_int
 from .models import FloorPlan, PropertyInfo, Unit
+
+log = logging.getLogger(__name__)
+
+# Seconds between per-unit lease-term requests (one per unit, ~40 a week across sites).
+OPTIONS_PAUSE = (1.0, 3.0)
 
 
 def _plan_name(raw: str) -> str:
@@ -64,7 +72,29 @@ def page_plan_details(page: str) -> dict:
     return out
 
 
-def parse(data: dict, today: Optional[date] = None, page: str = "") -> Tuple[List[FloorPlan], List[Unit]]:
+def parse_options(data: dict) -> List[dict]:
+    """Lease terms from a unit's `leasing_price_url` response -> [{months, price, total_price}].
+    Flat-pricing sites return one option with `lease_term: null`; that carries no term, so it's skipped."""
+    out = []
+    for o in (data.get("data", data) or {}).get("options") or []:
+        months, price = to_int(o.get("lease_term")), to_int(o.get("price"))
+        if not months or not price:
+            continue
+        total = to_float(re.sub(r"[^\d.]", "", o.get("total_display_price") or ""))
+        out.append({"months": months, "price": price, "total_price": round(total) if total else None})
+    return sorted(out, key=lambda o: o["months"])
+
+
+def parse(data: dict, today: Optional[date] = None, page: str = "", cfg: Optional[dict] = None) -> Tuple[List[FloorPlan], List[Unit]]:
+    """Optional complexes.yaml overrides in `cfg`:
+    - `lease_months`: replaces the term SightMap quotes. North Hill's SightMap says flat 12-month
+      pricing while RealPage, its leasing system, says 15 is the minimum.
+    - `omit_building`: drop the building when it's already part of the unit number ("605" / "605-304"),
+      so unit keys match an earlier source that had no building (history and starred units carry over).
+    - `plan_sqft`: {plan name: sqft} for plans with no units when the page doesn't list sizes."""
+    cfg = cfg or {}
+    lease_months, omit_building = cfg.get("lease_months"), cfg.get("omit_building", False)
+    plan_sqft = {str(k): v for k, v in (cfg.get("plan_sqft") or {}).items()}
     sm = data.get("data", data)
     # "Flat pricing" sites quote every price for one lease term (Attain: 12 months).
     flat_lease = to_int(sm.get("flat_pricing_lease_term_months")) if sm.get("pricing_strategy") == "flat_pricing" else None
@@ -81,9 +111,9 @@ def parse(data: dict, today: Optional[date] = None, page: str = "") -> Tuple[Lis
             price=to_int(u.get("price")),
             total_price=round(min(totals)) if totals else to_int(u.get("total_display_price")),
             sqft=to_int(u.get("area")),
-            building=u.get("building") or None,
+            building=None if omit_building else (u.get("building") or None),
             available_date=parse_date(u.get("available_on"), today),
-            lease_months=int(lease.group(1)) if lease else flat_lease,
+            lease_months=lease_months or (int(lease.group(1)) if lease else flat_lease),
             specials=[{"title": special[:120], "description": special}] if special else [],
         ))
 
@@ -106,7 +136,7 @@ def parse(data: dict, today: Optional[date] = None, page: str = "") -> Tuple[Lis
             name=name,
             beds=to_float(fp.get("bedroom_count")),
             baths=to_float(fp.get("bathroom_count")),
-            sqft=min(sqfts) if sqfts else (sqft_on_page(text, name) or (extra.get(_norm(name)) or (None, None))[0]),
+            sqft=min(sqfts) if sqfts else (plan_sqft.get(name) or sqft_on_page(text, name) or (extra.get(_norm(name)) or (None, None))[0]),
             rent_min=min(prices) if prices else None,
             rent_max=max(prices) if prices else None,
             units_available=len(us),
@@ -127,7 +157,9 @@ def scrape(cfg: dict, today: Optional[date] = None) -> Tuple[PropertyInfo, List[
     api = re.search(r"https://sightmap\.com/app/api/v1/[a-z0-9]+/sightmaps/\d+", embed_page)
     if not api:
         raise ValueError("SightMap data URL not found in embed page")
-    floorplans, units = parse(json.loads(http_get(api.group(0))), today, page)
+    data = json.loads(http_get(api.group(0)))
+    floorplans, units = parse(data, today, page, cfg)
+    add_lease_options(data, units, today or date.today())
     info = parse_property(page)
     if not info.phone and ':property="' in page:  # RealPage/Vest pages (Attain) carry the phone in :property
         try:
@@ -138,3 +170,24 @@ def scrape(cfg: dict, today: Optional[date] = None) -> Tuple[PropertyInfo, List[
         except Exception:
             pass
     return info, floorplans, units
+
+
+def add_lease_options(data: dict, units: List[Unit], today: date) -> None:
+    """Fill `Unit.lease_options` from each unit's price-by-term endpoint (SightMap's rent calculator).
+    Prices depend on the move-in date, so ask for the unit's own available date (or today). A failed
+    request only costs that unit its options; it keeps the default quote."""
+    # parse() builds one Unit per SightMap unit, in order; unit numbers alone can repeat across buildings.
+    raw_units = data.get("data", data).get("units", [])
+    first = True
+    for raw, unit in zip(raw_units, units):
+        url = raw.get("leasing_price_url")
+        if not url:
+            continue
+        if not first:
+            time.sleep(random.uniform(*OPTIONS_PAUSE))
+        first = False
+        move_in = max(unit.available_date or today.isoformat(), today.isoformat())
+        try:
+            unit.lease_options = parse_options(json.loads(http_get(f"{url}&date={move_in}")))
+        except Exception as e:
+            log.warning("SightMap lease terms failed for unit %s: %s", unit.unit_number, e)

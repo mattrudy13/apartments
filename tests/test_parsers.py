@@ -141,6 +141,45 @@ def test_sightmap_nexus():
     assert entrata.parse_property(read("sightmap_nexus_floorplans.html")).phone == "757-663-5564"  # @graph JSON-LD
 
 
+def test_sightmap_lease_options():
+    import json
+
+    from scraper import sightmap
+
+    opts = sightmap.parse_options(json.loads(read("sightmap_leasing_options.json")))
+    assert opts == [
+        {"months": 12, "price": 1861, "total_price": 1907},
+        {"months": 13, "price": 1834, "total_price": 1880},
+        {"months": 14, "price": 1812, "total_price": 1858},
+    ]
+    # Flat-pricing sites answer with one option and no term: nothing to choose between.
+    assert sightmap.parse_options(json.loads(read("sightmap_leasing_flat.json"))) == []
+
+
+def test_sightmap_add_lease_options(monkeypatch):
+    import json
+
+    from scraper import sightmap
+
+    data = json.loads(read("sightmap_nexus_api.json"))
+    plans, units = sightmap.parse(data, TODAY)
+    asked = []
+
+    def fake_get(url):
+        asked.append(url)
+        if len(asked) == 2:
+            raise RuntimeError("boom")  # one failed unit keeps its default quote
+        return read("sightmap_leasing_options.json")
+
+    monkeypatch.setattr(sightmap, "http_get", fake_get)
+    monkeypatch.setattr(sightmap, "OPTIONS_PAUSE", (0, 0))
+    sightmap.add_lease_options(data, units, date(2026, 10, 25))
+    assert len(asked) == len(units)
+    assert asked[0].endswith("&date=2026-10-25")  # available 10-19, already past: ask for today
+    assert [o["months"] for o in units[0].lease_options] == [12, 13, 14]
+    assert units[1].lease_options == [] and units[1].price
+
+
 def test_realpage_leasestar_north_hill():
     import json
 
