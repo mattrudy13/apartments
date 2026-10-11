@@ -172,3 +172,8 @@ the tests, rebuilds `site/data/` and deploys Pages
 If a site fails to scrape, the run still pushes; that complex is marked **stale** and
 keeps showing its last good data. Errors are recorded in `data/status.json` and listed at
 the top of the weekly email.
+
+Sites decide whether to block partly by IP address, so the network the Mac is on at run time
+matters. A site that suddenly returns 403 "Just a moment..." (a Cloudflare challenge) after a
+network change may work again from the usual network; test from another network (e.g. a phone
+hotspot) before changing the scraper.

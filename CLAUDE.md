@@ -4,7 +4,7 @@ Tracks availability and pricing for a list of apartment complexes and publishes 
 static dashboard to GitHub Pages: https://mattrudy13.github.io/apartments/
 See README.md for usage commands.
 
-## Status (2026-10-07)
+## Status (2026-10-10)
 
 Working end to end:
 - Nine tracked complexes (`complexes.yaml`): Attain at Chic's Beach (`sightmap`, was
@@ -37,6 +37,15 @@ Working end to end:
   scrapers store every term's price (`Unit.lease_options`); the build prices each unit at its
   cheapest term of `min_lease_months` (11) or more. North Hill moved to its SightMap (no Chrome).
   Complex pages name their data source. Not yet run by the scheduler (first: Mon 2026-10-12).
+- **Open (2026-10-10): RentCafe sites blocked by Cloudflare.** Linkhorn Bay, Salt Meadow Bay and
+  Indigo 19 (and rentcafe.com itself) return 403 `cf-mitigated: challenge` ("Just a moment...")
+  to plain HTTP, and headless Chrome (`channel="chrome"`, which passes ReNew) stayed stuck too.
+  They worked on 10-05/10-06. Blocked from the first request of the 10-10 session, before any
+  heavy testing, so not caused by this project's traffic that day. The Mac had also moved to a
+  different network (Verizon Fios, Virginia Beach) since the last good run, so the cause is
+  either that IP's Cloudflare reputation or a Yardi-wide bot-rule change. Untested: a phone or
+  hotspot on another network (a 200 there means it's this network). If still blocked Monday,
+  those three show "stale". Don't build a workaround until the cause is known.
 
 Next steps: see ENHANCEMENTS.md.
 Daily pulls are a one-liner (`scripts/install_schedule.sh daily`) if wanted.
@@ -137,6 +146,8 @@ plain request each for their homepage banner.
 - Address/phone come from the `ApartmentComplex` JSON-LD block.
 
 **Linkhorn Bay (Yardi RentCafe)** — plain HTTP
+- All RentCafe sites sit behind Yardi's Cloudflare; see the open issue under Status (blocked
+  2026-10-10 from a new network).
 - `/floorplans` has one `.fp-container` card per plan (code = numeric ID in
   `id="fp-container-602897"`), with "Starting at" price and "N Available". The count
   element has `data-max="6"`, so cards may cap the count; the scraper uses the number

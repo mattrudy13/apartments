@@ -19,6 +19,25 @@ Finished items move to **Done** at the bottom.
 - [ ] **Indigo 19 prices** — its own site says "Rent: Call" and its leasing portal blocks
       plain requests. Check other public sources that list its units with prices (e.g. the
       manager's site or a listing site) before giving up on it.
+- [ ] **RentCafe behind Cloudflare** — since 2026-10-10 Linkhorn Bay, Salt Meadow Bay and
+      Indigo 19 return a Cloudflare challenge to plain HTTP and headless Chrome. First find out
+      whether it's the Mac's new network (test from a hotspot); only if it's Yardi-wide, try
+      headed Chrome or another public source for those listings.
+- [ ] **Say why a scrape failed** — record "blocked (Cloudflare challenge / 403 / 429)" vs "page
+      changed (parse error)" in `status.json`, plus the network the run came from, and show it
+      in the digest and the stale badge. Blocks are usually temporary; parse errors need code.
+- [ ] **Fewer ReNew term requests** — ReNew rate-limits (429 on 2026-10-10). Fetch lease terms
+      only for units whose bed count is in `viable.yaml` (or skip plans already far over the
+      limit), cutting ~28 requests a week. Verify the first scheduled run (2026-10-12) first.
+- [ ] **Starred floorplans survive source switches** — shortlist floorplan ids use the site's
+      plan code, which changed when North Hill moved to SightMap. Fall back to matching by
+      complex + plan name so stars carry over.
+- [ ] **Digest: don't count term switches as price drops** — the first run after lease-term
+      pricing (and any week the cheapest term changes) can report "drops" that are only a
+      different lease length. Compare at the same term when both pulls have it, or label it.
+- [ ] **Target move-in date** — SightMap and Entrata price by move-in date; the scraper asks for
+      each unit's available date. A move-in date in `viable.yaml` would price every unit for when
+      you'd actually move (and could hide units not available by then).
 - [ ] **Banners shown by JavaScript** — site-wide banners are read from static HTML only
       (Attain, North Hill). Some sites show promos in JS popups (Greystar/Nexus, G5/Columbus
       Station, North Hill's "Special Offers" pop-up); reading those needs Chrome per site.
