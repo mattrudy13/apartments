@@ -75,6 +75,52 @@ def test_entrata_lease_terms():
           "&property_floorplan[id]=690926&unit_space[id]=5148564&occupancy_type=c")
 
 
+
+def test_entrata_wants_terms():
+    viable = {"beds": [1.0, 2.0], "max_monthly": 1900}
+    assert entrata.wants_terms(2.0, 2184, viable)  # within the margin: a cheaper term could qualify
+    assert not entrata.wants_terms(2.0, 2200, viable)  # 1900 * 1.15 = 2185
+    assert not entrata.wants_terms(3.0, 1500, viable)  # bed count never viable
+    assert entrata.wants_terms(1.0, None, viable)
+    assert entrata.wants_terms(3.0, 5000, {"beds": [], "max_monthly": None})  # no viable.yaml
+
+
+class FakeBrowser:
+    """Serves the saved ReNew pages; lease-term requests fail after `terms_ok` successes."""
+
+    def __init__(self, terms_ok):
+        self.calls, self.terms_ok = [], terms_ok
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        pass
+
+    def get(self, url):
+        self.calls.append("page")
+        return read("renew_detail_douglas.html" if "/floorplans/" in url else "renew_floorplans.html")
+
+    def fetch(self, path, pause=None):
+        self.calls.append("terms")
+        if self.calls.count("terms") > self.terms_ok:
+            raise RuntimeError("HTTP 429")
+        return read("renew_lease_terms.html")
+
+
+def test_entrata_scrape_fetches_terms_after_pages(monkeypatch):
+    browser = FakeBrowser(terms_ok=1)
+    monkeypatch.setattr(entrata, "Browser", lambda: browser)
+    monkeypatch.setattr(entrata, "load_viable", lambda: {"beds": [], "max_monthly": None})
+    cfg = {"slug": "renew", "url": "https://www.renewmarinashores.com/virginia-beach/renew-marina-shores/conventional/"}
+    info, floorplans, units = entrata.scrape(cfg, TODAY)
+    # Every page loads before any term request, so the 429 can't block a page load.
+    pages = browser.calls.count("page")
+    assert browser.calls[:pages] == ["page"] * pages and pages > 1
+    assert browser.calls[pages:] == ["terms", "terms"]  # stops at the first failure
+    assert units[0].lease_options and not any(u.lease_options for u in units[1:])
+    assert all(u.price for u in units)  # units without terms keep their quote
+
 def test_entrata_property_info():
     info = entrata.parse_property(read("renew_floorplans.html"))
     assert info.address == "2257 Willow Oak Cir., Virginia Beach, 23451"

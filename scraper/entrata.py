@@ -10,9 +10,11 @@ import json
 import logging
 import re
 from datetime import date
+from pathlib import Path
 from typing import List, Optional, Tuple
 from urllib.parse import parse_qs, urlparse
 
+import yaml
 from bs4 import BeautifulSoup, Tag
 
 from .fetch import Browser, parse_date, to_float, to_int
@@ -21,6 +23,11 @@ from .models import FloorPlan, PropertyInfo, Unit
 log = logging.getLogger(__name__)
 PRICE_BASIS = "total"  # prices are "Total Monthly Leasing Price" (rent + required fees)
 TERMS_PAUSE = (5.0, 10.0)  # seconds between per-unit lease-term requests (same as page loads)
+# Lease terms are fetched only for units that could be viable: a viable bed count, quoted under
+# max_monthly plus this share. ReNew rate-limits (~28 term requests got a 429 on 2026-10-10 and
+# 10-13); this cut it to ~10 on 10-05's units. Specials are applied later from the quote either way.
+TERMS_MARGIN = 0.15
+VIABLE_CONFIG = Path(__file__).resolve().parent.parent / "viable.yaml"
 
 
 def _text(el: Optional[Tag]) -> str:
@@ -202,9 +209,24 @@ def lease_terms_path(listing_url: str, floorplan_id: str, unit_space_id: str) ->
             f"&property_floorplan[id]={floorplan_id}&unit_space[id]={unit_space_id}&occupancy_type=c")
 
 
+def load_viable(path: Path = VIABLE_CONFIG) -> dict:
+    """beds / max_monthly from viable.yaml (read here because build.py imports the scrapers)."""
+    cfg = (yaml.safe_load(path.read_text()) if path.exists() else None) or {}
+    return {"beds": [float(b) for b in cfg.get("beds") or []], "max_monthly": cfg.get("max_monthly")}
+
+
+def wants_terms(beds: Optional[float], price: Optional[int], viable: dict) -> bool:
+    """Whether a unit is worth a lease-term request. Without a viable.yaml, every unit is."""
+    if viable.get("beds") and beds not in viable["beds"]:
+        return False
+    limit = viable.get("max_monthly")
+    return not limit or price is None or price < limit * (1 + TERMS_MARGIN)
+
+
 def scrape(cfg: dict, today: Optional[date] = None) -> Tuple[PropertyInfo, List[FloorPlan], List[Unit]]:
     units: List[Unit] = []
-    terms_ok = True
+    pending = []  # (floorplan, unit, unit-space id) still needing lease terms
+    viable = load_viable()
     with Browser() as browser:
         listing = browser.get(cfg["url"])
         info = parse_property(listing)
@@ -217,21 +239,11 @@ def scrape(cfg: dict, today: Optional[date] = None) -> Tuple[PropertyInfo, List[
             if not fp_units:
                 log.warning("%s: no unit rows on %s", cfg["slug"], fp.details_url)
                 continue
-            # Prices for every lease term: one in-page request per unit, spaced like page loads.
-            # The site rate-limits (429 on 2026-10-10 with 1-3 s gaps, then a Cloudflare challenge),
-            # so the first failure stops term requests for the rest of the run; units keep their quote.
-            space_ids = unit_space_ids(detail) if terms_ok else {}
+            space_ids = unit_space_ids(detail)
             for u in fp_units:
                 space = space_ids.get((u.building, u.unit_number))
-                if not space or not terms_ok:
-                    continue
-                try:
-                    u.lease_options = parse_lease_terms(
-                        browser.fetch(lease_terms_path(cfg["url"], fp.code, space), pause=TERMS_PAUSE))
-                except Exception as e:
-                    terms_ok = False
-                    log.warning("%s: lease terms failed for %s #%s, skipping the rest: %s",
-                                cfg["slug"], u.building, u.unit_number, e)
+                if space and wants_terms(fp.beds, u.price, viable):
+                    pending.append((fp, u, space))
             fp.units_available = len(fp_units)
             prices = [u.price for u in fp_units if u.price]
             if prices:
@@ -240,4 +252,18 @@ def scrape(cfg: dict, today: Optional[date] = None) -> Tuple[PropertyInfo, List[
             if dates:
                 fp.earliest_available = dates[0]
             units.extend(fp_units)
+
+        # Prices for every lease term: one in-page request per unit, after every page has loaded,
+        # so a rate limit (429 on 2026-10-10 and 10-13, then a Cloudflare challenge on the next
+        # page load) costs only terms, never the snapshot. The first failure stops term requests;
+        # units keep their quote.
+        log.info("%s: fetching lease terms for %d of %d units", cfg["slug"], len(pending), len(units))
+        for fp, u, space in pending:
+            try:
+                u.lease_options = parse_lease_terms(
+                    browser.fetch(lease_terms_path(cfg["url"], fp.code, space), pause=TERMS_PAUSE))
+            except Exception as e:
+                log.warning("%s: lease terms failed for %s #%s, skipping the rest: %s",
+                            cfg["slug"], u.building, u.unit_number, e)
+                break
     return info, floorplans, units
