@@ -72,7 +72,7 @@ Daily pulls are a one-liner (`scripts/install_schedule.sh daily`) if wanted.
 - `tests/` — parser tests against saved pages/JSON in `tests/fixtures/` (`test_parsers.py`),
   build logic (`test_build.py`), the email digest (`test_alerts.py`), specials parsing (`test_specials.py`), banner parsing
   (`test_banners.py`, small hand-trimmed fixtures), the Browser pause (`test_fetch.py`) and the
-  retry selection (`test_run.py`); 99 tests.
+  retry selection (`test_run.py`); 101 tests.
   Fixtures are scrubbed of site API keys (GitHub push protection rejected a SightMap page
   with a Mapbox token; don't commit raw embed pages). `pytest.ini` puts the repo
   root on the path (plain `pytest` failed in CI without it).
@@ -408,6 +408,9 @@ plain request each for their homepage banner.
   aren't listed, so the email doesn't repeat them weekly. The shortlist section still covers
   every starred item.
 - The shortlist lives in the browser, so `alerts.yaml` takes a pasted share link instead.
+- Specials started/ended compare only offers still running on each pull (same rule as the site's
+  "ended" badge), so a stale banner like North Hill's "May 31st" never shows as new (fixed
+  2026-10-13; the 10-12 preview listed it). An offer whose deadline passes reads as ended.
 - Sent every week, even with no changes: a missing email is the "Mac didn't run" signal.
 - SMTP creds in `~/.config/apartments/alerts.env` (not TCC-protected, so launchd can read
   it); env vars `SMTP_*`/`MAIL_*` override. Uses stdlib `smtplib`; no new dependencies.
