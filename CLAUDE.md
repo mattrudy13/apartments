@@ -29,10 +29,10 @@ Working end to end:
   succeeded, see below) and `2026-10-13` (manual `--only` refill of Linkhorn Bay and Indigo 19).
   Next scheduled run: Mon 2026-10-19.
 - Added 2026-10-09: weekly email digest (`alerts.py`, run at the end of `scrape_and_push.sh`).
-  It needs `~/.config/apartments/alerts.env` on this Mac; without it the step prints "not
-  sending" and the job carries on (setup tracked in issue #2). **Still not set up as of
-  2026-10-13**, so no digest has been sent. On 10-12 the step didn't even run: that run pulled the
-  new script mid-run and bash kept executing the old copy (see Dev notes).
+  SMTP is set up in `~/.config/apartments/alerts.env` (Gmail app password); the user sent the
+  10-12 digest by hand on 2026-10-13 and it arrived. First scheduled send: Mon 2026-10-19. The
+  10-12 run itself sent nothing: it pulled the new script mid-run and bash kept executing the
+  old copy (see Dev notes). Issue #2 still has viable.yaml/shortlist checks open.
 - Added 2026-10-09: **viable units** (`viable.yaml`: 1–2 BR under $1,900/mo). The main page
   (`index.html`) lists only those; the old overview is now `all.html`; complex pages default to
   "Viable only"; the digest reports only viable units. Scraping is unchanged.
