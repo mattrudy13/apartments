@@ -141,8 +141,8 @@ that touch `data/`, `site/`, `scraper/`, `tests/`, `build.py` or `complexes.yaml
 the site (docs-only changes don't); a failing test blocks the deploy.
 
 ```sh
-scripts/install_schedule.sh          # launchd job: Mondays 9:00 (runs on wake if asleep)
-scripts/install_schedule.sh daily    # every day 9:00
+scripts/install_schedule.sh          # launchd jobs: Mondays 9:00, retry 14:00 (run on wake if asleep)
+scripts/install_schedule.sh daily    # every day 9:00 and 14:00
 scripts/install_schedule.sh uninstall
 launchctl kickstart gui/$(id -u)/com.apartments.scraper   # run it now
 tail -f ~/Library/Logs/apartments-scraper.log
@@ -172,6 +172,12 @@ the tests, rebuilds `site/data/` and deploys Pages
 If a site fails to scrape, the run still pushes; that complex is marked **stale** and
 keeps showing its last good data. Errors are recorded in `data/status.json` and listed at
 the top of the weekly email.
+
+The 14:00 job (`com.apartments.scraper.retry`, `scrape_and_push.sh --retry`) re-scrapes only
+the complexes that failed earlier that day. If it recovers one, it pushes and re-sends the
+digest with "(updated after retry)" in the subject; otherwise it does nothing. Keep the Mac
+open and on power at those times: a closed laptop on battery only wakes for ~45-second
+bursts, so requests time out mid-run (what happened on 2026-10-12).
 
 Sites decide whether to block partly by IP address, so the network the Mac is on at run time
 matters. A site that suddenly returns 403 "Just a moment..." (a Cloudflare challenge) after a

@@ -2,6 +2,7 @@
 
     python -m scraper.run                 # all complexes
     python -m scraper.run --only attain-chics-beach
+    python -m scraper.run --retry         # only complexes whose scrape failed earlier today
 """
 from __future__ import annotations
 
@@ -61,9 +62,18 @@ def scrape_one(cfg: dict, today: date) -> Snapshot:
     )
 
 
+def retry_slugs(status: dict, today: date) -> list:
+    """Complexes whose latest attempt was today and failed (the afternoon retry's targets).
+    A retry that launchd fires the next day (Mac asleep at 14:00) finds none, so it never
+    turns into an unscheduled full run."""
+    return sorted(slug for slug, s in status.items()
+                  if s.get("last_attempt") == today.isoformat() and not s.get("ok"))
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--only", nargs="*", help="slugs to scrape (default: all)")
+    parser.add_argument("--retry", action="store_true", help="only complexes that failed earlier today")
     args = parser.parse_args(argv)
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
 
@@ -71,6 +81,12 @@ def main(argv=None) -> int:
     out_dir = ROOT / "data" / "snapshots" / today.isoformat()
     status_path = ROOT / "data" / "status.json"
     status = json.loads(status_path.read_text()) if status_path.exists() else {}
+    if args.retry:
+        args.only = retry_slugs(status, today)
+        if not args.only:
+            log.info("nothing to retry")
+            return 0
+        log.info("retrying %s", ", ".join(args.only))
 
     failures = 0
     for cfg in load_complexes():

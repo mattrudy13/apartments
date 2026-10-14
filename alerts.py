@@ -260,7 +260,7 @@ def criteria_text(c: dict) -> str:
     return text + (f" under {money(c['max_monthly'])}/mo" if c.get("max_monthly") else "")
 
 
-def subject(d: dict) -> str:
+def subject(d: dict, retry: bool = False) -> str:
     when = date.fromisoformat(d["run_date"]).strftime("%b %-d")
     drops = len(d["price_drops"])
     parts = [f"{len(d['new_units'])} new viable"]
@@ -270,7 +270,8 @@ def subject(d: dict) -> str:
     failed = sum(1 for c in d["complexes"] if not c["refreshed"] and c["error"])
     if failed:
         parts.append(f"{failed} scrape{'s' if failed != 1 else ''} failed")
-    return f"Apartments {when}: " + ", ".join(parts)
+    label = "Apartments (updated after retry)" if retry else "Apartments"
+    return f"{label} {when}: " + ", ".join(parts)
 
 
 # ---------- rendering ----------
@@ -439,6 +440,7 @@ def main(argv=None) -> int:
     p.add_argument("--date", help="pull to report on (default: the newest snapshot)")
     p.add_argument("--problem", action="append", default=[], help="extra line for 'Needs attention'")
     p.add_argument("--failure", metavar="MSG", help="send only a short failure notice")
+    p.add_argument("--retry", action="store_true", help="mark the subject as re-sent after the afternoon retry")
     args = p.parse_args(argv)
 
     if args.failure:
@@ -448,7 +450,7 @@ def main(argv=None) -> int:
         status_path = ROOT / "data" / "status.json"
         status = json.loads(status_path.read_text()) if status_path.exists() else {}
         d = build_digest(load_config(), complexes, status, args.date, problems=args.problem)
-        subj, text, html = subject(d), render_text(d), render_html(d)
+        subj, text, html = subject(d, args.retry), render_text(d), render_html(d)
     if args.preview:
         Path(args.preview).write_text(html or text)
         print(f"Wrote {args.preview}: {subj}")

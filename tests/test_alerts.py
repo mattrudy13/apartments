@@ -58,6 +58,7 @@ def test_new_viable_units_price_drops_and_leased(tmp_path):
     c = d["complexes"][0]
     assert (c["leased"], c["priced_out"], c["viable_now"], c["viable_before"]) == (1, 0, 3, 3)
     assert alerts.subject(d) == "Apartments Oct 12: 1 new viable, 1 price drop"
+    assert alerts.subject(d, retry=True) == "Apartments (updated after retry) Oct 12: 1 new viable, 1 price drop"
 
 
 def test_newly_viable_and_priced_out(tmp_path):
