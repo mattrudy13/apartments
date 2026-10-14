@@ -4,7 +4,7 @@ Tracks availability and pricing for a list of apartment complexes and publishes 
 static dashboard to GitHub Pages: https://mattrudy13.github.io/apartments/
 See README.md for usage commands.
 
-## Status (2026-10-10)
+## Status (2026-10-13)
 
 Working end to end:
 - Nine tracked complexes (`complexes.yaml`): Attain at Chic's Beach (`sightmap`, was
@@ -13,7 +13,8 @@ Working end to end:
   added 2026-10-06: Nexus (`sightmap`), Indigo 19 (`rentcafe`, no prices), North Hill
   (`sightmap`, was `realpage_leasestar` until 2026-10-10), Salt Meadow Bay (`rentcafe`, card
   layout) and Columbus Station (`g5`).
-- Weekly launchd job on the Mac scrapes and pushes snapshots; the GitHub Action
+- Weekly launchd job on the Mac scrapes and pushes snapshots (Mon 9:00, plus a 14:00 retry of
+  that day's failures, added 2026-10-13); the GitHub Action
   (`.github/workflows/deploy.yml`) tests, builds `site/data/` and deploys Pages.
 - Overview page (`site/index.html`) and complex detail page (`site/complex.html?c=<slug>`).
 - Effective (net) rent from specials, per-unit listing history, base vs total-per-month
@@ -37,15 +38,17 @@ Working end to end:
   scrapers store every term's price (`Unit.lease_options`); the build prices each unit at its
   cheapest term of `min_lease_months` (11) or more. North Hill moved to its SightMap (no Chrome).
   Complex pages name their data source. Not yet run by the scheduler (first: Mon 2026-10-12).
-- **Open (2026-10-10): RentCafe sites blocked by Cloudflare.** Linkhorn Bay, Salt Meadow Bay and
-  Indigo 19 (and rentcafe.com itself) return 403 `cf-mitigated: challenge` ("Just a moment...")
-  to plain HTTP, and headless Chrome (`channel="chrome"`, which passes ReNew) stayed stuck too.
-  They worked on 10-05/10-06. Blocked from the first request of the 10-10 session, before any
-  heavy testing, so not caused by this project's traffic that day. The Mac had also moved to a
-  different network (Verizon Fios, Virginia Beach) since the last good run, so the cause is
-  either that IP's Cloudflare reputation or a Yardi-wide bot-rule change. Untested: a phone or
-  hotspot on another network (a 200 there means it's this network). If still blocked Monday,
-  those three show "stale". Don't build a workaround until the cause is known.
+- Cleared by 2026-10-12: the RentCafe sites (Linkhorn Bay, Salt Meadow Bay, Indigo 19) returned
+  403 Cloudflare challenges on 10-10 from a new network (Verizon Fios), cause never pinned down.
+  They answered 200 to plain HTTP on 10-12 and 10-13 with no changes on our side.
+- **2026-10-12 run (Columbus Day):** the Mac was closed on battery, so the job only ran during
+  ~45 s dark wakes; it took 2.5 h and in-flight requests timed out (Linkhorn Bay, Indigo 19,
+  ReNew went stale). Diagnosed from `pmset -g log` ("DarkWake ... Using BATT"). The user's Mac is
+  normally open and on power 8–5 weekdays, so 9:00 stays; the 14:00 retry covers partial days.
+  Linkhorn Bay and Indigo 19 were refilled by a manual `--only` run on 10-13.
+- **ReNew stale since 10-05 (open):** 10-13's manual run got a 429 on lease-term requests, then
+  the next detail page stuck on Cloudflare. Fixed in code the same day (terms fetched after all
+  pages, only for possibly viable units); first real test is Mon 2026-10-19.
 
 Next steps: see ENHANCEMENTS.md.
 Daily pulls are a one-liner (`scripts/install_schedule.sh daily`) if wanted.
@@ -62,7 +65,8 @@ Daily pulls are a one-liner (`scripts/install_schedule.sh daily`) if wanted.
   `viable` (index.html, `renderViable`), `all` (all.html, `renderAll`), `complex` (complex.html).
 - `tests/` — parser tests against saved pages/JSON in `tests/fixtures/` (`test_parsers.py`),
   build logic (`test_build.py`), the email digest (`test_alerts.py`), specials parsing (`test_specials.py`), banner parsing
-  (`test_banners.py`, small hand-trimmed fixtures) and the Browser pause (`test_fetch.py`); 96 tests.
+  (`test_banners.py`, small hand-trimmed fixtures), the Browser pause (`test_fetch.py`) and the
+  retry selection (`test_run.py`); 99 tests.
   Fixtures are scrubbed of site API keys (GitHub push protection rejected a SightMap page
   with a Mapbox token; don't commit raw embed pages). `pytest.ini` puts the repo
   root on the path (plain `pytest` failed in CI without it).
@@ -89,6 +93,11 @@ So the launchd job runs from its own clone with its own venv:
 - Clone: `~/Library/Application Support/apartments-scraper` (venv at `.venv/` inside it)
 - Plist: `~/Library/LaunchAgents/com.apartments.scraper.plist`
 - Log: `~/Library/Logs/apartments-scraper.log`
+- Retry job: `com.apartments.scraper.retry` (Mon 14:00, `scrape_and_push.sh --retry`). It
+  re-scrapes only complexes whose `status.json` entry failed that same day
+  (`run.retry_slugs`), so when launchd fires it late on the next wake it does nothing. It
+  re-sends the digest ("updated after retry") only if it recovered a complex (the user's choice:
+  next week's baseline would otherwise skip those changes).
 - Run now: `launchctl kickstart gui/$(id -u)/com.apartments.scraper`
 
 The script runs `git pull` before every scrape, so changes pushed from this Desktop copy
@@ -99,7 +108,8 @@ as too broad. The README documents this setup.
 ## Scraping load
 
 Weekly volume is small (Attain: 3 requests + 1 per unit (~29) for lease terms; ReNew: ~7
-Chrome page loads + 1 in-page request per unit (~28), all 5–10 s apart, ~5 min; Linkhorn
+Chrome page loads, then 1 in-page term request per possibly viable unit (~10 of ~28), all
+5–10 s apart, ~3 min; Linkhorn
 Bay: 7 requests; North Beach: 2; Nexus: 3 + ~11; Indigo 19: ~7; North Hill: 3 + ~8;
 Salt Meadow Bay: ~7; Columbus Station: ~6 GraphQL POSTs). SightMap term requests are 1–3 s
 apart. Only ReNew uses Chrome. To fill in a newly added complex without re-hitting the others, run
@@ -146,8 +156,8 @@ plain request each for their homepage banner.
 - Address/phone come from the `ApartmentComplex` JSON-LD block.
 
 **Linkhorn Bay (Yardi RentCafe)** — plain HTTP
-- All RentCafe sites sit behind Yardi's Cloudflare; see the open issue under Status (blocked
-  2026-10-10 from a new network).
+- All RentCafe sites sit behind Yardi's Cloudflare; it challenged this Mac 2026-10-10 (new network),
+  cleared by 10-12 on its own (see Status).
 - `/floorplans` has one `.fp-container` card per plan (code = numeric ID in
   `id="fp-container-602897"`), with "Starting at" price and "N Available". The count
   element has `data-max="6"`, so cards may cap the count; the scraper uses the number
@@ -250,8 +260,12 @@ plain request each for their homepage banner.
   &unit_space[id]=..`; `Browser.fetch` runs it inside the Chrome page (same cookies). Prices
   there are Entrata totals. 12 months is sometimes $500 dearer than 11 or 15.
 - ReNew rate-limits: on 2026-10-10, term requests 1–3 s apart got a 429 and the next page load
-  hung on Cloudflare's challenge. Now 5–10 s apart, and the first failure stops term requests
-  for the rest of the run (units keep the default quote).
+  hung on Cloudflare's challenge; on 10-13 the same happened at 5–10 s. So `entrata.scrape` now
+  loads every page first and requests terms last (a 429 costs only terms, never the snapshot),
+  only for units `wants_terms` picks: a `viable.yaml` bed count and a quote under `max_monthly`
+  + 15% (`TERMS_MARGIN`). The first failure stops term requests; units keep the default quote,
+  and specials still apply to it. In the fixtures, ReNew's 15-month quote already equals its
+  cheapest 11+ term, so skipped units lose little.
 - Scrapers store all terms unfiltered in `Unit.lease_options` (`price`/`total_price`/
   `lease_months` stay the site's default quote). `build.choose_lease_term` (inside
   `apply_specials`, because specials depend on the term) works out each term's monthly cost
