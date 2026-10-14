@@ -22,22 +22,25 @@ Working end to end:
 - Added 2026-10-07: price per sq ft, a shortlist (starred floorplans/units, per browser, with a
   share link), site-wide promo banners (Attain, North Hill) feeding net rent, per-bedroom
   specials, random 5–10 s pauses between Chrome pages, and tap-to-expand details for phones.
-  Banners first reach the live site with the next scrape (none run since the code landed).
+  Banners first scraped 2026-10-12 (Attain and North Hill, one each).
 - Real snapshots: `2026-10-04` (setup day), `2026-10-05` (first scheduled Monday run, 09:00,
-  confirmed working unattended) and `2026-10-06` (the five new complexes plus Attain
-  re-scraped from SightMap, all via manual `--only` runs). Next scheduled run: Mon 2026-10-12,
-  the first to cover all nine. Snapshots so far are a day apart, so week-over-week trends
-  and the >15% data checks become meaningful after that run.
+  confirmed working unattended), `2026-10-06` (the five new complexes plus Attain re-scraped
+  from SightMap, via manual `--only` runs), `2026-10-12` (first scheduled run of all nine; six
+  succeeded, see below) and `2026-10-13` (manual `--only` refill of Linkhorn Bay and Indigo 19).
+  Next scheduled run: Mon 2026-10-19.
 - Added 2026-10-09: weekly email digest (`alerts.py`, run at the end of `scrape_and_push.sh`).
-  It needs `~/.config/apartments/alerts.env` in place on this Mac before Monday's run;
-  without it the step prints "not sending" and the job carries on (setup tracked in issue #2).
+  It needs `~/.config/apartments/alerts.env` on this Mac; without it the step prints "not
+  sending" and the job carries on (setup tracked in issue #2). **Still not set up as of
+  2026-10-13**, so no digest has been sent. On 10-12 the step didn't even run: that run pulled the
+  new script mid-run and bash kept executing the old copy (see Dev notes).
 - Added 2026-10-09: **viable units** (`viable.yaml`: 1–2 BR under $1,900/mo). The main page
   (`index.html`) lists only those; the old overview is now `all.html`; complex pages default to
   "Viable only"; the digest reports only viable units. Scraping is unchanged.
 - Added 2026-10-10: **lease terms**. SightMap (Attain, Nexus, North Hill) and Entrata (ReNew)
   scrapers store every term's price (`Unit.lease_options`); the build prices each unit at its
   cheapest term of `min_lease_months` (11) or more. North Hill moved to its SightMap (no Chrome).
-  Complex pages name their data source. Not yet run by the scheduler (first: Mon 2026-10-12).
+  Complex pages name their data source. First scheduled run 2026-10-12: worked for the
+  SightMap sites; ReNew hasn't completed a run with terms yet (see below).
 - Cleared by 2026-10-12: the RentCafe sites (Linkhorn Bay, Salt Meadow Bay, Indigo 19) returned
   403 Cloudflare challenges on 10-10 from a new network (Verizon Fios), cause never pinned down.
   They answered 200 to plain HTTP on 10-12 and 10-13 with no changes on our side.
@@ -46,9 +49,12 @@ Working end to end:
   ReNew went stale). Diagnosed from `pmset -g log` ("DarkWake ... Using BATT"). The user's Mac is
   normally open and on power 8–5 weekdays, so 9:00 stays; the 14:00 retry covers partial days.
   Linkhorn Bay and Indigo 19 were refilled by a manual `--only` run on 10-13.
-- **ReNew stale since 10-05 (open):** 10-13's manual run got a 429 on lease-term requests, then
-  the next detail page stuck on Cloudflare. Fixed in code the same day (terms fetched after all
-  pages, only for possibly viable units); first real test is Mon 2026-10-19.
+- **ReNew stale since 10-05 (open):** 10-13's manual run (~19:30 ET) got a 429 on lease-term
+  requests, then the next detail page stuck on Cloudflare. Fixed in code the same day (terms
+  fetched after all pages, only for possibly viable units). An accidental `--retry` with the new
+  code ~1 h later was challenged on a page load (Douglas) before any term request, so the Mac
+  was still flagged then. Not retried after that; first real test is Mon 2026-10-19. If 10-19
+  also fails on a page load, cut page loads next (see ENHANCEMENTS.md).
 
 Next steps: see ENHANCEMENTS.md.
 Daily pulls are a one-liner (`scripts/install_schedule.sh daily`) if wanted.
@@ -415,6 +421,12 @@ plain request each for their homepage banner.
 - Local preview: `python build.py && python -m http.server -d site 8000`.
 - Commits: the user's global rule forbids commits/pushes on weekdays 8am–5pm ET unless
   asked; outside that window, commit and push finished work without asking.
+- `scrape_and_push.sh` changes take effect one run late: the job's `git pull` replaces the file
+  while bash is still executing the old copy (10-12 ran without the digest step this way). After
+  changing it or `install_schedule.sh`, pull in the scheduler's clone by hand, and rerun
+  `scripts/install_schedule.sh` there for schedule changes (done 2026-10-13 for the retry job).
+- `scraper.run --retry` is a real scrape whenever `status.json` has a failure dated today; it
+  isn't a dry run.
 - Snapshots/data are committed only from the scheduler's clone (weekly job, or a manual
   `--only` run there); code changes come from this Desktop copy. Scraping in this copy
   is fine for testing, but discard `data/` changes before pulling.

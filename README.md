@@ -31,7 +31,9 @@ as move-in-by dates per unit; see `scraper/specials.py`.
 **Lease terms**: where a site prices several lease lengths (SightMap sites, Entrata), each unit
 is priced at its cheapest term of at least `min_lease_months` (`viable.yaml`, 11), ties going to
 the shorter lease. Tap a unit's price to compare terms. Units quoted only for a shorter term
-are kept and flagged ("9 mo (under 11)").
+are kept and flagged ("9 mo (under 11)"). ReNew rate-limits term requests, so it fetches terms
+only for units that could be viable (a `viable.yaml` bed count, quoted under the limit + 15%);
+other units keep the site's default quote.
 
 **Data checks**: the build flags a complex with a "check data" badge (and lists the reasons
 on its page) when its latest data disagrees with itself: floorplan counts vs unit lists,
@@ -178,6 +180,10 @@ the complexes that failed earlier that day. If it recovers one, it pushes and re
 digest with "(updated after retry)" in the subject; otherwise it does nothing. Keep the Mac
 open and on power at those times: a closed laptop on battery only wakes for ~45-second
 bursts, so requests time out mid-run (what happened on 2026-10-12).
+
+Changes to `scripts/scrape_and_push.sh` reach the scheduler one run late (bash keeps running
+the copy it started with while `git pull` replaces it), so pull in the scheduler's clone after
+changing it. After changing `scripts/install_schedule.sh`, rerun it there too.
 
 Sites decide whether to block partly by IP address, so the network the Mac is on at run time
 matters. A site that suddenly returns 403 "Just a moment..." (a Cloudflare challenge) after a

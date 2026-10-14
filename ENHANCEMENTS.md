@@ -19,16 +19,14 @@ Finished items move to **Done** at the bottom.
 - [ ] **Indigo 19 prices** — its own site says "Rent: Call" and its leasing portal blocks
       plain requests. Check other public sources that list its units with prices (e.g. the
       manager's site or a listing site) before giving up on it.
-- [ ] **RentCafe behind Cloudflare** — since 2026-10-10 Linkhorn Bay, Salt Meadow Bay and
-      Indigo 19 return a Cloudflare challenge to plain HTTP and headless Chrome. First find out
-      whether it's the Mac's new network (test from a hotspot); only if it's Yardi-wide, try
-      headed Chrome or another public source for those listings.
 - [ ] **Say why a scrape failed** — record "blocked (Cloudflare challenge / 403 / 429)" vs "page
-      changed (parse error)" in `status.json`, plus the network the run came from, and show it
-      in the digest and the stale badge. Blocks are usually temporary; parse errors need code.
-- [ ] **Fewer ReNew term requests** — ReNew rate-limits (429 on 2026-10-10). Fetch lease terms
-      only for units whose bed count is in `viable.yaml` (or skip plans already far over the
-      limit), cutting ~28 requests a week. Verify the first scheduled run (2026-10-12) first.
+      changed (parse error)" vs "timed out" in `status.json`, plus the network the run came from
+      and whether the Mac was on battery / lid closed (10-12's timeouts were the Mac sleeping, found
+      only via `pmset -g log`). Show it in the digest and the stale badge. Blocks are usually
+      temporary; parse errors need code; sleep needs nothing.
+- [ ] **Fewer ReNew page loads** — only if Mon 2026-10-19 is still challenged on a *page load*
+      (10-13's runs were). Skip detail pages for plans whose card price is far over the limit
+      (~7 loads to ~4). Trade-off: those plans' units drop out of the All units page and history.
 - [ ] **Starred floorplans survive source switches** — shortlist floorplan ids use the site's
       plan code, which changed when North Hill moved to SightMap. Fall back to matching by
       complex + plan name so stars carry over.
@@ -66,6 +64,12 @@ Finished items move to **Done** at the bottom.
 - [x] **Site-wide promo banners** — `banner:` in complexes.yaml (Attain, North Hill); discounts
       read from banner text lower net rent with the usual guards, incl. per-bedroom amounts
       ("$500 off 2-bedroom or $1,000 off 3-bedroom"). Tap a special for its full text.
+- [x] **Afternoon retry** — a Mon 14:00 launchd job re-scrapes only that day's failures and
+      re-sends the digest if it recovered one (2026-10-13, after the Mac slept through 10-12).
+- [x] **Fewer ReNew term requests** — terms fetched after every page (a 429 costs only terms)
+      and only for possibly viable units, ~28 requests to ~10 (2026-10-13; unverified live).
+- [x] **RentCafe Cloudflare block** — Linkhorn Bay, Salt Meadow Bay and Indigo 19 were challenged
+      2026-10-10 from a new network; it cleared by 10-12 with no changes. Nothing built.
 - [x] **Gentler Chrome scraping** — random 5–10 s pause between Chrome page loads (ReNew ~80 s).
 - [x] **Price per sq ft** — sortable column in floorplan tables, per unit, and in the shortlist
       (listed price; net in the tooltip). Add it to the search page when that's built.
