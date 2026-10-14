@@ -29,6 +29,7 @@ import yaml
 
 from build import (SNAPSHOTS, bed_label, data_checks, load_history, load_viable_config, metrics,
                    normalize_specials, prepare_history, unit_key)
+from scraper.specials import parse_special
 
 ROOT = Path(__file__).resolve().parent
 DEFAULT_ENV = Path.home() / ".config" / "apartments" / "alerts.env"
@@ -103,11 +104,17 @@ def unit_row(u: dict, plan: dict, info: dict) -> dict:
     }
 
 
-def special_titles(snap: dict) -> Dict[str, str]:
-    """Normalized title -> display title, for floorplan and site-wide specials."""
+def special_titles(snap: dict, snap_date: str) -> Dict[str, str]:
+    """Normalized title -> display title, for floorplan and site-wide specials still running on
+    snap_date. Ended ones are left out (same rule as the site's "ended" badge), so a stale banner
+    like North Hill's "move in by May 31st" never reads as a new special."""
+    ref = date.fromisoformat(snap_date)
     out = {}
     for s in normalize_specials(snap.get("property_specials")) + [
             s for fp in snap["floorplans"] for s in normalize_specials(fp.get("specials"))]:
+        t = parse_special(s["title"], s.get("description", ""), ref)
+        if (t.expires and t.expires < snap_date) or (t.move_in_by and t.move_in_by < snap_date):
+            continue
         out[" ".join(s["title"].lower().split())] = s["title"]
     return out
 
@@ -147,7 +154,7 @@ def complex_changes(cfg: dict, history: list, run_date: str, st: dict) -> dict:
     out.update(baseline=base_date, viable_before=prev["viable_units"], viable_min_before=prev["viable_min"],
                base_plans={fp["code"]: fp for fp in base["floorplans"]})
 
-    now_t, before_t = special_titles(latest), special_titles(base)
+    now_t, before_t = special_titles(latest, run_date), special_titles(base, base_date)
     out["specials_started"] = [t for k, t in now_t.items() if k not in before_t]
     out["specials_ended"] = [t for k, t in before_t.items() if k not in now_t]
 

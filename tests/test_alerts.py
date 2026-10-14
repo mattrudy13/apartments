@@ -83,6 +83,24 @@ def test_new_special_makes_unit_viable_and_is_reported(tmp_path):
     assert d["specials"] == [("Test", ["$100 Off Monthly Rent"], [])]
 
 
+
+def test_ended_banner_is_not_a_new_special(tmp_path):
+    # North Hill's stale banner, first scraped 2026-10-12: its deadline passed months ago.
+    stale = {"title": "Enjoy 2 Weeks Base Rent Free When You Move In by May 31st!", "description": ""}
+    s1 = snap([unit("101", 1950)])
+    s2 = {**snap([unit("101", 1950)]), "property_specials": [stale]}
+    write(tmp_path, "t", {"2026-10-05": s1, "2026-10-12": s2})
+    assert digest(tmp_path, config())["specials"] == []
+
+
+def test_special_reaching_its_deadline_reads_as_ended(tmp_path):
+    special = {"title": "$500 off when you move in by Oct 10", "description": ""}
+    write(tmp_path, "t", {
+        "2026-10-05": snap([unit("101", 1950)], specials=[special]),
+        "2026-10-12": snap([unit("101", 1950)], specials=[special]),  # still on the page, but over
+    })
+    assert digest(tmp_path, config())["specials"] == [("Test", [], [special["title"]])]
+
 def test_studios_and_3br_are_left_out(tmp_path):
     plans = [{"code": "P0", "name": "Loft", "beds": 0}, {"code": "P2", "name": "Oak", "beds": 2},
              {"code": "P3", "name": "Elm", "beds": 3}]
