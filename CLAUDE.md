@@ -72,7 +72,7 @@ Daily pulls are a one-liner (`scripts/install_schedule.sh daily`) if wanted.
 - `tests/` — parser tests against saved pages/JSON in `tests/fixtures/` (`test_parsers.py`),
   build logic (`test_build.py`), the email digest (`test_alerts.py`), specials parsing (`test_specials.py`), banner parsing
   (`test_banners.py`, small hand-trimmed fixtures), the Browser pause (`test_fetch.py`) and the
-  retry selection (`test_run.py`); 101 tests.
+  retry selection (`test_run.py`); 104 tests.
   Fixtures are scrubbed of site API keys (GitHub push protection rejected a SightMap page
   with a Mapbox token; don't commit raw embed pages). `pytest.ini` puts the repo
   root on the path (plain `pytest` failed in CI without it).
@@ -352,6 +352,16 @@ plain request each for their homepage banner.
 - Complex detail page charts **lowest price by bedroom count** (≤4 series) instead of
   one line per floorplan (Attain has 49 plans, which would be unreadable). Per-floorplan
   trends are sparklines in the floorplan table instead.
+- **90-day lows** (added 2026-10-19; the user's target move is early Feb 2027): `build.bed_lows`
+  gives each complex's lowest by_beds prices over the last 90 days of pulls (`summary.lows`), and
+  each floorplan gets `low` (`rent_min`/`effective_min`). The window starts no earlier than
+  `unit_history_since`, so Attain's wrong pre-10-06 prices never set a low. The overview shows it
+  under each bedroom price in the cell's mode (base or total, plus net when lower), always with
+  the amount ("at low" wording made the columns too wide). Complex pages show it under From/Net.
+  Attain's lows come from 10-06, its last flat-pricing pull, and sit well under its later prices.
+- **Latest move-in** column (overview): furthest-out `available_date` among listed units; undated
+  units don't count (Indigo 19 has none, so "—"). Sorts furthest first on the first click. To fit
+  it, the trend sparkline is 70px, Updated drops the year, and two headers wrap.
 - One y-axis per chart: price and unit count are separate charts on the overview.
 - Price deltas: up is red (bad for a renter), down is green; unit deltas the reverse.
 - "Net" values appear only when specials lower the price (Net columns are hidden at a
