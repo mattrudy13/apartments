@@ -306,3 +306,30 @@ def test_picked_term_drives_viable():
                                     [("2026-10-10", s)], {"ok": True}, CRITERIA)
     assert detail["units"][0]["viable"] and detail["units"][0]["monthly"] == 1880
     assert summary["source"] == "SightMap (live unit map)"
+
+
+def test_lows_cover_the_window_and_start_at_unit_history_since():
+    # 09-20 had a bogus low from an old source; 09-27 is the real low; it has risen since.
+    h = history(snap([unit("1", 1200)]), snap([unit("1", 1500)]), snap([unit("1", 1600)]), snap([unit("1", 1700)]))
+    cfg = {"slug": "t", "name": "T", "url": "x", "unit_history_since": "2026-09-27"}
+    summary, detail = build_complex(cfg, h, {"ok": True})
+    assert summary["lows"]["1 BR"]["min_price"] == 1500
+    assert detail["floorplans"][0]["low"]["rent_min"] == 1500
+    summary, _ = build_complex({"slug": "t", "name": "T", "url": "x"}, h, {"ok": True})
+    assert summary["lows"]["1 BR"]["min_price"] == 1200
+
+
+def test_lows_skip_pulls_older_than_90_days():
+    old, new = snap([unit("1", 1000)]), snap([unit("1", 1500)])
+    apply_specials(old, "2026-06-01")
+    apply_specials(new, "2026-10-11")
+    summary, _ = build_complex({"slug": "t", "name": "T", "url": "x"}, [("2026-06-01", old), ("2026-10-11", new)], {"ok": True})
+    assert summary["lows"]["1 BR"]["min_price"] == 1500
+
+
+def test_latest_move_in_ignores_undated_units():
+    s = snap([unit("1", 1500, avail="2026-11-01"), unit("2", 1600, avail="2027-01-15"), unit("3", 1700, avail=None)])
+    summary, _ = build_complex({"slug": "t", "name": "T", "url": "x"}, history(s), {"ok": True})
+    assert summary["latest_move_in"] == "2027-01-15"
+    summary, _ = build_complex({"slug": "t", "name": "T", "url": "x"}, history(snap([unit("1", 1500, avail=None)])), {"ok": True})
+    assert summary["latest_move_in"] is None

@@ -10,7 +10,7 @@ from __future__ import annotations
 import json
 import re
 from collections import defaultdict
-from datetime import date
+from datetime import date, timedelta
 from pathlib import Path
 from typing import List, Optional, Tuple
 
@@ -34,6 +34,8 @@ SOURCE_LABELS = {
     "realpage_craft": "RealPage page data",
 }
 VIABLE_CONFIG = ROOT / "viable.yaml"
+# Lows cover the run-up to a move a few months out (the user's target is early Feb 2027).
+LOW_WINDOW_DAYS = 90
 
 
 def bed_sort_key(label: str):
@@ -358,6 +360,17 @@ def data_checks(window: List[Tuple[str, dict]], series: List[dict]) -> List[str]
 
 # ---------- build ----------
 
+def bed_lows(series: List[dict]) -> dict:
+    """Lowest value of each by_beds price field across `series`, per bedroom label."""
+    lows = defaultdict(lambda: dict.fromkeys(("min_price", "min_effective", "min_total", "min_total_net")))
+    for p in series:
+        for bed, b in p["by_beds"].items():
+            for k in lows[bed]:
+                if b.get(k) and (lows[bed][k] is None or b[k] < lows[bed][k]):
+                    lows[bed][k] = b[k]
+    return dict(sorted(lows.items(), key=lambda kv: bed_sort_key(kv[0])))
+
+
 def delta(cur, prev):
     return None if cur is None or prev is None else cur - prev
 
@@ -385,6 +398,12 @@ def build_complex(cfg: dict, history: list, st: dict, criteria: Optional[dict] =
     series = [{"date": d, **metrics(s)} for d, s in history]
     latest_date, latest = history[-1]
     cur, prev = series[-1], (series[-2] if len(series) > 1 else None)
+    # After a data-source switch, unit IDs change (Attain: "4705-WSH #104" -> "4705 #104"), so
+    # unit tracking restarts at `unit_history_since` instead of flagging every unit new/gone.
+    # Lows start there too: Attain's older source had wrong prices.
+    since = str(cfg.get("unit_history_since") or "")
+    low_start = max(since, (date.fromisoformat(latest_date) - timedelta(days=LOW_WINDOW_DAYS)).isoformat())
+    move_in = [u["available_date"] for u in latest["units"] if u.get("available_date")]
 
     summary = {
         "slug": slug,
@@ -402,6 +421,9 @@ def build_complex(cfg: dict, history: list, st: dict, criteria: Optional[dict] =
         "price_basis": latest["price_basis"],
         "source": SOURCE_LABELS.get(cfg.get("scraper")),
         "by_beds": cur["by_beds"],
+        "lows": bed_lows([p for p in series if p["date"] >= low_start] or series[-1:]),
+        # How far ahead the complex lists units (undated units don't count).
+        "latest_move_in": max(move_in) if move_in else None,
         "viable_units": cur["viable_units"],
         "viable_min": cur["viable_min"],
         "viable_units_delta": delta(cur["viable_units"], prev and prev["viable_units"]),
@@ -426,9 +448,9 @@ def build_complex(cfg: dict, history: list, st: dict, criteria: Optional[dict] =
                 "effective_min": fp.get("effective_min"),
                 "units": fp["units_available"],
             })
-    # After a data-source switch, unit IDs change (Attain: "4705-WSH #104" -> "4705 #104"), so
-    # unit tracking restarts at `unit_history_since` instead of flagging every unit new/gone.
-    since = str(cfg.get("unit_history_since") or "")
+    for fp in latest["floorplans"]:
+        window = [p for p in fp_history[fp["code"]] if p["date"] >= low_start and p["units"]]
+        fp["low"] = {k: min((p[k] for p in window if p[k]), default=None) for k in ("rent_min", "effective_min")}
     unit_window = [(d, s) for d, s in history if d >= since] or history[-1:]
     uh, gone = unit_histories(unit_window)
     checks = data_checks(unit_window, series)
