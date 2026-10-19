@@ -1,48 +1,47 @@
 {
  "attain-chics-beach": {
-  "last_attempt": "2026-10-12",
-  "last_success": "2026-10-12",
+  "last_attempt": "2026-10-19",
+  "last_success": "2026-10-19",
   "ok": true
  },
  "columbus-station": {
-  "last_attempt": "2026-10-12",
-  "last_success": "2026-10-12",
+  "last_attempt": "2026-10-19",
+  "last_success": "2026-10-19",
   "ok": true
  },
  "indigo-19": {
-  "last_attempt": "2026-10-13",
-  "last_success": "2026-10-13",
+  "last_attempt": "2026-10-19",
+  "last_success": "2026-10-19",
   "ok": true
  },
  "linkhorn-bay": {
-  "last_attempt": "2026-10-13",
-  "last_success": "2026-10-13",
+  "last_attempt": "2026-10-19",
+  "last_success": "2026-10-19",
   "ok": true
  },
  "nexus": {
-  "last_attempt": "2026-10-12",
-  "last_success": "2026-10-12",
+  "last_attempt": "2026-10-19",
+  "last_success": "2026-10-19",
   "ok": true
  },
  "north-beach": {
-  "last_attempt": "2026-10-12",
-  "last_success": "2026-10-12",
+  "last_attempt": "2026-10-19",
+  "last_success": "2026-10-19",
   "ok": true
  },
  "north-hill": {
-  "last_attempt": "2026-10-12",
-  "last_success": "2026-10-12",
+  "last_attempt": "2026-10-19",
+  "last_success": "2026-10-19",
   "ok": true
  },
  "renew-marina-shores": {
-  "error": "Stuck on Cloudflare challenge: https://www.renewmarinashores.com/virginia-beach/renew-marina-shores/floorplans/chesapeake-loft-690922/fp_name/occupancy_type/conventional/",
-  "last_attempt": "2026-10-13",
-  "last_success": "2026-10-05",
-  "ok": false
+  "last_attempt": "2026-10-19",
+  "last_success": "2026-10-19",
+  "ok": true
  },
  "salt-meadow-bay": {
-  "last_attempt": "2026-10-12",
-  "last_success": "2026-10-12",
+  "last_attempt": "2026-10-19",
+  "last_success": "2026-10-19",
   "ok": true
  }
 }

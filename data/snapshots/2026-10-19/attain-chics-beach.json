@@ -1,0 +1,2961 @@
+{
+ "slug": "attain-chics-beach",
+ "name": "Attain at Chic's Beach",
+ "url": "https://www.attainchicsbeach.com/",
+ "scraped_at": "2026-10-19T13:01:23+00:00",
+ "property": {
+  "address": "4705 Windsong Dr, Virginia Beach, VA, 23455",
+  "phone": "757-460-1789"
+ },
+ "floorplans": [
+  {
+   "code": "567563",
+   "name": "C40E",
+   "beds": 3.0,
+   "baths": 2.0,
+   "sqft": 1366,
+   "rent_min": 2995,
+   "rent_max": 2995,
+   "units_available": 2,
+   "earliest_available": "2026-10-19",
+   "image_url": "https://cdn.sightmap.com/assets/go/w3/gow3m7j8v2m/31/87/31874a009fc8b7f1b6e6425a3e7bf7ca.jpg",
+   "details_url": null,
+   "lease_months": 15,
+   "specials": []
+  },
+  {
+   "code": "567565",
+   "name": "A28",
+   "beds": 1.0,
+   "baths": 1.0,
+   "sqft": 808,
+   "rent_min": null,
+   "rent_max": null,
+   "units_available": 0,
+   "earliest_available": null,
+   "image_url": "https://cdn.sightmap.com/assets/go/w3/gow3m7j8v2m/b2/4f/b24f529069580303fcf8035c290b7c55.jpg",
+   "details_url": null,
+   "lease_months": null,
+   "specials": []
+  },
+  {
+   "code": "567566",
+   "name": "A28S",
+   "beds": 1.0,
+   "baths": 1.0,
+   "sqft": 892,
+   "rent_min": 2100,
+   "rent_max": 2100,
+   "units_available": 3,
+   "earliest_available": "2026-10-19",
+   "image_url": "https://cdn.sightmap.com/assets/go/w3/gow3m7j8v2m/5f/54/5f54fa36174879e4a8bd0d1f48d7ceaa.jpg",
+   "details_url": null,
+   "lease_months": 15,
+   "specials": []
+  },
+  {
+   "code": "567567",
+   "name": "A20K",
+   "beds": 1.0,
+   "baths": 1.0,
+   "sqft": 912,
+   "rent_min": null,
+   "rent_max": null,
+   "units_available": 0,
+   "earliest_available": null,
+   "image_url": "https://cdn.sightmap.com/assets/go/w3/gow3m7j8v2m/df/01/df01bad40ecc316497c112981d22a539.jpg",
+   "details_url": null,
+   "lease_months": null,
+   "specials": []
+  },
+  {
+   "code": "567568",
+   "name": "C40K",
+   "beds": 3.0,
+   "baths": 2.0,
+   "sqft": 1370,
+   "rent_min": 2995,
+   "rent_max": 2995,
+   "units_available": 6,
+   "earliest_available": "2026-10-19",
+   "image_url": "https://cdn.sightmap.com/assets/go/w3/gow3m7j8v2m/dc/54/dc54a8435597b4aac87676519e29cef2.jpg",
+   "details_url": null,
+   "lease_months": 15,
+   "specials": []
+  },
+  {
+   "code": "567569",
+   "name": "A16K",
+   "beds": 1.0,
+   "baths": 1.0,
+   "sqft": 779,
+   "rent_min": 1923,
+   "rent_max": 1923,
+   "units_available": 1,
+   "earliest_available": "2026-12-30",
+   "image_url": "https://cdn.sightmap.com/assets/go/w3/gow3m7j8v2m/5c/55/5c55fa788ac74dea19c56e2091253b2f.jpg",
+   "details_url": null,
+   "lease_months": 15,
+   "specials": []
+  },
+  {
+   "code": "567570",
+   "name": "B46D",
+   "beds": 2.0,
+   "baths": 2.0,
+   "sqft": 1345,
+   "rent_min": 3096,
+   "rent_max": 3096,
+   "units_available": 1,
+   "earliest_available": "2026-10-19",
+   "image_url": "https://cdn.sightmap.com/assets/go/w3/gow3m7j8v2m/89/3b/893bbc16a164acf977458d1f0d19b89c.jpg",
+   "details_url": null,
+   "lease_months": 15,
+   "specials": []
+  },
+  {
+   "code": "567571",
+   "name": "B36",
+   "beds": 2.0,
+   "baths": 2.0,
+   "sqft": 1050,
+   "rent_min": 2391,
+   "rent_max": 2391,
+   "units_available": 1,
+   "earliest_available": "2026-10-19",
+   "image_url": "https://cdn.sightmap.com/assets/go/w3/gow3m7j8v2m/33/0e/330e1e3ce832f89762e1cadf9d094779.jpg",
+   "details_url": null,
+   "lease_months": 15,
+   "specials": []
+  },
+  {
+   "code": "567572",
+   "name": "B34",
+   "beds": 2.0,
+   "baths": 2.0,
+   "sqft": 993,
+   "rent_min": 2255,
+   "rent_max": 2255,
+   "units_available": 1,
+   "earliest_available": "2026-12-12",
+   "image_url": "https://cdn.sightmap.com/assets/go/w3/gow3m7j8v2m/a1/e0/a1e09da2504e262849e92e85910eb274.jpg",
+   "details_url": null,
+   "lease_months": 15,
+   "specials": []
+  },
+  {
+   "code": "567574",
+   "name": "B30E",
+   "beds": 2.0,
+   "baths": 2.0,
+   "sqft": 1055,
+   "rent_min": 2403,
+   "rent_max": 2403,
+   "units_available": 1,
+   "earliest_available": "2026-10-19",
+   "image_url": "https://cdn.sightmap.com/assets/go/w3/gow3m7j8v2m/98/53/9853097d08b68a3b6a9d341eb83f59fc.jpg",
+   "details_url": null,
+   "lease_months": 15,
+   "specials": []
+  },
+  {
+   "code": "567575",
+   "name": "B28K",
+   "beds": 2.0,
+   "baths": 2.0,
+   "sqft": 1290,
+   "rent_min": null,
+   "rent_max": null,
+   "units_available": 0,
+   "earliest_available": null,
+   "image_url": "https://cdn.sightmap.com/assets/go/w3/gow3m7j8v2m/02/78/027831fcca4e09520c7c4a0458bb1263.jpg",
+   "details_url": null,
+   "lease_months": null,
+   "specials": []
+  },
+  {
+   "code": "567576",
+   "name": "B30K",
+   "beds": 2.0,
+   "baths": 2.0,
+   "sqft": 1168,
+   "rent_min": null,
+   "rent_max": null,
+   "units_available": 0,
+   "earliest_available": null,
+   "image_url": "https://cdn.sightmap.com/assets/go/w3/gow3m7j8v2m/4a/91/4a915cb5afaa5c91e0209a86a5410252.jpg",
+   "details_url": null,
+   "lease_months": null,
+   "specials": []
+  },
+  {
+   "code": "567577",
+   "name": "C40KA",
+   "beds": 3.0,
+   "baths": 2.0,
+   "sqft": 1377,
+   "rent_min": null,
+   "rent_max": null,
+   "units_available": 0,
+   "earliest_available": null,
+   "image_url": "https://cdn.sightmap.com/assets/go/w3/gow3m7j8v2m/70/c5/70c547aa69eac1931d7945893b2f8411.jpg",
+   "details_url": null,
+   "lease_months": null,
+   "specials": []
+  },
+  {
+   "code": "567578",
+   "name": "B36S",
+   "beds": 2.0,
+   "baths": 2.0,
+   "sqft": 1121,
+   "rent_min": 2561,
+   "rent_max": 2561,
+   "units_available": 1,
+   "earliest_available": "2026-11-21",
+   "image_url": "https://cdn.sightmap.com/assets/go/w3/gow3m7j8v2m/46/5e/465ee65ab7a4b2516383cd1f5c1b74aa.jpg",
+   "details_url": null,
+   "lease_months": 15,
+   "specials": []
+  },
+  {
+   "code": "567579",
+   "name": "C46",
+   "beds": 3.0,
+   "baths": 2.0,
+   "sqft": 1345,
+   "rent_min": 2995,
+   "rent_max": 2995,
+   "units_available": 1,
+   "earliest_available": "2026-10-19",
+   "image_url": "https://cdn.sightmap.com/assets/go/w3/gow3m7j8v2m/d7/87/d787996dcd173de1552f37761ed7b196.jpg",
+   "details_url": null,
+   "lease_months": 15,
+   "specials": []
+  },
+  {
+   "code": "567580",
+   "name": "A28D",
+   "beds": 1.0,
+   "baths": 2.0,
+   "sqft": 1205,
+   "rent_min": null,
+   "rent_max": null,
+   "units_available": 0,
+   "earliest_available": null,
+   "image_url": "https://cdn.sightmap.com/assets/go/w3/gow3m7j8v2m/e1/47/e147eb14dc4643ff34663d189c0a2adf.jpg",
+   "details_url": null,
+   "lease_months": null,
+   "specials": []
+  },
+  {
+   "code": "567581",
+   "name": "A3",
+   "beds": 1.0,
+   "baths": 1.0,
+   "sqft": 558,
+   "rent_min": 1693,
+   "rent_max": 1693,
+   "units_available": 1,
+   "earliest_available": "2026-10-19",
+   "image_url": "https://cdn.sightmap.com/assets/go/w3/gow3m7j8v2m/8e/9c/8e9c8a776739a92b1b8132b5bc696916.jpg",
+   "details_url": null,
+   "lease_months": 15,
+   "specials": []
+  },
+  {
+   "code": "567582",
+   "name": "A4",
+   "beds": 1.0,
+   "baths": 1.0,
+   "sqft": 597,
+   "rent_min": 1779,
+   "rent_max": 1804,
+   "units_available": 2,
+   "earliest_available": "2026-10-19",
+   "image_url": "https://cdn.sightmap.com/assets/go/w3/gow3m7j8v2m/0b/7b/0b7b524f1ba9d5e47ef766918a221817.jpg",
+   "details_url": null,
+   "lease_months": 15,
+   "specials": []
+  },
+  {
+   "code": "567583",
+   "name": "B1",
+   "beds": 2.0,
+   "baths": 1.0,
+   "sqft": 819,
+   "rent_min": 1888,
+   "rent_max": 1888,
+   "units_available": 2,
+   "earliest_available": "2026-10-20",
+   "image_url": "https://cdn.sightmap.com/assets/go/w3/gow3m7j8v2m/dd/df/dddf7c5947ebc6a8363670576a4e7716.jpg",
+   "details_url": null,
+   "lease_months": 15,
+   "specials": []
+  },
+  {
+   "code": "567584",
+   "name": "B2.1",
+   "beds": 2.0,
+   "baths": 1.0,
+   "sqft": 819,
+   "rent_min": null,
+   "rent_max": null,
+   "units_available": 0,
+   "earliest_available": null,
+   "image_url": "https://cdn.sightmap.com/assets/go/w3/gow3m7j8v2m/84/f2/84f21776591501149db4b1263aa91c8b.jpg",
+   "details_url": null,
+   "lease_months": null,
+   "specials": []
+  },
+  {
+   "code": "567585",
+   "name": "A1",
+   "beds": 1.0,
+   "baths": 1.0,
+   "sqft": 499,
+   "rent_min": 1623,
+   "rent_max": 1633,
+   "units_available": 2,
+   "earliest_available": "2026-11-13",
+   "image_url": "https://cdn.sightmap.com/assets/go/w3/gow3m7j8v2m/6b/b5/6bb52d91547497d0eb8f1ef20670038e.jpg",
+   "details_url": null,
+   "lease_months": 15,
+   "specials": []
+  },
+  {
+   "code": "567586",
+   "name": "A2.1",
+   "beds": 1.0,
+   "baths": 1.0,
+   "sqft": 566,
+   "rent_min": null,
+   "rent_max": null,
+   "units_available": 0,
+   "earliest_available": null,
+   "image_url": "https://optimise2.assets-servd.host/lackadaisical-tern/production/images/168926/218346/floor-plan-images/A2.1-V.jpg?w=2400&q=82&auto=format&fit=clip&dm=1767400726&s=0683010099234f5c21003c867f06246a",
+   "details_url": null,
+   "lease_months": null,
+   "specials": []
+  },
+  {
+   "code": "567587",
+   "name": "A1.2",
+   "beds": 1.0,
+   "baths": 1.0,
+   "sqft": 504,
+   "rent_min": null,
+   "rent_max": null,
+   "units_available": 0,
+   "earliest_available": null,
+   "image_url": "https://optimise2.assets-servd.host/lackadaisical-tern/production/images/168926/218346/floor-plan-images/A1-V-A1.1-V-and-A1.2-V.jpg?w=2400&q=82&auto=format&fit=clip&dm=1767400723&s=587a7f9991074176ec4e580858dbf19e",
+   "details_url": null,
+   "lease_months": null,
+   "specials": []
+  },
+  {
+   "code": "567588",
+   "name": "B2",
+   "beds": 2.0,
+   "baths": 1.0,
+   "sqft": 858,
+   "rent_min": null,
+   "rent_max": null,
+   "units_available": 0,
+   "earliest_available": null,
+   "image_url": "https://optimise2.assets-servd.host/lackadaisical-tern/production/images/168926/218346/floor-plan-images/B2-V-and-B2.1-V.jpg?w=2400&q=82&auto=format&fit=clip&dm=1767400752&s=b6683bdde44f19f368f589c5dcdb7f8f",
+   "details_url": null,
+   "lease_months": null,
+   "specials": []
+  },
+  {
+   "code": "567589",
+   "name": "2.1.5A",
+   "beds": 2.0,
+   "baths": 1.5,
+   "sqft": null,
+   "rent_min": null,
+   "rent_max": null,
+   "units_available": 0,
+   "earliest_available": null,
+   "image_url": null,
+   "details_url": null,
+   "lease_months": null,
+   "specials": []
+  },
+  {
+   "code": "567590",
+   "name": "2-1A",
+   "beds": 2.0,
+   "baths": 1.0,
+   "sqft": 827,
+   "rent_min": null,
+   "rent_max": null,
+   "units_available": 0,
+   "earliest_available": null,
+   "image_url": "https://optimise2.assets-servd.host/lackadaisical-tern/production/images/168926/218346/floor-plan-images/2-1A-V.jpg?w=2400&q=82&auto=format&fit=clip&dm=1767400719&s=2ef96a64c3a654ad69ef9a91834fc02f",
+   "details_url": null,
+   "lease_months": null,
+   "specials": []
+  },
+  {
+   "code": "567591",
+   "name": "2.1.5B",
+   "beds": 2.0,
+   "baths": 1.5,
+   "sqft": null,
+   "rent_min": null,
+   "rent_max": null,
+   "units_available": 0,
+   "earliest_available": null,
+   "image_url": null,
+   "details_url": null,
+   "lease_months": null,
+   "specials": []
+  },
+  {
+   "code": "567592",
+   "name": "2-2B",
+   "beds": 2.0,
+   "baths": 2.0,
+   "sqft": 866,
+   "rent_min": null,
+   "rent_max": null,
+   "units_available": 0,
+   "earliest_available": null,
+   "image_url": "https://optimise2.assets-servd.host/lackadaisical-tern/production/images/168926/218346/floor-plan-images/2-2-SHOW-V-and-2-2B-V.jpg?w=2400&q=82&auto=format&fit=clip&dm=1767400721&s=c65c286ca26e0c0451b9021713399269",
+   "details_url": null,
+   "lease_months": null,
+   "specials": []
+  },
+  {
+   "code": "567593",
+   "name": "2-2 SHOW",
+   "beds": 2.0,
+   "baths": 2.0,
+   "sqft": 866,
+   "rent_min": null,
+   "rent_max": null,
+   "units_available": 0,
+   "earliest_available": null,
+   "image_url": "https://optimise2.assets-servd.host/lackadaisical-tern/production/images/168926/218346/floor-plan-images/2-2-SHOW-V-and-2-2B-V.jpg?w=2400&q=82&auto=format&fit=clip&dm=1767400721&s=c65c286ca26e0c0451b9021713399269",
+   "details_url": null,
+   "lease_months": null,
+   "specials": []
+  },
+  {
+   "code": "567594",
+   "name": "B3",
+   "beds": 2.0,
+   "baths": 1.5,
+   "sqft": 819,
+   "rent_min": 1851,
+   "rent_max": 1851,
+   "units_available": 1,
+   "earliest_available": "2027-01-05",
+   "image_url": "https://cdn.sightmap.com/assets/go/w3/gow3m7j8v2m/68/70/6870b81fbfaa326d66772576b17ffcac.jpg",
+   "details_url": null,
+   "lease_months": 15,
+   "specials": []
+  },
+  {
+   "code": "567595",
+   "name": "B4",
+   "beds": 2.0,
+   "baths": 1.5,
+   "sqft": 858,
+   "rent_min": 1904,
+   "rent_max": 1904,
+   "units_available": 1,
+   "earliest_available": "2026-10-22",
+   "image_url": "https://cdn.sightmap.com/assets/go/w3/gow3m7j8v2m/76/9f/769f95cd39d6d5c8e9fc416ef13ee484.jpg",
+   "details_url": null,
+   "lease_months": 15,
+   "specials": []
+  },
+  {
+   "code": "567596",
+   "name": "B3E",
+   "beds": 2.0,
+   "baths": 1.5,
+   "sqft": 819,
+   "rent_min": null,
+   "rent_max": null,
+   "units_available": 0,
+   "earliest_available": null,
+   "image_url": "https://cdn.sightmap.com/assets/go/w3/gow3m7j8v2m/76/63/7663b38744633b9caa9146d54b588930.jpg",
+   "details_url": null,
+   "lease_months": null,
+   "specials": []
+  },
+  {
+   "code": "567597",
+   "name": "B1E",
+   "beds": 2.0,
+   "baths": 1.0,
+   "sqft": 833,
+   "rent_min": 1894,
+   "rent_max": 1894,
+   "units_available": 1,
+   "earliest_available": "2026-11-07",
+   "image_url": "https://optimise2.assets-servd.host/lackadaisical-tern/production/images/168926/218346/floor-plan-images/B1-V-B1E-V-and-B1E-ADA-V.jpg?w=2400&q=82&auto=format&fit=clip&dm=1767400749&s=4616a6eb6a8dac50c289ae0a925eb39b",
+   "details_url": null,
+   "lease_months": 15,
+   "specials": []
+  },
+  {
+   "code": "567598",
+   "name": "B4E",
+   "beds": 2.0,
+   "baths": 1.5,
+   "sqft": 858,
+   "rent_min": null,
+   "rent_max": null,
+   "units_available": 0,
+   "earliest_available": null,
+   "image_url": "https://cdn.sightmap.com/assets/go/w3/gow3m7j8v2m/cd/28/cd285edf875cf46b2fb53c3be68b1c3f.jpg",
+   "details_url": null,
+   "lease_months": null,
+   "specials": []
+  },
+  {
+   "code": "567599",
+   "name": "B2E",
+   "beds": 2.0,
+   "baths": 1.0,
+   "sqft": 858,
+   "rent_min": null,
+   "rent_max": null,
+   "units_available": 0,
+   "earliest_available": null,
+   "image_url": "https://cdn.sightmap.com/assets/go/w3/gow3m7j8v2m/09/31/093138892120fbc6b547199c8017f588.jpg",
+   "details_url": null,
+   "lease_months": null,
+   "specials": []
+  },
+  {
+   "code": "815315",
+   "name": "B38",
+   "beds": 2.0,
+   "baths": 2.0,
+   "sqft": 1104,
+   "rent_min": 2520,
+   "rent_max": 2520,
+   "units_available": 2,
+   "earliest_available": "2026-12-12",
+   "image_url": "https://optimise2.assets-servd.host/lackadaisical-tern/production/images/168926/218346/floor-plan-images/B38-H-and-B28A-H.jpg?w=2400&q=82&auto=format&fit=clip&dm=1767400779&s=3cefd4ea97b741ad4458686aada7de73",
+   "details_url": null,
+   "lease_months": 15,
+   "specials": []
+  }
+ ],
+ "units": [
+  {
+   "unit_number": "101",
+   "floorplan_code": "567563",
+   "price": 2995,
+   "sqft": 1366,
+   "floor": null,
+   "building": "1",
+   "available_date": "2026-10-19",
+   "apply_url": null,
+   "total_price": 3130,
+   "lease_months": 15,
+   "specials": [],
+   "lease_options": [
+    {
+     "months": 3,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 4,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 5,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 6,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 7,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 8,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 9,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 10,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 11,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 12,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 13,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 14,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 15,
+     "price": 2995,
+     "total_price": 3130
+    }
+   ]
+  },
+  {
+   "unit_number": "123",
+   "floorplan_code": "567563",
+   "price": 2995,
+   "sqft": 1366,
+   "floor": null,
+   "building": "1",
+   "available_date": "2026-10-19",
+   "apply_url": null,
+   "total_price": 3130,
+   "lease_months": 15,
+   "specials": [],
+   "lease_options": [
+    {
+     "months": 3,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 4,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 5,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 6,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 7,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 8,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 9,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 10,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 11,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 12,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 13,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 14,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 15,
+     "price": 2995,
+     "total_price": 3130
+    }
+   ]
+  },
+  {
+   "unit_number": "213",
+   "floorplan_code": "567572",
+   "price": 2255,
+   "sqft": 993,
+   "floor": null,
+   "building": "1",
+   "available_date": "2026-12-12",
+   "apply_url": null,
+   "total_price": 2390,
+   "lease_months": 15,
+   "specials": [],
+   "lease_options": [
+    {
+     "months": 3,
+     "price": 4000,
+     "total_price": 4135
+    },
+    {
+     "months": 4,
+     "price": 3596,
+     "total_price": 3731
+    },
+    {
+     "months": 5,
+     "price": 3458,
+     "total_price": 3593
+    },
+    {
+     "months": 6,
+     "price": 2427,
+     "total_price": 2562
+    },
+    {
+     "months": 7,
+     "price": 2850,
+     "total_price": 2985
+    },
+    {
+     "months": 8,
+     "price": 2717,
+     "total_price": 2852
+    },
+    {
+     "months": 9,
+     "price": 2312,
+     "total_price": 2447
+    },
+    {
+     "months": 10,
+     "price": 2643,
+     "total_price": 2778
+    },
+    {
+     "months": 11,
+     "price": 2920,
+     "total_price": 3055
+    },
+    {
+     "months": 12,
+     "price": 2455,
+     "total_price": 2590
+    },
+    {
+     "months": 13,
+     "price": 2255,
+     "total_price": 2390
+    },
+    {
+     "months": 14,
+     "price": 2255,
+     "total_price": 2390
+    },
+    {
+     "months": 15,
+     "price": 2255,
+     "total_price": 2390
+    }
+   ]
+  },
+  {
+   "unit_number": "308",
+   "floorplan_code": "567569",
+   "price": 1923,
+   "sqft": 779,
+   "floor": null,
+   "building": "1",
+   "available_date": "2026-12-30",
+   "apply_url": null,
+   "total_price": 2058,
+   "lease_months": 15,
+   "specials": [],
+   "lease_options": [
+    {
+     "months": 3,
+     "price": 3180,
+     "total_price": 3315
+    },
+    {
+     "months": 4,
+     "price": 3147,
+     "total_price": 3282
+    },
+    {
+     "months": 5,
+     "price": 2141,
+     "total_price": 2276
+    },
+    {
+     "months": 6,
+     "price": 2708,
+     "total_price": 2843
+    },
+    {
+     "months": 7,
+     "price": 2034,
+     "total_price": 2169
+    },
+    {
+     "months": 8,
+     "price": 2001,
+     "total_price": 2136
+    },
+    {
+     "months": 9,
+     "price": 1975,
+     "total_price": 2110
+    },
+    {
+     "months": 10,
+     "price": 1954,
+     "total_price": 2089
+    },
+    {
+     "months": 11,
+     "price": 2228,
+     "total_price": 2363
+    },
+    {
+     "months": 12,
+     "price": 1923,
+     "total_price": 2058
+    },
+    {
+     "months": 13,
+     "price": 1923,
+     "total_price": 2058
+    },
+    {
+     "months": 14,
+     "price": 1923,
+     "total_price": 2058
+    },
+    {
+     "months": 15,
+     "price": 1923,
+     "total_price": 2058
+    }
+   ]
+  },
+  {
+   "unit_number": "211",
+   "floorplan_code": "567571",
+   "price": 2391,
+   "sqft": 1050,
+   "floor": null,
+   "building": "2",
+   "available_date": "2026-10-19",
+   "apply_url": null,
+   "total_price": 2526,
+   "lease_months": 15,
+   "specials": [],
+   "lease_options": [
+    {
+     "months": 3,
+     "price": 2908,
+     "total_price": 3043
+    },
+    {
+     "months": 4,
+     "price": 2736,
+     "total_price": 2871
+    },
+    {
+     "months": 5,
+     "price": 3413,
+     "total_price": 3548
+    },
+    {
+     "months": 6,
+     "price": 3267,
+     "total_price": 3402
+    },
+    {
+     "months": 7,
+     "price": 3243,
+     "total_price": 3378
+    },
+    {
+     "months": 8,
+     "price": 2477,
+     "total_price": 2612
+    },
+    {
+     "months": 9,
+     "price": 2838,
+     "total_price": 2973
+    },
+    {
+     "months": 10,
+     "price": 2745,
+     "total_price": 2880
+    },
+    {
+     "months": 11,
+     "price": 2407,
+     "total_price": 2542
+    },
+    {
+     "months": 12,
+     "price": 2703,
+     "total_price": 2838
+    },
+    {
+     "months": 13,
+     "price": 2973,
+     "total_price": 3108
+    },
+    {
+     "months": 14,
+     "price": 2573,
+     "total_price": 2708
+    },
+    {
+     "months": 15,
+     "price": 2391,
+     "total_price": 2526
+    }
+   ]
+  },
+  {
+   "unit_number": "218",
+   "floorplan_code": "815315",
+   "price": 2520,
+   "sqft": 1104,
+   "floor": null,
+   "building": "2",
+   "available_date": "2026-12-18",
+   "apply_url": null,
+   "total_price": 2655,
+   "lease_months": 15,
+   "specials": [],
+   "lease_options": [
+    {
+     "months": 3,
+     "price": 4409,
+     "total_price": 4544
+    },
+    {
+     "months": 4,
+     "price": 3978,
+     "total_price": 4113
+    },
+    {
+     "months": 5,
+     "price": 3836,
+     "total_price": 3971
+    },
+    {
+     "months": 6,
+     "price": 2692,
+     "total_price": 2827
+    },
+    {
+     "months": 7,
+     "price": 3171,
+     "total_price": 3306
+    },
+    {
+     "months": 8,
+     "price": 3026,
+     "total_price": 3161
+    },
+    {
+     "months": 9,
+     "price": 2577,
+     "total_price": 2712
+    },
+    {
+     "months": 10,
+     "price": 2950,
+     "total_price": 3085
+    },
+    {
+     "months": 11,
+     "price": 3261,
+     "total_price": 3396
+    },
+    {
+     "months": 12,
+     "price": 2744,
+     "total_price": 2879
+    },
+    {
+     "months": 13,
+     "price": 2520,
+     "total_price": 2655
+    },
+    {
+     "months": 14,
+     "price": 2520,
+     "total_price": 2655
+    },
+    {
+     "months": 15,
+     "price": 2520,
+     "total_price": 2655
+    }
+   ]
+  },
+  {
+   "unit_number": "220",
+   "floorplan_code": "567568",
+   "price": 2995,
+   "sqft": 1370,
+   "floor": null,
+   "building": "2",
+   "available_date": "2026-10-24",
+   "apply_url": null,
+   "total_price": 3130,
+   "lease_months": 15,
+   "specials": [],
+   "lease_options": [
+    {
+     "months": 3,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 4,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 5,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 6,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 7,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 8,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 9,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 10,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 11,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 12,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 13,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 14,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 15,
+     "price": 2995,
+     "total_price": 3130
+    }
+   ]
+  },
+  {
+   "unit_number": "301",
+   "floorplan_code": "567574",
+   "price": 2403,
+   "sqft": 1055,
+   "floor": null,
+   "building": "2",
+   "available_date": "2026-10-19",
+   "apply_url": null,
+   "total_price": 2538,
+   "lease_months": 15,
+   "specials": [],
+   "lease_options": [
+    {
+     "months": 3,
+     "price": 2920,
+     "total_price": 3055
+    },
+    {
+     "months": 4,
+     "price": 2748,
+     "total_price": 2883
+    },
+    {
+     "months": 5,
+     "price": 3429,
+     "total_price": 3564
+    },
+    {
+     "months": 6,
+     "price": 3283,
+     "total_price": 3418
+    },
+    {
+     "months": 7,
+     "price": 3258,
+     "total_price": 3393
+    },
+    {
+     "months": 8,
+     "price": 2489,
+     "total_price": 2624
+    },
+    {
+     "months": 9,
+     "price": 2852,
+     "total_price": 2987
+    },
+    {
+     "months": 10,
+     "price": 2758,
+     "total_price": 2893
+    },
+    {
+     "months": 11,
+     "price": 2419,
+     "total_price": 2554
+    },
+    {
+     "months": 12,
+     "price": 2717,
+     "total_price": 2852
+    },
+    {
+     "months": 13,
+     "price": 2988,
+     "total_price": 3123
+    },
+    {
+     "months": 14,
+     "price": 2586,
+     "total_price": 2721
+    },
+    {
+     "months": 15,
+     "price": 2403,
+     "total_price": 2538
+    }
+   ]
+  },
+  {
+   "unit_number": "302",
+   "floorplan_code": "567568",
+   "price": 2995,
+   "sqft": 1370,
+   "floor": null,
+   "building": "2",
+   "available_date": "2026-10-19",
+   "apply_url": null,
+   "total_price": 3130,
+   "lease_months": 15,
+   "specials": [],
+   "lease_options": [
+    {
+     "months": 3,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 4,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 5,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 6,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 7,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 8,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 9,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 10,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 11,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 12,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 13,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 14,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 15,
+     "price": 2995,
+     "total_price": 3130
+    }
+   ]
+  },
+  {
+   "unit_number": "403",
+   "floorplan_code": "567570",
+   "price": 3096,
+   "sqft": 1345,
+   "floor": null,
+   "building": "2",
+   "available_date": "2026-10-19",
+   "apply_url": null,
+   "total_price": 3231,
+   "lease_months": 15,
+   "specials": [],
+   "lease_options": [
+    {
+     "months": 3,
+     "price": 3613,
+     "total_price": 3748
+    },
+    {
+     "months": 4,
+     "price": 3441,
+     "total_price": 3576
+    },
+    {
+     "months": 5,
+     "price": 4348,
+     "total_price": 4483
+    },
+    {
+     "months": 6,
+     "price": 4180,
+     "total_price": 4315
+    },
+    {
+     "months": 7,
+     "price": 4163,
+     "total_price": 4298
+    },
+    {
+     "months": 8,
+     "price": 3182,
+     "total_price": 3317
+    },
+    {
+     "months": 9,
+     "price": 3658,
+     "total_price": 3793
+    },
+    {
+     "months": 10,
+     "price": 3544,
+     "total_price": 3679
+    },
+    {
+     "months": 11,
+     "price": 3112,
+     "total_price": 3247
+    },
+    {
+     "months": 12,
+     "price": 3500,
+     "total_price": 3635
+    },
+    {
+     "months": 13,
+     "price": 3850,
+     "total_price": 3985
+    },
+    {
+     "months": 14,
+     "price": 3332,
+     "total_price": 3467
+    },
+    {
+     "months": 15,
+     "price": 3096,
+     "total_price": 3231
+    }
+   ]
+  },
+  {
+   "unit_number": "406",
+   "floorplan_code": "567566",
+   "price": 2100,
+   "sqft": 892,
+   "floor": null,
+   "building": "2",
+   "available_date": "2026-10-19",
+   "apply_url": null,
+   "total_price": 2235,
+   "lease_months": 15,
+   "specials": [],
+   "lease_options": [
+    {
+     "months": 3,
+     "price": 2566,
+     "total_price": 2701
+    },
+    {
+     "months": 4,
+     "price": 2411,
+     "total_price": 2546
+    },
+    {
+     "months": 5,
+     "price": 2836,
+     "total_price": 2971
+    },
+    {
+     "months": 6,
+     "price": 2920,
+     "total_price": 3055
+    },
+    {
+     "months": 7,
+     "price": 2211,
+     "total_price": 2346
+    },
+    {
+     "months": 8,
+     "price": 2694,
+     "total_price": 2829
+    },
+    {
+     "months": 9,
+     "price": 2152,
+     "total_price": 2287
+    },
+    {
+     "months": 10,
+     "price": 2131,
+     "total_price": 2266
+    },
+    {
+     "months": 11,
+     "price": 2114,
+     "total_price": 2249
+    },
+    {
+     "months": 12,
+     "price": 2100,
+     "total_price": 2235
+    },
+    {
+     "months": 13,
+     "price": 2369,
+     "total_price": 2504
+    },
+    {
+     "months": 14,
+     "price": 2100,
+     "total_price": 2235
+    },
+    {
+     "months": 15,
+     "price": 2100,
+     "total_price": 2235
+    }
+   ]
+  },
+  {
+   "unit_number": "407",
+   "floorplan_code": "567579",
+   "price": 2995,
+   "sqft": 1345,
+   "floor": null,
+   "building": "2",
+   "available_date": "2026-10-19",
+   "apply_url": null,
+   "total_price": 3130,
+   "lease_months": 15,
+   "specials": [],
+   "lease_options": [
+    {
+     "months": 3,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 4,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 5,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 6,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 7,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 8,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 9,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 10,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 11,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 12,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 13,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 14,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 15,
+     "price": 2995,
+     "total_price": 3130
+    }
+   ]
+  },
+  {
+   "unit_number": "420",
+   "floorplan_code": "567568",
+   "price": 2995,
+   "sqft": 1370,
+   "floor": null,
+   "building": "2",
+   "available_date": "2026-10-19",
+   "apply_url": null,
+   "total_price": 3130,
+   "lease_months": 15,
+   "specials": [],
+   "lease_options": [
+    {
+     "months": 3,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 4,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 5,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 6,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 7,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 8,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 9,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 10,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 11,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 12,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 13,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 14,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 15,
+     "price": 2995,
+     "total_price": 3130
+    }
+   ]
+  },
+  {
+   "unit_number": "202",
+   "floorplan_code": "567568",
+   "price": 2995,
+   "sqft": 1370,
+   "floor": null,
+   "building": "3",
+   "available_date": "2026-10-19",
+   "apply_url": null,
+   "total_price": 3130,
+   "lease_months": 15,
+   "specials": [],
+   "lease_options": [
+    {
+     "months": 3,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 4,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 5,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 6,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 7,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 8,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 9,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 10,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 11,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 12,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 13,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 14,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 15,
+     "price": 2995,
+     "total_price": 3130
+    }
+   ]
+  },
+  {
+   "unit_number": "204",
+   "floorplan_code": "567566",
+   "price": 2100,
+   "sqft": 892,
+   "floor": null,
+   "building": "3",
+   "available_date": "2026-10-19",
+   "apply_url": null,
+   "total_price": 2235,
+   "lease_months": 15,
+   "specials": [],
+   "lease_options": [
+    {
+     "months": 3,
+     "price": 2566,
+     "total_price": 2701
+    },
+    {
+     "months": 4,
+     "price": 2411,
+     "total_price": 2546
+    },
+    {
+     "months": 5,
+     "price": 2836,
+     "total_price": 2971
+    },
+    {
+     "months": 6,
+     "price": 2920,
+     "total_price": 3055
+    },
+    {
+     "months": 7,
+     "price": 2211,
+     "total_price": 2346
+    },
+    {
+     "months": 8,
+     "price": 2694,
+     "total_price": 2829
+    },
+    {
+     "months": 9,
+     "price": 2152,
+     "total_price": 2287
+    },
+    {
+     "months": 10,
+     "price": 2131,
+     "total_price": 2266
+    },
+    {
+     "months": 11,
+     "price": 2114,
+     "total_price": 2249
+    },
+    {
+     "months": 12,
+     "price": 2100,
+     "total_price": 2235
+    },
+    {
+     "months": 13,
+     "price": 2369,
+     "total_price": 2504
+    },
+    {
+     "months": 14,
+     "price": 2100,
+     "total_price": 2235
+    },
+    {
+     "months": 15,
+     "price": 2100,
+     "total_price": 2235
+    }
+   ]
+  },
+  {
+   "unit_number": "216",
+   "floorplan_code": "567578",
+   "price": 2561,
+   "sqft": 1121,
+   "floor": null,
+   "building": "3",
+   "available_date": "2026-11-21",
+   "apply_url": null,
+   "total_price": 2696,
+   "lease_months": 15,
+   "specials": [],
+   "lease_options": [
+    {
+     "months": 3,
+     "price": 3078,
+     "total_price": 3213
+    },
+    {
+     "months": 4,
+     "price": 3952,
+     "total_price": 4087
+    },
+    {
+     "months": 5,
+     "price": 3707,
+     "total_price": 3842
+    },
+    {
+     "months": 6,
+     "price": 3644,
+     "total_price": 3779
+    },
+    {
+     "months": 7,
+     "price": 2684,
+     "total_price": 2819
+    },
+    {
+     "months": 8,
+     "price": 3117,
+     "total_price": 3252
+    },
+    {
+     "months": 9,
+     "price": 2997,
+     "total_price": 3132
+    },
+    {
+     "months": 10,
+     "price": 2596,
+     "total_price": 2731
+    },
+    {
+     "months": 11,
+     "price": 2942,
+     "total_price": 3077
+    },
+    {
+     "months": 12,
+     "price": 3237,
+     "total_price": 3372
+    },
+    {
+     "months": 13,
+     "price": 2771,
+     "total_price": 2906
+    },
+    {
+     "months": 14,
+     "price": 2561,
+     "total_price": 2696
+    },
+    {
+     "months": 15,
+     "price": 2561,
+     "total_price": 2696
+    }
+   ]
+  },
+  {
+   "unit_number": "220",
+   "floorplan_code": "567568",
+   "price": 2995,
+   "sqft": 1370,
+   "floor": null,
+   "building": "3",
+   "available_date": "2026-10-19",
+   "apply_url": null,
+   "total_price": 3130,
+   "lease_months": 15,
+   "specials": [],
+   "lease_options": [
+    {
+     "months": 3,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 4,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 5,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 6,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 7,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 8,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 9,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 10,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 11,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 12,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 13,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 14,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 15,
+     "price": 2995,
+     "total_price": 3130
+    }
+   ]
+  },
+  {
+   "unit_number": "308",
+   "floorplan_code": "567566",
+   "price": 2100,
+   "sqft": 892,
+   "floor": null,
+   "building": "3",
+   "available_date": "2026-11-28",
+   "apply_url": null,
+   "total_price": 2235,
+   "lease_months": 15,
+   "specials": [],
+   "lease_options": [
+    {
+     "months": 3,
+     "price": 2566,
+     "total_price": 2701
+    },
+    {
+     "months": 4,
+     "price": 3059,
+     "total_price": 3194
+    },
+    {
+     "months": 5,
+     "price": 3116,
+     "total_price": 3251
+    },
+    {
+     "months": 6,
+     "price": 2255,
+     "total_price": 2390
+    },
+    {
+     "months": 7,
+     "price": 2801,
+     "total_price": 2936
+    },
+    {
+     "months": 8,
+     "price": 2178,
+     "total_price": 2313
+    },
+    {
+     "months": 9,
+     "price": 2152,
+     "total_price": 2287
+    },
+    {
+     "months": 10,
+     "price": 2131,
+     "total_price": 2266
+    },
+    {
+     "months": 11,
+     "price": 2114,
+     "total_price": 2249
+    },
+    {
+     "months": 12,
+     "price": 2392,
+     "total_price": 2527
+    },
+    {
+     "months": 13,
+     "price": 2100,
+     "total_price": 2235
+    },
+    {
+     "months": 14,
+     "price": 2100,
+     "total_price": 2235
+    },
+    {
+     "months": 15,
+     "price": 2100,
+     "total_price": 2235
+    }
+   ]
+  },
+  {
+   "unit_number": "312",
+   "floorplan_code": "815315",
+   "price": 2520,
+   "sqft": 1104,
+   "floor": null,
+   "building": "3",
+   "available_date": "2026-12-12",
+   "apply_url": null,
+   "total_price": 2655,
+   "lease_months": 15,
+   "specials": [],
+   "lease_options": [
+    {
+     "months": 3,
+     "price": 4409,
+     "total_price": 4544
+    },
+    {
+     "months": 4,
+     "price": 3978,
+     "total_price": 4113
+    },
+    {
+     "months": 5,
+     "price": 3836,
+     "total_price": 3971
+    },
+    {
+     "months": 6,
+     "price": 2692,
+     "total_price": 2827
+    },
+    {
+     "months": 7,
+     "price": 3171,
+     "total_price": 3306
+    },
+    {
+     "months": 8,
+     "price": 3026,
+     "total_price": 3161
+    },
+    {
+     "months": 9,
+     "price": 2577,
+     "total_price": 2712
+    },
+    {
+     "months": 10,
+     "price": 2950,
+     "total_price": 3085
+    },
+    {
+     "months": 11,
+     "price": 3261,
+     "total_price": 3396
+    },
+    {
+     "months": 12,
+     "price": 2744,
+     "total_price": 2879
+    },
+    {
+     "months": 13,
+     "price": 2520,
+     "total_price": 2655
+    },
+    {
+     "months": 14,
+     "price": 2520,
+     "total_price": 2655
+    },
+    {
+     "months": 15,
+     "price": 2520,
+     "total_price": 2655
+    }
+   ]
+  },
+  {
+   "unit_number": "402",
+   "floorplan_code": "567568",
+   "price": 2995,
+   "sqft": 1370,
+   "floor": null,
+   "building": "3",
+   "available_date": "2026-10-19",
+   "apply_url": null,
+   "total_price": 3130,
+   "lease_months": 15,
+   "specials": [],
+   "lease_options": [
+    {
+     "months": 3,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 4,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 5,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 6,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 7,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 8,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 9,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 10,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 11,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 12,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 13,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 14,
+     "price": 2995,
+     "total_price": 3130
+    },
+    {
+     "months": 15,
+     "price": 2995,
+     "total_price": 3130
+    }
+   ]
+  },
+  {
+   "unit_number": "201",
+   "floorplan_code": "567582",
+   "price": 1804,
+   "sqft": 597,
+   "floor": null,
+   "building": "2337",
+   "available_date": "2026-12-08",
+   "apply_url": null,
+   "total_price": 1939,
+   "lease_months": 15,
+   "specials": [],
+   "lease_options": [
+    {
+     "months": 3,
+     "price": 2894,
+     "total_price": 3029
+    },
+    {
+     "months": 4,
+     "price": 2893,
+     "total_price": 3028
+    },
+    {
+     "months": 5,
+     "price": 1966,
+     "total_price": 2101
+    },
+    {
+     "months": 6,
+     "price": 1920,
+     "total_price": 2055
+    },
+    {
+     "months": 7,
+     "price": 1887,
+     "total_price": 2022
+    },
+    {
+     "months": 8,
+     "price": 1862,
+     "total_price": 1997
+    },
+    {
+     "months": 9,
+     "price": 1843,
+     "total_price": 1978
+    },
+    {
+     "months": 10,
+     "price": 1827,
+     "total_price": 1962
+    },
+    {
+     "months": 11,
+     "price": 2088,
+     "total_price": 2223
+    },
+    {
+     "months": 12,
+     "price": 1804,
+     "total_price": 1939
+    },
+    {
+     "months": 13,
+     "price": 1804,
+     "total_price": 1939
+    },
+    {
+     "months": 14,
+     "price": 1804,
+     "total_price": 1939
+    },
+    {
+     "months": 15,
+     "price": 1804,
+     "total_price": 1939
+    }
+   ]
+  },
+  {
+   "unit_number": "104",
+   "floorplan_code": "567581",
+   "price": 1693,
+   "sqft": 558,
+   "floor": null,
+   "building": "2345",
+   "available_date": "2026-10-19",
+   "apply_url": null,
+   "total_price": 1828,
+   "lease_months": 15,
+   "specials": [],
+   "lease_options": [
+    {
+     "months": 3,
+     "price": 2041,
+     "total_price": 2176
+    },
+    {
+     "months": 4,
+     "price": 1925,
+     "total_price": 2060
+    },
+    {
+     "months": 5,
+     "price": 2273,
+     "total_price": 2408
+    },
+    {
+     "months": 6,
+     "price": 2345,
+     "total_price": 2480
+    },
+    {
+     "months": 7,
+     "price": 1776,
+     "total_price": 1911
+    },
+    {
+     "months": 8,
+     "price": 2167,
+     "total_price": 2302
+    },
+    {
+     "months": 9,
+     "price": 1732,
+     "total_price": 1867
+    },
+    {
+     "months": 10,
+     "price": 1716,
+     "total_price": 1851
+    },
+    {
+     "months": 11,
+     "price": 1704,
+     "total_price": 1839
+    },
+    {
+     "months": 12,
+     "price": 1693,
+     "total_price": 1828
+    },
+    {
+     "months": 13,
+     "price": 1910,
+     "total_price": 2045
+    },
+    {
+     "months": 14,
+     "price": 1693,
+     "total_price": 1828
+    },
+    {
+     "months": 15,
+     "price": 1693,
+     "total_price": 1828
+    }
+   ]
+  },
+  {
+   "unit_number": "201",
+   "floorplan_code": "567582",
+   "price": 1779,
+   "sqft": 597,
+   "floor": null,
+   "building": "2349",
+   "available_date": "2026-10-19",
+   "apply_url": null,
+   "total_price": 1914,
+   "lease_months": 15,
+   "specials": [],
+   "lease_options": [
+    {
+     "months": 3,
+     "price": 2127,
+     "total_price": 2262
+    },
+    {
+     "months": 4,
+     "price": 2011,
+     "total_price": 2146
+    },
+    {
+     "months": 5,
+     "price": 2380,
+     "total_price": 2515
+    },
+    {
+     "months": 6,
+     "price": 2458,
+     "total_price": 2593
+    },
+    {
+     "months": 7,
+     "price": 1862,
+     "total_price": 1997
+    },
+    {
+     "months": 8,
+     "price": 2274,
+     "total_price": 2409
+    },
+    {
+     "months": 9,
+     "price": 1818,
+     "total_price": 1953
+    },
+    {
+     "months": 10,
+     "price": 1802,
+     "total_price": 1937
+    },
+    {
+     "months": 11,
+     "price": 1790,
+     "total_price": 1925
+    },
+    {
+     "months": 12,
+     "price": 1779,
+     "total_price": 1914
+    },
+    {
+     "months": 13,
+     "price": 2007,
+     "total_price": 2142
+    },
+    {
+     "months": 14,
+     "price": 1779,
+     "total_price": 1914
+    },
+    {
+     "months": 15,
+     "price": 1779,
+     "total_price": 1914
+    }
+   ]
+  },
+  {
+   "unit_number": "201",
+   "floorplan_code": "567585",
+   "price": 1633,
+   "sqft": 499,
+   "floor": null,
+   "building": "2370",
+   "available_date": "2026-11-13",
+   "apply_url": null,
+   "total_price": 1768,
+   "lease_months": 15,
+   "specials": [],
+   "lease_options": [
+    {
+     "months": 3,
+     "price": 1981,
+     "total_price": 2116
+    },
+    {
+     "months": 4,
+     "price": 2369,
+     "total_price": 2504
+    },
+    {
+     "months": 5,
+     "price": 2416,
+     "total_price": 2551
+    },
+    {
+     "months": 6,
+     "price": 1749,
+     "total_price": 1884
+    },
+    {
+     "months": 7,
+     "price": 2175,
+     "total_price": 2310
+    },
+    {
+     "months": 8,
+     "price": 1691,
+     "total_price": 1826
+    },
+    {
+     "months": 9,
+     "price": 1672,
+     "total_price": 1807
+    },
+    {
+     "months": 10,
+     "price": 1656,
+     "total_price": 1791
+    },
+    {
+     "months": 11,
+     "price": 1644,
+     "total_price": 1779
+    },
+    {
+     "months": 12,
+     "price": 1860,
+     "total_price": 1995
+    },
+    {
+     "months": 13,
+     "price": 1633,
+     "total_price": 1768
+    },
+    {
+     "months": 14,
+     "price": 1633,
+     "total_price": 1768
+    },
+    {
+     "months": 15,
+     "price": 1633,
+     "total_price": 1768
+    }
+   ]
+  },
+  {
+   "unit_number": "102",
+   "floorplan_code": "567585",
+   "price": 1623,
+   "sqft": 499,
+   "floor": null,
+   "building": "2375",
+   "available_date": "2026-11-25",
+   "apply_url": null,
+   "total_price": 1758,
+   "lease_months": 15,
+   "specials": [],
+   "lease_options": [
+    {
+     "months": 3,
+     "price": 2638,
+     "total_price": 2773
+    },
+    {
+     "months": 4,
+     "price": 2355,
+     "total_price": 2490
+    },
+    {
+     "months": 5,
+     "price": 2402,
+     "total_price": 2537
+    },
+    {
+     "months": 6,
+     "price": 1739,
+     "total_price": 1874
+    },
+    {
+     "months": 7,
+     "price": 2162,
+     "total_price": 2297
+    },
+    {
+     "months": 8,
+     "price": 1681,
+     "total_price": 1816
+    },
+    {
+     "months": 9,
+     "price": 1662,
+     "total_price": 1797
+    },
+    {
+     "months": 10,
+     "price": 1646,
+     "total_price": 1781
+    },
+    {
+     "months": 11,
+     "price": 1634,
+     "total_price": 1769
+    },
+    {
+     "months": 12,
+     "price": 1623,
+     "total_price": 1758
+    },
+    {
+     "months": 13,
+     "price": 1623,
+     "total_price": 1758
+    },
+    {
+     "months": 14,
+     "price": 1623,
+     "total_price": 1758
+    },
+    {
+     "months": 15,
+     "price": 1623,
+     "total_price": 1758
+    }
+   ]
+  },
+  {
+   "unit_number": "103",
+   "floorplan_code": "567594",
+   "price": 1851,
+   "sqft": 819,
+   "floor": null,
+   "building": "4745",
+   "available_date": "2027-01-05",
+   "apply_url": null,
+   "total_price": 1986,
+   "lease_months": 15,
+   "specials": [],
+   "lease_options": [
+    {
+     "months": 3,
+     "price": 3346,
+     "total_price": 3481
+    },
+    {
+     "months": 4,
+     "price": 3108,
+     "total_price": 3243
+    },
+    {
+     "months": 5,
+     "price": 2040,
+     "total_price": 2175
+    },
+    {
+     "months": 6,
+     "price": 2438,
+     "total_price": 2573
+    },
+    {
+     "months": 7,
+     "price": 2300,
+     "total_price": 2435
+    },
+    {
+     "months": 8,
+     "price": 1919,
+     "total_price": 2054
+    },
+    {
+     "months": 9,
+     "price": 2218,
+     "total_price": 2353
+    },
+    {
+     "months": 10,
+     "price": 2464,
+     "total_price": 2599
+    },
+    {
+     "months": 11,
+     "price": 2396,
+     "total_price": 2531
+    },
+    {
+     "months": 12,
+     "price": 1851,
+     "total_price": 1986
+    },
+    {
+     "months": 13,
+     "price": 1851,
+     "total_price": 1986
+    },
+    {
+     "months": 14,
+     "price": 1851,
+     "total_price": 1986
+    },
+    {
+     "months": 15,
+     "price": 1851,
+     "total_price": 1986
+    }
+   ]
+  },
+  {
+   "unit_number": "104",
+   "floorplan_code": "567597",
+   "price": 1894,
+   "sqft": 833,
+   "floor": null,
+   "building": "4749",
+   "available_date": "2026-11-07",
+   "apply_url": null,
+   "total_price": 2029,
+   "lease_months": 15,
+   "specials": [],
+   "lease_options": [
+    {
+     "months": 3,
+     "price": 2299,
+     "total_price": 2434
+    },
+    {
+     "months": 4,
+     "price": 2937,
+     "total_price": 3072
+    },
+    {
+     "months": 5,
+     "price": 2752,
+     "total_price": 2887
+    },
+    {
+     "months": 6,
+     "price": 2702,
+     "total_price": 2837
+    },
+    {
+     "months": 7,
+     "price": 1990,
+     "total_price": 2125
+    },
+    {
+     "months": 8,
+     "price": 2309,
+     "total_price": 2444
+    },
+    {
+     "months": 9,
+     "price": 2220,
+     "total_price": 2355
+    },
+    {
+     "months": 10,
+     "price": 1921,
+     "total_price": 2056
+    },
+    {
+     "months": 11,
+     "price": 1906,
+     "total_price": 2041
+    },
+    {
+     "months": 12,
+     "price": 2394,
+     "total_price": 2529
+    },
+    {
+     "months": 13,
+     "price": 2355,
+     "total_price": 2490
+    },
+    {
+     "months": 14,
+     "price": 1894,
+     "total_price": 2029
+    },
+    {
+     "months": 15,
+     "price": 1894,
+     "total_price": 2029
+    }
+   ]
+  },
+  {
+   "unit_number": "103",
+   "floorplan_code": "567583",
+   "price": 1888,
+   "sqft": 819,
+   "floor": null,
+   "building": "4753",
+   "available_date": "2026-12-08",
+   "apply_url": null,
+   "total_price": 2023,
+   "lease_months": 15,
+   "specials": [],
+   "lease_options": [
+    {
+     "months": 3,
+     "price": 3321,
+     "total_price": 3456
+    },
+    {
+     "months": 4,
+     "price": 2992,
+     "total_price": 3127
+    },
+    {
+     "months": 5,
+     "price": 2883,
+     "total_price": 3018
+    },
+    {
+     "months": 6,
+     "price": 2023,
+     "total_price": 2158
+    },
+    {
+     "months": 7,
+     "price": 1984,
+     "total_price": 2119
+    },
+    {
+     "months": 8,
+     "price": 2271,
+     "total_price": 2406
+    },
+    {
+     "months": 9,
+     "price": 1933,
+     "total_price": 2068
+    },
+    {
+     "months": 10,
+     "price": 1915,
+     "total_price": 2050
+    },
+    {
+     "months": 11,
+     "price": 2444,
+     "total_price": 2579
+    },
+    {
+     "months": 12,
+     "price": 2056,
+     "total_price": 2191
+    },
+    {
+     "months": 13,
+     "price": 1888,
+     "total_price": 2023
+    },
+    {
+     "months": 14,
+     "price": 1888,
+     "total_price": 2023
+    },
+    {
+     "months": 15,
+     "price": 1888,
+     "total_price": 2023
+    }
+   ]
+  },
+  {
+   "unit_number": "104",
+   "floorplan_code": "567583",
+   "price": 1888,
+   "sqft": 819,
+   "floor": null,
+   "building": "4753",
+   "available_date": "2026-10-20",
+   "apply_url": null,
+   "total_price": 2023,
+   "lease_months": 15,
+   "specials": [],
+   "lease_options": [
+    {
+     "months": 3,
+     "price": 2293,
+     "total_price": 2428
+    },
+    {
+     "months": 4,
+     "price": 2158,
+     "total_price": 2293
+    },
+    {
+     "months": 5,
+     "price": 2694,
+     "total_price": 2829
+    },
+    {
+     "months": 6,
+     "price": 2579,
+     "total_price": 2714
+    },
+    {
+     "months": 7,
+     "price": 2559,
+     "total_price": 2694
+    },
+    {
+     "months": 8,
+     "price": 1956,
+     "total_price": 2091
+    },
+    {
+     "months": 9,
+     "price": 2241,
+     "total_price": 2376
+    },
+    {
+     "months": 10,
+     "price": 2167,
+     "total_price": 2302
+    },
+    {
+     "months": 11,
+     "price": 1900,
+     "total_price": 2035
+    },
+    {
+     "months": 12,
+     "price": 2134,
+     "total_price": 2269
+    },
+    {
+     "months": 13,
+     "price": 2348,
+     "total_price": 2483
+    },
+    {
+     "months": 14,
+     "price": 2032,
+     "total_price": 2167
+    },
+    {
+     "months": 15,
+     "price": 1888,
+     "total_price": 2023
+    }
+   ]
+  },
+  {
+   "unit_number": "201",
+   "floorplan_code": "567595",
+   "price": 1904,
+   "sqft": 858,
+   "floor": null,
+   "building": "4756",
+   "available_date": "2026-10-22",
+   "apply_url": null,
+   "total_price": 2039,
+   "lease_months": 15,
+   "specials": [],
+   "lease_options": [
+    {
+     "months": 3,
+     "price": 2309,
+     "total_price": 2444
+    },
+    {
+     "months": 4,
+     "price": 2174,
+     "total_price": 2309
+    },
+    {
+     "months": 5,
+     "price": 2715,
+     "total_price": 2850
+    },
+    {
+     "months": 6,
+     "price": 2600,
+     "total_price": 2735
+    },
+    {
+     "months": 7,
+     "price": 2580,
+     "total_price": 2715
+    },
+    {
+     "months": 8,
+     "price": 1972,
+     "total_price": 2107
+    },
+    {
+     "months": 9,
+     "price": 2259,
+     "total_price": 2394
+    },
+    {
+     "months": 10,
+     "price": 2185,
+     "total_price": 2320
+    },
+    {
+     "months": 11,
+     "price": 1916,
+     "total_price": 2051
+    },
+    {
+     "months": 12,
+     "price": 2153,
+     "total_price": 2288
+    },
+    {
+     "months": 13,
+     "price": 2368,
+     "total_price": 2503
+    },
+    {
+     "months": 14,
+     "price": 2049,
+     "total_price": 2184
+    },
+    {
+     "months": 15,
+     "price": 1904,
+     "total_price": 2039
+    }
+   ]
+  }
+ ],
+ "price_basis": "base",
+ "property_specials": [
+  {
+   "title": "MOVE IN BY OCTOBER 31 AND ENJOY $500 OFF 2-BEDROOM HOMES OR $1,000 OFF 3-BEDROOM HOMES!",
+   "description": "FALL INTO SAVINGS TODAY! \u2014 *All offers are limited and subject to change without notice. For qualified applicants on 12+ month leases. Contact the leasing team for more information"
+  }
+ ]
+}
