@@ -24,8 +24,8 @@ Finished items move to **Done** at the bottom.
       and whether the Mac was on battery / lid closed (10-12's timeouts were the Mac sleeping, found
       only via `pmset -g log`). Show it in the digest and the stale badge. Blocks are usually
       temporary; parse errors need code; sleep needs nothing.
-- [ ] **Fewer ReNew page loads** — only if Mon 2026-10-19 is still challenged on a *page load*
-      (10-13's runs were). Skip detail pages for plans whose card price is far over the limit
+- [ ] **Fewer ReNew page loads** — only if ReNew is challenged on a *page load* again (10-13's
+      runs were; 10-19's passed every page load, and only the 6th of 6 term requests got a 429). Skip detail pages for plans whose card price is far over the limit
       (~7 loads to ~4). Trade-off: those plans' units drop out of the All units page and history.
 - [ ] **Starred floorplans survive source switches** — shortlist floorplan ids use the site's
       plan code, which changed when North Hill moved to SightMap. Fall back to matching by
@@ -47,6 +47,10 @@ Finished items move to **Done** at the bottom.
       "Not Pet Friendly"); North Beach lists cats/dogs per unit.
 
 ## Done
+- [x] **90-day lows and latest move-in** (2026-10-19) — the All units table shows each bedroom
+      size's lowest price over the last 90 days of pulls (same mode as the cell, plus net when
+      lower) and each complex's furthest-out available date; complex pages show each plan's low.
+      Lows start at `unit_history_since`.
 - [x] **Lease-term normalization** — SightMap and Entrata (ReNew) prices for every term are
       scraped; each unit uses its cheapest term of 11+ months (`viable.yaml`), ties to the
       shorter lease, with all terms on tap. Not possible yet: RentCafe (Linkhorn Bay's range,

@@ -4,7 +4,7 @@ Tracks availability and pricing for a list of apartment complexes and publishes 
 static dashboard to GitHub Pages: https://mattrudy13.github.io/apartments/
 See README.md for usage commands.
 
-## Status (2026-10-13)
+## Status (2026-10-19)
 
 Working end to end:
 - Nine tracked complexes (`complexes.yaml`): Attain at Chic's Beach (`sightmap`, was
@@ -23,15 +23,19 @@ Working end to end:
   share link), site-wide promo banners (Attain, North Hill) feeding net rent, per-bedroom
   specials, random 5–10 s pauses between Chrome pages, and tap-to-expand details for phones.
   Banners first scraped 2026-10-12 (Attain and North Hill, one each).
+- Added 2026-10-19: **90-day lows** per bedroom size (overview) and per floorplan (complex pages),
+  and a **Latest move-in** column on the overview (see Design choices). The user's target move is
+  early Feb 2027, so they're watching how far ahead complexes list and how prices move.
 - Real snapshots: `2026-10-04` (setup day), `2026-10-05` (first scheduled Monday run, 09:00,
   confirmed working unattended), `2026-10-06` (the five new complexes plus Attain re-scraped
   from SightMap, via manual `--only` runs), `2026-10-12` (first scheduled run of all nine; six
-  succeeded, see below) and `2026-10-13` (manual `--only` refill of Linkhorn Bay and Indigo 19).
-  Next scheduled run: Mon 2026-10-19.
+  succeeded, see below), `2026-10-13` (manual `--only` refill of Linkhorn Bay and Indigo 19) and
+  `2026-10-19` (scheduled; all nine succeeded in ~5.5 min, so the 14:00 retry had nothing to do).
+  Next scheduled run: Mon 2026-10-26.
 - Added 2026-10-09: weekly email digest (`alerts.py`, run at the end of `scrape_and_push.sh`).
   SMTP is set up in `~/.config/apartments/alerts.env` (Gmail app password); the user sent the
-  10-12 digest by hand on 2026-10-13 and it arrived. First scheduled send: Mon 2026-10-19. The
-  10-12 run itself sent nothing: it pulled the new script mid-run and bash kept executing the
+  10-12 digest by hand on 2026-10-13 and it arrived. First scheduled send worked on Mon
+  2026-10-19 ("16 new viable, 2 newly viable, 5 price drops"). The 10-12 run itself sent nothing: it pulled the new script mid-run and bash kept executing the
   old copy (see Dev notes). Issue #2 still has viable.yaml/shortlist checks open.
 - Added 2026-10-09: **viable units** (`viable.yaml`: 1–2 BR under $1,900/mo). The main page
   (`index.html`) lists only those; the old overview is now `all.html`; complex pages default to
@@ -40,7 +44,7 @@ Working end to end:
   scrapers store every term's price (`Unit.lease_options`); the build prices each unit at its
   cheapest term of `min_lease_months` (11) or more. North Hill moved to its SightMap (no Chrome).
   Complex pages name their data source. First scheduled run 2026-10-12: worked for the
-  SightMap sites; ReNew hasn't completed a run with terms yet (see below).
+  SightMap sites; ReNew's first run with terms was 2026-10-19 (see below).
 - Cleared by 2026-10-12: the RentCafe sites (Linkhorn Bay, Salt Meadow Bay, Indigo 19) returned
   403 Cloudflare challenges on 10-10 from a new network (Verizon Fios), cause never pinned down.
   They answered 200 to plain HTTP on 10-12 and 10-13 with no changes on our side.
@@ -49,12 +53,14 @@ Working end to end:
   ReNew went stale). Diagnosed from `pmset -g log` ("DarkWake ... Using BATT"). The user's Mac is
   normally open and on power 8–5 weekdays, so 9:00 stays; the 14:00 retry covers partial days.
   Linkhorn Bay and Indigo 19 were refilled by a manual `--only` run on 10-13.
-- **ReNew stale since 10-05 (open):** 10-13's manual run (~19:30 ET) got a 429 on lease-term
+- **ReNew stale 10-05 to 10-19 (resolved):** 10-13's manual run (~19:30 ET) got a 429 on lease-term
   requests, then the next detail page stuck on Cloudflare. Fixed in code the same day (terms
   fetched after all pages, only for possibly viable units). An accidental `--retry` with the new
   code ~1 h later was challenged on a page load (Douglas) before any term request, so the Mac
-  was still flagged then. Not retried after that; first real test is Mon 2026-10-19. If 10-19
-  also fails on a page load, cut page loads next (see ENHANCEMENTS.md).
+  was still flagged then. The scheduled 10-19 run passed every page load (156 s), got terms
+  for 5 of the 6 possibly viable units, then a 429 on the 6th stopped term requests as designed;
+  the snapshot saved. So the term requests still trip ReNew's rate limit, but no longer cost the
+  snapshot. "Fewer ReNew page loads" isn't needed unless page loads get challenged again.
 
 Next steps: see ENHANCEMENTS.md.
 Daily pulls are a one-liner (`scripts/install_schedule.sh daily`) if wanted.

@@ -12,11 +12,12 @@ https://mattrudy13.github.io/apartments/
   floorplans/units, with a share link to move it to another device
 - **All units**: everything still tracked: a sortable table of units available, lowest price
   and lowest price per bedroom count, switchable between **base rent** and **total per month**
-  (rent + required fees), with net-of-specials prices and change since the last pull, plus trend
-  charts (one small chart per complex on a shared scale)
+  (rent + required fees), with net-of-specials prices and change since the last pull, each
+  bedroom size's **90-day low**, each complex's **latest move-in** date, plus trend charts (one
+  small chart per complex on a shared scale)
 - **Complex page**: current specials and how they were read, floorplans (sortable,
   filterable by bedrooms, starred only, or **viable only**, which is on by default), price per
-  sq ft, the units in each plan with net rent, days listed and price changes, units no longer
+  sq ft, each plan's 90-day low, the units in each plan with net rent, days listed and price changes, units no longer
   listed, and price history by bedroom count
 
 **Viable units** are set in `viable.yaml`: bedroom counts and a monthly limit. Monthly cost is
