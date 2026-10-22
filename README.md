@@ -1,9 +1,25 @@
-# apartments
+# Apartment price tracker
 
-Tracks availability and pricing for a list of apartment complexes. A weekly job on a
-Mac scrapes each complex's site and pushes a snapshot to `data/snapshots/`; a GitHub
-Action then rebuilds and publishes a static dashboard to GitHub Pages:
-https://mattrudy13.github.io/apartments/
+Tracks prices and availability at nine Virginia Beach apartment complexes and shows what each unit
+really costs per month.
+
+**Site:** https://mattrudy13.github.io/apartments/
+
+## At a glance
+
+- **What it does:** a weekly job scrapes each complex's website (five different leasing platforms) and
+  saves a snapshot to git. A dashboard compares the true monthly cost, rent after specials (such as
+  "two months free" spread over the lease) plus required fees, against a budget, with price history.
+- **Data quality:** each build checks every complex's data against itself (floorplan counts against
+  unit lists, missing prices, sudden price swings) and flags anything that disagrees. A weekly email
+  digest lists new units, price drops, specials and any failed scrapes.
+- **Built with:** Python (httpx, Beautiful Soup, Playwright for sites behind bot protection), pytest
+  (104 tests), a scheduled macOS job, GitHub Actions and GitHub Pages.
+
+## Details
+
+A weekly job on a Mac scrapes each complex's site and pushes a snapshot to `data/snapshots/`; a GitHub
+Action then rebuilds and publishes the static dashboard.
 
 - **Viable units** (main page): every unit across complexes that fits `viable.yaml`
   (currently 1 or 2 BR under $1,900 a month), cheapest first, with what you'd pay per month
