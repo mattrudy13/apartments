@@ -177,7 +177,7 @@ not permitted"). The current setup uses a dedicated clone with its own venv:
 ```sh
 D="$HOME/Library/Application Support/apartments-scraper"
 git clone https://github.com/mattrudy13/apartments.git "$D"
-/usr/bin/python3 -m venv "$D/.venv"
+/opt/homebrew/opt/python@3.14/bin/python3.14 -m venv "$D/.venv"
 "$D/.venv/bin/pip" install -r "$D/requirements.txt"
 "$D/scripts/install_schedule.sh"
 ```
