@@ -114,7 +114,8 @@ So the launchd job runs from its own clone with its own venv:
 
 The script runs `git pull` before every scrape, so changes pushed from this Desktop copy
 (e.g. new entries in `complexes.yaml`) are picked up automatically. If `requirements.txt`
-changes, reinstall deps in the clone's venv. Granting `bash` Full Disk Access was rejected
+changes, reinstall deps in the clone's venv (the scraper launches Google Chrome via
+`channel="chrome"`, so a Playwright upgrade doesn't need `playwright install`). Granting `bash` Full Disk Access was rejected
 as too broad. The README documents this setup.
 
 ## Scraping load
@@ -434,9 +435,13 @@ plain request each for their homepage banner.
 
 ## Dev notes
 
-- Desktop copy: `~/Desktop/coding/GitHub/apartments`, venv at `.venv/` inside it (Python 3.9;
-  activate with `source .venv/bin/activate`; code stays 3.9-compatible
-  via `from __future__ import annotations`). CI uses Python 3.12.
+- Desktop copy: `~/Desktop/coding/GitHub/apartments`, venv at `.venv/` inside it (Python 3.14
+  from Homebrew's version-stable path `/opt/homebrew/opt/python@3.14`; activate with
+  `source .venv/bin/activate`). CI uses Python 3.12.
+- Both venvs (Desktop and the scheduler clone) moved off the system Python 3.9 on 2026-10-24:
+  the security fixes for anyio, certifi's bundled CAs, pytest and soupsieve need 3.10+.
+  The old 3.9 venvs are in `~/Library/Application Support/apartments-venv-py39-backup/`
+  (delete once a Monday run has passed).
 - Local preview: `python build.py && python -m http.server -d site 8000`.
 - Commits: the user's global rule forbids commits/pushes on weekdays 8am–5pm ET unless
   asked; outside that window, commit and push finished work without asking.
