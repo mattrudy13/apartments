@@ -13,6 +13,8 @@ const sortBedKeys = (keys) => [...new Set(keys)].sort((a, b) => bedKeyOrder(a) -
 const bedLabel = (b) => (b == null ? "—" : b === 0 ? "Studio" : `${b} BR`);
 const cssVar = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 const seriesColor = (i) => cssVar(`--series-${(i % 8) + 1}`);
+// Scraped links must be http(s): a javascript: URL would run script on click.
+const safeUrl = (u) => (/^https?:\/\//i.test(String(u ?? "")) ? String(u) : null);
 
 /** Tiny DOM builder: h("td", {class: "r"}, "text", childNode). Strings become text nodes. */
 function h(tag, attrs = {}, ...children) {
@@ -740,7 +742,7 @@ async function renderComplex() {
   add(root, 
     h("div", { class: "muted" },
       [d.property.address, d.property.phone].filter(Boolean).join(" · "), " · ",
-      h("a", { href: d.url, target: "_blank", rel: "noopener" }, "Official site ↗"),
+      safeUrl(d.url) ? h("a", { href: safeUrl(d.url), target: "_blank", rel: "noopener" }, "Official site ↗") : null,
       d.source ? ` · Data: ${d.source}` : null),
     d.stale ? h("div", { class: "banner" }, `The latest pull failed (${d.error || "unknown error"}). Showing data from ${fmtDate(d.date)}.`) : null,
     d.checks && d.checks.length ? h("div", { class: "banner" },
@@ -934,7 +936,7 @@ async function renderComplex() {
               h("td", {}, availLabel(u.available_date, today)),
               h("td", {}, listedEl(u.history, historyStart)),
               h("td", { class: "num" }, priceChangeEl(u.history)),
-              h("td", {}, u.apply_url ? h("a", { href: u.apply_url, target: "_blank", rel: "noopener", onclick: (e) => e.stopPropagation() }, "Apply ↗") : ""),
+              h("td", {}, safeUrl(u.apply_url) ? h("a", { href: safeUrl(u.apply_url), target: "_blank", rel: "noopener", onclick: (e) => e.stopPropagation() }, "Apply ↗") : ""),
             )))))));
       }
     }
