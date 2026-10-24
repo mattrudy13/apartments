@@ -1,47 +1,50 @@
 {
  "attain-chics-beach": {
-  "last_attempt": "2026-10-19",
-  "last_success": "2026-10-19",
+  "last_attempt": "2026-10-24",
+  "last_success": "2026-10-24",
   "ok": true
  },
  "columbus-station": {
-  "last_attempt": "2026-10-19",
-  "last_success": "2026-10-19",
+  "last_attempt": "2026-10-24",
+  "last_success": "2026-10-24",
   "ok": true
  },
  "indigo-19": {
-  "last_attempt": "2026-10-19",
+  "error": "Client error '403 Forbidden' for url 'https://www.indigo19apartments.com/floorplans'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403",
+  "last_attempt": "2026-10-24",
   "last_success": "2026-10-19",
-  "ok": true
+  "ok": false
  },
  "linkhorn-bay": {
-  "last_attempt": "2026-10-19",
+  "error": "Client error '403 Forbidden' for url 'https://www.linkhornbayapartments-prg.com/floorplans'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403",
+  "last_attempt": "2026-10-24",
   "last_success": "2026-10-19",
-  "ok": true
+  "ok": false
  },
  "nexus": {
-  "last_attempt": "2026-10-19",
-  "last_success": "2026-10-19",
+  "last_attempt": "2026-10-24",
+  "last_success": "2026-10-24",
   "ok": true
  },
  "north-beach": {
-  "last_attempt": "2026-10-19",
-  "last_success": "2026-10-19",
+  "last_attempt": "2026-10-24",
+  "last_success": "2026-10-24",
   "ok": true
  },
  "north-hill": {
-  "last_attempt": "2026-10-19",
-  "last_success": "2026-10-19",
+  "last_attempt": "2026-10-24",
+  "last_success": "2026-10-24",
   "ok": true
  },
  "renew-marina-shores": {
-  "last_attempt": "2026-10-19",
-  "last_success": "2026-10-19",
+  "last_attempt": "2026-10-24",
+  "last_success": "2026-10-24",
   "ok": true
  },
  "salt-meadow-bay": {
-  "last_attempt": "2026-10-19",
+  "error": "Client error '403 Forbidden' for url 'https://www.saltmeadowbay.com/floorplans'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403",
+  "last_attempt": "2026-10-24",
   "last_success": "2026-10-19",
-  "ok": true
+  "ok": false
  }
 }
