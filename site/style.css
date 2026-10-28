@@ -192,3 +192,8 @@ td.wrap-cell { white-space: normal; min-width: 90px; }
 .star-mark { color: var(--series-4); }
 .name-cell .plan-line { color: var(--text-2); font-size: 13px; }
 .plan-name { font-size: 14px; font-weight: 600; color: var(--text); }
+
+/* A price's breakdown opens as its own row under the price, so it never squeezes the price column on phones. */
+tr.breakdown-row td { text-align: right; white-space: normal; padding-top: 0; }
+tr.breakdown-row .expand-detail { display: inline-block; max-width: 340px; margin: 0; }
+tr:has(+ tr.breakdown-row) td { border-bottom: 0; }

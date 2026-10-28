@@ -577,10 +577,10 @@ function termLines(u, { perMonth = false, minLease } = {}) {
   ];
 }
 
-/** Monthly cost cell: the amount and its lease term, with how it was worked out on tap. */
-function monthlyEl(u, minLease) {
+/** How a unit's monthly amount adds up, for its tap-to-open breakdown. */
+function monthlyLines(u, minLease) {
   const e = u.effective || {};
-  const lines = [
+  return [
     u.incl_fees ? `Listed price (includes required fees): ${money(u.price)}` : `Base rent: ${money(u.price)}`,
     u.total_price && !u.incl_fees ? `Required monthly fees: ${money(u.total_price - u.price)}` : null,
     e.savings ? `Specials: −${money(e.savings)}/mo (${e.applied.join(", ")}, over a ${e.lease_months}-month lease${e.lease_assumed ? ", assumed" : ""})` : null,
@@ -588,9 +588,19 @@ function monthlyEl(u, minLease) {
     u.fees_known ? null : "This site doesn't list its required monthly fees, so they aren't included.",
     ...termLines(u, { perMonth: true, minLease }),
   ];
-  return [expander("net-btn", h("strong", {}, money(u.monthly)), lines), termEl(u, minLease),
-    u.fees_known ? null : h("div", { class: "muted small" }, "fees not listed")];
 }
+
+/** Monthly cost cell: the amount (tap to open its breakdown) and its lease term. The breakdown is
+ *  a full-width row from breakdownRow(): opened inside this narrow cell it squeezed the column on phones. */
+function monthlyEl(u, minLease, { open, onToggle }) {
+  return [h("button", {
+    type: "button", class: "expand-btn net-btn", "aria-expanded": String(open),
+    onclick: (e) => { e.stopPropagation(); onToggle(); }, onkeydown: (e) => e.stopPropagation(),
+  }, h("strong", {}, money(u.monthly))), termEl(u, minLease),
+  u.fees_known ? null : h("div", { class: "muted small" }, "fees not listed")];
+}
+const breakdownRow = (u, minLease, colspan, heading) => h("tr", { class: "breakdown-row" }, h("td", { colspan },
+  h("div", { class: "expand-detail" }, [heading, ...monthlyLines(u, minLease)].filter(Boolean).map((l) => h("div", {}, l)))));
 
 async function renderViable() {
   const imported = importSharedShortlist();
@@ -653,6 +663,9 @@ async function renderViable() {
     { key: "available_date", label: "Earliest", hideSm: true },
   ];
   const open = new Set();
+  // Price breakdowns open as their own row: "<plan key>" for a plan's cheapest unit, "<plan key>|<unit key>" for a unit.
+  const openPrice = new Set();
+  const priceToggle = (key) => ({ open: openPrice.has(key), onToggle: () => { if (openPrice.has(key)) openPrice.delete(key); else openPrice.add(key); drawTable(); } });
   const moveIn = (iso, today) => (!iso ? "" : iso <= today ? "Now" : shortDate(iso));
   const newBadge = (n, total) => (n ? h("span", { class: "badge new" }, total === 1 ? "New" : `${n} new`) : null);
   const drawFilters = () => filterRow.replaceChildren(...[null, ...bedOptions].map((b) =>
@@ -667,15 +680,16 @@ async function renderViable() {
   const unitsTable = (p) => h("table", {},
     h("thead", {}, h("tr", {}, h("th", {}, "Unit"), h("th", { class: "r" }, "Per month"),
       h("th", { class: "hide-sm" }, "Available"), h("th", { class: "hide-sm" }, "Listed"), h("th", { class: "hide-sm" }, "Price change"))),
-    h("tbody", {}, p.units.map((u) => h("tr", {},
+    h("tbody", {}, p.units.flatMap((u) => [h("tr", {},
       h("td", { class: "unit-cell" }, starBtn(unitEntry({ slug: u.slug, name: u.complex }, u, { name: u.plan }), drawShortlist), `#${u.unit_number}`,
         u.building || u.floor ? h("div", { class: "muted small" }, [u.building ? `Bldg ${u.building}` : null, u.floor ? `Floor ${u.floor}` : null].filter(Boolean).join(" · ")) : null),
       // Phones show two columns, so the move-in date goes under the price.
-      h("td", { class: "r num" }, monthlyEl(u, crit.min_lease_months),
+      h("td", { class: "r num" }, monthlyEl(u, crit.min_lease_months, priceToggle(`${p.key}|${unitKey(u)}`)),
         h("div", { class: "muted small show-sm" }, moveIn(u.available_date, u.date), u.history && u.history.is_new ? [" ", newBadge(1, 1)] : null)),
       h("td", { class: "hide-sm" }, availLabel(u.available_date, u.date)),
       h("td", { class: "hide-sm" }, listedEl(u.history, u.history_start)),
-      h("td", { class: "hide-sm" }, priceChangeEl(u.history))))));
+      h("td", { class: "hide-sm" }, priceChangeEl(u.history))),
+      openPrice.has(`${p.key}|${unitKey(u)}`) ? breakdownRow(u, crit.min_lease_months, 5) : null].filter(Boolean))));
   const drawTable = () => {
     const shown = plans.filter((p) => state.beds === null || p.beds === state.beds).sort((a, b) => {
       const av = state.sort === "complex" ? a.complex : a[state.sort], bv = state.sort === "complex" ? b.complex : b[state.sort];
@@ -701,13 +715,14 @@ async function renderViable() {
           h("div", { class: "addr plan-line" }, h("span", { class: "plan-name" }, p.plan), ` · ${bedLabel(p.beds)}`, h("span", { class: "show-sm" }, p.sqft ? ` · ${p.sqft.toLocaleString()} sq ft` : ""))),
         h("td", { class: "r num hide-sm" }, p.sqft ? p.sqft.toLocaleString() : "—"),
         // Phones show three columns: the count and earliest move-in go under the price.
-        h("td", { class: "r num" }, h("span", { class: "muted small" }, "from "), monthlyEl(p.cheapest, crit.min_lease_months),
+        h("td", { class: "r num" }, h("span", { class: "muted small" }, "from "), monthlyEl(p.cheapest, crit.min_lease_months, priceToggle(p.key)),
           h("div", { class: "muted small show-sm" }, `${p.count} viable`, p.available_date ? ` · ${moveIn(p.available_date, p.date)}` : "", starMark),
           p.newCount ? h("div", { class: "show-sm" }, newBadge(p.newCount, p.count)) : null),
         h("td", { class: "r num hide-sm" }, fmtPpsf(p.ppsf)),
         h("td", { class: "r num hide-sm" }, p.count, starMark && starMark.cloneNode(true), p.newCount ? [" ", newBadge(p.newCount, p.count)] : null),
         h("td", { class: "hide-sm" }, availLabel(p.available_date, p.date)),
       ));
+      if (openPrice.has(p.key)) rows.push(breakdownRow(p.cheapest, crit.min_lease_months, columns.length + 1, `Cheapest unit, #${p.cheapest.unit_number}:`));
       if (isOpen) rows.push(h("tr", { class: "units-row" }, h("td", { colspan: columns.length + 1 }, unitsTable(p))));
     }
     tbody.replaceChildren(...(rows.length ? rows : [h("tr", {}, h("td", { colspan: columns.length + 1, class: "muted" }, "No units fit right now."))]));

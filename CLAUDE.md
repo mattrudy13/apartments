@@ -415,6 +415,8 @@ plain request each for their homepage banner.
   columns on plan rows and two on units. The user's choices: phone and desktop alike, one-unit
   plans expand like the rest, and plans start collapsed even when they hold starred units (a ★
   after the count marks them). The row's ☆ stars the plan (`planEntry`); units keep their own.
+  Tapping a price opens its breakdown as its own row under that row (`breakdownRow`), not inside the
+  cell: opened in the narrow price cell it squeezed the column on phones and cut off the price.
   The user rejected "cheapest 1BR/2BR per complex" and a collapsible per-complex list as too
   close to the "By complex" table. The complex page's floorplan table is still wider than a
   phone (it scrolls inside its card).
