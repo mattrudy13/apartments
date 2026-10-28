@@ -623,54 +623,93 @@ async function renderViable() {
 
   add(root, await shortlistCard());
 
-  // Viable units, one row per unit, cheapest first.
+  // Viable units, one row per floor plan (cheapest first); tap a plan for its units. One row per
+  // unit let the cheapest complex crowd out the rest (Linkhorn Bay was 63 of 96 rows on 10-26).
   const state = { beds: null, sort: "monthly", dir: 1 };
-  const bedOptions = [...new Set(units.map((u) => u.beds))].sort((a, b) => a - b);
+  const byPlan = new Map();
+  for (const u of units) {
+    const key = `${u.slug}|${u.floorplan_code}`;
+    if (!byPlan.has(key)) byPlan.set(key, { key, slug: u.slug, complex: u.complex, code: u.floorplan_code, plan: u.plan, beds: u.beds, units: [] });
+    byPlan.get(key).units.push(u);
+  }
+  const plans = [...byPlan.values()];
+  for (const p of plans) {
+    p.units.sort((a, b) => a.monthly - b.monthly);
+    const c = p.units[0];
+    p.cheapest = c; p.monthly = c.monthly; p.count = p.units.length; p.date = c.date;
+    p.sqft = (p.units.find((u) => u.sqft) || {}).sqft ?? null;
+    p.ppsf = ppsf(c.monthly, c.sqft || p.sqft);
+    p.available_date = p.units.map((u) => u.available_date).filter(Boolean).sort()[0] ?? null;
+    p.newCount = p.units.filter((u) => u.history && u.history.is_new).length;
+  }
+  const bedOptions = [...new Set(plans.map((p) => p.beds))].sort((a, b) => a - b);
   const filterRow = h("div", { class: "filters" }), thead = h("thead"), tbody = h("tbody");
   const columns = [
-    { key: "complex", label: "Complex / unit" },
-    { key: "plan", label: "Plan", hideSm: true },
+    { key: "complex", label: "Complex / plan" },
     { key: "sqft", label: "Sq ft", r: true, hideSm: true },
     { key: "monthly", label: "Per month", r: true },
     { key: "ppsf", label: "$/sq ft", r: true, hideSm: true },
-    { key: "available_date", label: "Available", hideSm: true },
-    { key: "days", label: "Listed", hideSm: true },
+    { key: "count", label: "Viable", r: true, hideSm: true },
+    { key: "available_date", label: "Earliest", hideSm: true },
   ];
-  for (const u of units) { u.ppsf = ppsf(u.monthly, u.sqft); u.days = u.history ? u.history.days_listed : null; }
+  const open = new Set();
+  const moveIn = (iso, today) => (!iso ? "" : iso <= today ? "Now" : shortDate(iso));
+  const newBadge = (n, total) => (n ? h("span", { class: "badge new" }, total === 1 ? "New" : `${n} new`) : null);
   const drawFilters = () => filterRow.replaceChildren(...[null, ...bedOptions].map((b) =>
     h("button", { class: "chip", "aria-pressed": String(state.beds === b), onclick: () => { state.beds = b; drawFilters(); drawTable(); } },
-      b === null ? `All (${units.length})` : `${bedLabel(b)} (${units.filter((u) => u.beds === b).length})`)));
+      b === null ? `All (${plans.length})` : `${bedLabel(b)} (${plans.filter((p) => p.beds === b).length})`)));
   const drawHead = () => thead.replaceChildren(h("tr", {}, h("th", {}, ""),
     columns.map((c) => h("th", {
       class: `sortable ${c.r ? "r" : ""} ${c.hideSm ? "hide-sm" : ""}`,
       "aria-sort": state.sort === c.key ? (state.dir > 0 ? "ascending" : "descending") : null,
       onclick: () => { state.dir = state.sort === c.key ? -state.dir : 1; state.sort = c.key; drawHead(); drawTable(); },
-    }, c.label)),
-    h("th", { class: "hide-sm" }, "Price change")));
+    }, c.label))));
+  const unitsTable = (p) => h("table", {},
+    h("thead", {}, h("tr", {}, h("th", {}, "Unit"), h("th", { class: "r" }, "Per month"),
+      h("th", { class: "hide-sm" }, "Available"), h("th", { class: "hide-sm" }, "Listed"), h("th", { class: "hide-sm" }, "Price change"))),
+    h("tbody", {}, p.units.map((u) => h("tr", {},
+      h("td", { class: "unit-cell" }, starBtn(unitEntry({ slug: u.slug, name: u.complex }, u, { name: u.plan }), drawShortlist), `#${u.unit_number}`,
+        u.building || u.floor ? h("div", { class: "muted small" }, [u.building ? `Bldg ${u.building}` : null, u.floor ? `Floor ${u.floor}` : null].filter(Boolean).join(" · ")) : null),
+      // Phones show two columns, so the move-in date goes under the price.
+      h("td", { class: "r num" }, monthlyEl(u, crit.min_lease_months),
+        h("div", { class: "muted small show-sm" }, moveIn(u.available_date, u.date), u.history && u.history.is_new ? [" ", newBadge(1, 1)] : null)),
+      h("td", { class: "hide-sm" }, availLabel(u.available_date, u.date)),
+      h("td", { class: "hide-sm" }, listedEl(u.history, u.history_start)),
+      h("td", { class: "hide-sm" }, priceChangeEl(u.history))))));
   const drawTable = () => {
-    const rows = units.filter((u) => state.beds === null || u.beds === state.beds).sort((a, b) => {
-      const av = a[state.sort], bv = b[state.sort];
+    const shown = plans.filter((p) => state.beds === null || p.beds === state.beds).sort((a, b) => {
+      const av = state.sort === "complex" ? a.complex : a[state.sort], bv = state.sort === "complex" ? b.complex : b[state.sort];
       if (av == null && bv == null) return a.monthly - b.monthly;
       if (av == null) return 1; if (bv == null) return -1;
       return (av < bv ? -1 : av > bv ? 1 : a.monthly - b.monthly) * (av === bv ? 1 : state.dir);
     });
-    tbody.replaceChildren(...(rows.length ? rows.map((u) => h("tr", {},
-      h("td", {}, starBtn(unitEntry({ slug: u.slug, name: u.complex }, u, { name: u.plan }), drawShortlist)),
-      // Phones show three columns: plan and size fold into the unit line, the date under the price.
-      h("td", { class: "name-cell wrap-cell" },
-        h("a", { href: `complex.html?c=${encodeURIComponent(u.slug)}` }, u.complex),
-        h("div", { class: "addr" }, `#${u.unit_number}${u.building ? ` · Bldg ${u.building}` : ""}${u.floor ? ` · Floor ${u.floor}` : ""}`,
-          h("span", { class: "show-sm" }, ` · ${u.plan} · ${bedLabel(u.beds)}${u.sqft ? ` · ${u.sqft.toLocaleString()} sq ft` : ""}`))),
-      h("td", { class: "wrap-cell hide-sm" }, `${u.plan} · ${bedLabel(u.beds)}`),
-      h("td", { class: "r num hide-sm" }, u.sqft ? u.sqft.toLocaleString() : "—"),
-      h("td", { class: "r num" }, monthlyEl(u, crit.min_lease_months),
-        h("div", { class: "muted small show-sm" }, u.available_date ? (u.available_date <= u.date ? "Now" : shortDate(u.available_date)) : "",
-          u.history && u.history.is_new ? [" ", h("span", { class: "badge new" }, "New")] : null)),
-      h("td", { class: "r num hide-sm" }, fmtPpsf(u.ppsf)),
-      h("td", { class: "hide-sm" }, availLabel(u.available_date, u.date)),
-      h("td", { class: "hide-sm" }, listedEl(u.history, u.history_start)),
-      h("td", { class: "hide-sm" }, priceChangeEl(u.history)),
-    )) : [h("tr", {}, h("td", { colspan: columns.length + 2, class: "muted" }, "No units fit right now."))]));
+    const rows = [];
+    for (const p of shown) {
+      const isOpen = open.has(p.key);
+      const toggle = () => { if (isOpen) open.delete(p.key); else open.add(p.key); drawTable(); };
+      // Plans stay collapsed even when they hold starred units (the Shortlist card lists those); the ★ just marks them.
+      const starredUnits = p.units.some((u) => shortlist.has(unitId(u.slug, u)));
+      const starMark = starredUnits ? h("span", { class: "star-mark", "aria-label": "has starred units" }, " ★") : null;
+      rows.push(h("tr", {
+        class: `fp-row ${isOpen ? "open" : ""}`, tabindex: "0", "aria-expanded": String(isOpen),
+        onclick: toggle, onkeydown: (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); } },
+      },
+        h("td", { class: "fp-name" }, starBtn(planEntry({ slug: p.slug, name: p.complex }, { code: p.code, name: p.plan, rent_min: p.cheapest.price }), drawShortlist)),
+        h("td", { class: "name-cell wrap-cell" },
+          h("a", { href: `complex.html?c=${encodeURIComponent(p.slug)}`, onclick: (e) => e.stopPropagation() }, p.complex),
+          h("div", { class: "addr" }, `${p.plan} · ${bedLabel(p.beds)}`, h("span", { class: "show-sm" }, p.sqft ? ` · ${p.sqft.toLocaleString()} sq ft` : ""))),
+        h("td", { class: "r num hide-sm" }, p.sqft ? p.sqft.toLocaleString() : "—"),
+        // Phones show three columns: the count and earliest move-in go under the price.
+        h("td", { class: "r num" }, h("span", { class: "muted small" }, "from "), monthlyEl(p.cheapest, crit.min_lease_months),
+          h("div", { class: "muted small show-sm" }, `${p.count} viable`, p.available_date ? ` · ${moveIn(p.available_date, p.date)}` : "", starMark),
+          p.newCount ? h("div", { class: "show-sm" }, newBadge(p.newCount, p.count)) : null),
+        h("td", { class: "r num hide-sm" }, fmtPpsf(p.ppsf)),
+        h("td", { class: "r num hide-sm" }, p.count, starMark && starMark.cloneNode(true), p.newCount ? [" ", newBadge(p.newCount, p.count)] : null),
+        h("td", { class: "hide-sm" }, availLabel(p.available_date, p.date)),
+      ));
+      if (isOpen) rows.push(h("tr", { class: "units-row" }, h("td", { colspan: columns.length + 1 }, unitsTable(p))));
+    }
+    tbody.replaceChildren(...(rows.length ? rows : [h("tr", {}, h("td", { colspan: columns.length + 1, class: "muted" }, "No units fit right now."))]));
   };
   // Starring re-renders the shortlist card in place (it's rebuilt from storage).
   let slCard = null;
@@ -678,9 +717,9 @@ async function renderViable() {
   slCard = root.lastElementChild;
   drawFilters(); drawHead(); drawTable();
   add(root, h("div", { class: "card stack" },
-    h("h2", {}, "Viable units"), filterRow,
+    h("h2", {}, "Viable units ", h("span", { class: "muted" }, `(${units.length} unit${units.length === 1 ? "" : "s"} in ${plans.length} plan${plans.length === 1 ? "" : "s"})`)), filterRow,
     h("div", { class: "table-scroll" }, h("table", {}, thead, tbody)),
-    h("p", { class: "note" }, "“Per month” is what you'd pay each month: rent after specials (spread over the lease) plus the required monthly fees the site lists. Tap an amount to see how it adds up. “Fees not listed” means the site doesn't publish its fees, so the real total is higher. Where a site prices several lease terms, each unit uses its cheapest term of ${crit.min_lease_months || 1}+ months (ties go to the shorter lease); the term shows under the amount. $/sq ft uses the monthly amount. Star ☆ a unit to add it to your shortlist."),
+    h("p", { class: "note" }, `One row per floor plan, showing its cheapest unit that fits; tap a plan to see its units. “Per month” is what you'd pay each month: rent after specials (spread over the lease) plus the required monthly fees the site lists. Tap an amount to see how it adds up. “Fees not listed” means the site doesn't publish its fees, so the real total is higher. Where a site prices several lease terms, each unit uses its cheapest term of ${crit.min_lease_months || 1}+ months (ties go to the shorter lease); the term shows under the amount. $/sq ft uses the monthly amount. Star ☆ a plan or a unit to add it to your shortlist; ★ after the count marks a plan with starred units.`),
   ));
 
   // Per complex: how many fit and the cheapest, with the same stale / check-data flags as All units.

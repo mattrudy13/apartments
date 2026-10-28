@@ -187,3 +187,6 @@ td.wrap-cell { white-space: normal; min-width: 90px; }
 .term-line { font-variant-numeric: tabular-nums; }
 .term-line.chosen { font-weight: 600; }
 .term-line.off { color: var(--text-2); }
+
+/* Viable units grouped by plan: ★ after a plan's count when one of its units is starred. */
+.star-mark { color: var(--series-4); }
