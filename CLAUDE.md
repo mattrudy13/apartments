@@ -406,9 +406,18 @@ plain request each for their homepage banner.
   page names them in a banner instead.
 - Complex page: "Viable only" and "Starred only" are mutually exclusive, so a starred unit
   that doesn't fit is never hidden by both filters.
-- The main page's unit table drops to three columns on phones (plan and size fold into the
-  unit line, the date goes under the price). The complex page's floorplan table was already
-  wider than a phone before this change (it scrolls inside its card).
+- The main page's Viable units table has **one row per floor plan** (added 2026-10-27), grouped
+  in the JS by `slug` + `floorplan_code` from `viable.json` (no build change). Why: one row per
+  unit let the cheapest complex bury the rest (Linkhorn Bay was 63 of 96 rows on 10-26; per plan
+  it's 5 of 21). The row shows the cheapest viable unit's per-month amount ("from"), the viable
+  count, earliest move-in and "N new"; tapping it opens the plan's units (same `fp-row` /
+  `units-row` pattern as complex pages), where Listed and Price change live. Phones show three
+  columns on plan rows and two on units. The user's choices: phone and desktop alike, one-unit
+  plans expand like the rest, and plans start collapsed even when they hold starred units (a ★
+  after the count marks them). The row's ☆ stars the plan (`planEntry`); units keep their own.
+  The user rejected "cheapest 1BR/2BR per complex" and a collapsible per-complex list as too
+  close to the "By complex" table. The complex page's floorplan table is still wider than a
+  phone (it scrolls inside its card).
 
 ## Email digest
 
