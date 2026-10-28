@@ -697,7 +697,8 @@ async function renderViable() {
         h("td", { class: "fp-name" }, starBtn(planEntry({ slug: p.slug, name: p.complex }, { code: p.code, name: p.plan, rent_min: p.cheapest.price }), drawShortlist)),
         h("td", { class: "name-cell wrap-cell" },
           h("a", { href: `complex.html?c=${encodeURIComponent(p.slug)}`, onclick: (e) => e.stopPropagation() }, p.complex),
-          h("div", { class: "addr" }, `${p.plan} · ${bedLabel(p.beds)}`, h("span", { class: "show-sm" }, p.sqft ? ` · ${p.sqft.toLocaleString()} sq ft` : ""))),
+          // The plan is what each row stands for, so its name gets more weight than the usual address line.
+          h("div", { class: "addr plan-line" }, h("span", { class: "plan-name" }, p.plan), ` · ${bedLabel(p.beds)}`, h("span", { class: "show-sm" }, p.sqft ? ` · ${p.sqft.toLocaleString()} sq ft` : ""))),
         h("td", { class: "r num hide-sm" }, p.sqft ? p.sqft.toLocaleString() : "—"),
         // Phones show three columns: the count and earliest move-in go under the price.
         h("td", { class: "r num" }, h("span", { class: "muted small" }, "from "), monthlyEl(p.cheapest, crit.min_lease_months),

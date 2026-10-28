@@ -190,3 +190,5 @@ td.wrap-cell { white-space: normal; min-width: 90px; }
 
 /* Viable units grouped by plan: ★ after a plan's count when one of its units is starred. */
 .star-mark { color: var(--series-4); }
+.name-cell .plan-line { color: var(--text-2); font-size: 13px; }
+.plan-name { font-size: 14px; font-weight: 600; color: var(--text); }
