@@ -107,11 +107,13 @@ function expander(cls, label, lines) {
 // ---------- price per sq ft ----------
 const ppsf = (price, sqft) => (price != null && sqft ? price / sqft : null);
 const fmtPpsf = (n) => (n == null ? "—" : "$" + n.toFixed(2));
+/** Net-of-specials $/sq ft, or null when specials don't lower the price. */
+const netPpsf = (price, net, sqft) => (net != null && price != null && net < price ? ppsf(net, sqft) : null);
 /** "$1.85" cell content; tooltip shows the net $/sq ft when specials lower the price. */
 function ppsfEl(price, net, sqft) {
   const v = ppsf(price, sqft);
   if (v == null) return h("span", { class: "muted" }, "—");
-  const n = net != null && net < price ? ppsf(net, sqft) : null;
+  const n = netPpsf(price, net, sqft);
   return n != null ? expander("net-btn", fmtPpsf(v), [`Net of specials: ${fmtPpsf(n)}/sq ft`]) : h("span", {}, fmtPpsf(v));
 }
 
@@ -599,8 +601,10 @@ function monthlyEl(u, minLease, { open, onToggle }) {
   }, h("strong", {}, money(u.monthly))), termEl(u, minLease),
   u.fees_known ? null : h("div", { class: "muted small" }, "fees not listed")];
 }
-const breakdownRow = (u, minLease, colspan, heading) => h("tr", { class: "breakdown-row" }, h("td", { colspan },
-  h("div", { class: "expand-detail" }, [heading, ...monthlyLines(u, minLease)].filter(Boolean).map((l) => h("div", {}, l)))));
+/** A full-width row under a table row, holding the details of a value tapped in that row. */
+const detailRow = (colspan, lines, cls = "") => h("tr", { class: `breakdown-row ${cls}` }, h("td", { colspan },
+  h("div", { class: "expand-detail" }, lines.filter(Boolean).map((l) => h("div", {}, l)))));
+const breakdownRow = (u, minLease, colspan, heading) => detailRow(colspan, [heading, ...monthlyLines(u, minLease)]);
 
 async function renderViable() {
   const imported = importSharedShortlist();
@@ -901,18 +905,39 @@ async function renderComplex() {
   };
   const planSpecials = (f) => (f.special_terms || []).filter((t) => !t.site_wide || siteWideShows(t, f, today))
     .map((t) => (t.site_wide ? siteWideBadge(t, f) : specialBadge(t)));
+  // A unit's tapped value (price by lease term, net rent, net $/sq ft) opens its details as a row under
+  // the unit, one at a time per unit: inside the cell it squeezed the column to a word per line on phones.
+  const openDetail = new Map();
+  const detailBtn = (key, which, cls, label) => h("button", {
+    type: "button", class: `expand-btn net-btn ${cls}`, "aria-expanded": String(openDetail.get(key) === which),
+    onclick: (e) => { e.stopPropagation(); if (openDetail.get(key) === which) openDetail.delete(key); else openDetail.set(key, which); drawTable(); },
+    onkeydown: (e) => e.stopPropagation(),
+  }, label);
   const unitNetEl = (u) => {
     const e = u.effective;
     if (!e) return h("span", { class: "muted" }, "—");
-    const lines = [
+    if (!e.applied.length) return detailBtn(unitKey(u), "net", "muted", "n/a");
+    return detailBtn(unitKey(u), "net", "", [h("strong", {}, money(e.rent)), e.uncertain ? " *" : ""]);
+  };
+  const unitNetRent = (u) => (u.effective && u.effective.applied.length ? u.effective.rent : null);
+  const unitPpsfEl = (u, f) => {
+    const v = ppsf(u.price, u.sqft || f.sqft);
+    if (v == null) return h("span", { class: "muted" }, "—");
+    return netPpsf(u.price, unitNetRent(u), u.sqft || f.sqft) != null ? detailBtn(unitKey(u), "ppsf", "", fmtPpsf(v)) : fmtPpsf(v);
+  };
+  const unitDetailLines = (u, f, which) => {
+    if (which === "price") return termLines(u, { minLease: crit.min_lease_months });
+    if (which === "ppsf") return [`Net of specials: ${fmtPpsf(netPpsf(u.price, unitNetRent(u), u.sqft || f.sqft))}/sq ft`];
+    const e = u.effective;
+    return [
       e.applied.length ? `Applied: ${e.applied.join(", ")}` : "No specials apply",
       `${e.lease_months}-month lease${e.lease_assumed ? " (assumed)" : ""}`,
       ...e.skipped.map((x) => `Not applied — ${x}`),
       e.uncertain ? "Special is for select units only; ask whether this unit qualifies." : null,
-    ].filter(Boolean);
-    if (!e.applied.length) return expander("net-btn muted", "n/a", lines);
-    return expander("net-btn", [h("strong", {}, money(e.rent)), e.uncertain ? " *" : ""], lines);
+    ];
   };
+  // Unit, Price, Sq ft, $/sq ft, Available, Listed, Price change, Apply, plus the optional columns.
+  const unitColumns = 8 + hasBuilding + hasFloor + hasTotal + hasNet;
   const lowLine = (low) => (low == null ? null : h("div", { class: "muted small" }, `90-day low ${money(low)}`));
   const historyStart = d.history_start || d.dates[0];
   const open = new Set();
@@ -978,21 +1003,21 @@ async function renderComplex() {
           specialsSm.length ? h("div", { class: "show-sm specials-sm" }, specialsSm) : null,
           h("table", {},
             h("thead", {}, h("tr", {}, h("th", {}, "Unit"), hasBuilding && h("th", {}, "Building"), hasFloor && h("th", {}, "Floor"), h("th", { class: "r" }, totalBasis ? "Price (incl. fees)" : "Price"), hasTotal && h("th", { class: "r", title: "Base rent plus required monthly fees" }, "Total/mo"), hasNet && h("th", { class: "r" }, "Net"), h("th", { class: "r" }, "Sq ft"), h("th", { class: "r", title: "Listed price per square foot" }, "$/sq ft"), h("th", {}, "Available"), h("th", {}, "Listed"), h("th", {}, "Price change"), h("th", {}, ""))),
-            h("tbody", {}, units.map((u) => h("tr", {},
+            h("tbody", {}, units.flatMap((u) => [h("tr", {},
               h("td", { class: "num unit-cell" }, starBtn(unitEntry(d, u, f), onStar), u.unit_number,
                 u.viable && !viableOnly ? h("span", { class: "badge ok", style: "margin-left:6px" }, "Viable") : null), hasBuilding && h("td", {}, u.building || "—"), hasFloor && h("td", {}, u.floor || "—"),
               h("td", { class: "r num" }, (u.lease_options || []).length > 1
-                ? expander("net-btn", money(u.price), termLines(u, { minLease: crit.min_lease_months })) : priceOrCall(u.price, 1),
+                ? detailBtn(unitKey(u), "price", "", money(u.price)) : priceOrCall(u.price, 1),
                 termEl(u, crit.min_lease_months)),
               hasTotal && h("td", { class: "r num muted" }, u.total_price ? money(u.total_price) : "—"),
               hasNet && h("td", { class: "r num" }, unitNetEl(u)),
               h("td", { class: "r num" }, u.sqft ? u.sqft.toLocaleString() : "—"),
-              h("td", { class: "r num" }, ppsfEl(u.price, u.effective && u.effective.applied.length ? u.effective.rent : null, u.sqft || f.sqft)),
+              h("td", { class: "r num" }, unitPpsfEl(u, f)),
               h("td", {}, availLabel(u.available_date, today)),
               h("td", {}, listedEl(u.history, historyStart)),
               h("td", { class: "num" }, priceChangeEl(u.history)),
               h("td", {}, safeUrl(u.apply_url) ? h("a", { href: safeUrl(u.apply_url), target: "_blank", rel: "noopener", onclick: (e) => e.stopPropagation() }, "Apply ↗") : ""),
-            )))))));
+            ), openDetail.has(unitKey(u)) ? detailRow(unitColumns, unitDetailLines(u, f, openDetail.get(unitKey(u))), "left") : null]))))));
       }
     }
     if (!rows.length) rows.push(h("tr", {}, h("td", { colspan: columns.length + 2, class: "muted" }, "No floorplans match.")));

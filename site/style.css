@@ -173,6 +173,9 @@ tr.dim td { color: var(--text-3); }
 .expand-detail > div + div { margin-top: 3px; }
 .specials-sm { margin-bottom: 8px; flex-direction: column; align-items: flex-start; gap: 4px; white-space: normal; }
 @media (max-width: 640px) { div.show-sm.specials-sm { display: flex; } }
+/* The unit table under it is wider than a phone, so keep the specials in view and let long badges wrap. */
+.specials-sm { position: sticky; left: 0; max-width: min(340px, calc(100vw - 96px)); }
+.specials-sm .badge { white-space: normal; line-height: 1.4; }
 
 /* page tabs (Viable units / All units) */
 nav.tabs { display: flex; gap: 4px; margin-bottom: 12px; border-bottom: 1px solid var(--border); }
@@ -198,3 +201,6 @@ td.wrap-cell { white-space: normal; min-width: 90px; }
 tr.breakdown-row td { text-align: right; white-space: normal; padding-top: 0; }
 tr.breakdown-row .expand-detail { display: inline-block; max-width: 340px; margin: 0; }
 tr:has(+ tr.breakdown-row) td { border-bottom: 0; }
+/* Complex pages' unit tables are wider than a phone; left-aligned and sticky, the details stay on screen however far the table is scrolled. */
+tr.breakdown-row.left td { text-align: left; }
+tr.breakdown-row.left .expand-detail { position: sticky; left: 0; max-width: min(340px, calc(100vw - 96px)); }

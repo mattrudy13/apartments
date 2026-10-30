@@ -380,6 +380,9 @@ plain request each for their homepage banner.
   rent breakdown and net $/sq ft use `expander()`. Phones hide the Specials column, so an
   expanded plan lists its specials above its units. Site-wide badges in the table are compact
   ("Site-wide: $500 off · move in by Oct 31"); the full banner text is in the expanded view.
+  On complex pages a unit's price, Net and $/sq ft details open as a row under the unit (one at a
+  time per unit; added 2026-10-29), left-aligned and `position: sticky` so they stay on screen while
+  the wide unit table scrolls. Opened inside the cell they squeezed it to a word per line on phones.
 - **$/sq ft** uses the listed price (base, or incl. fees at total-basis sites); net-of-specials
   $/sq ft is in the tooltip. Plans use `rent_min` / plan sqft; units fall back to plan sqft.
   On phones (≤640px) the floorplan table hides that column and shows "$x.xx/sq ft" under the
