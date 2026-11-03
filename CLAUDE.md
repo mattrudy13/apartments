@@ -168,9 +168,14 @@ plain request each for their homepage banner.
 - No floor data; the UI hides the Floor/Building columns when no unit has them.
 - Address/phone come from the `ApartmentComplex` JSON-LD block.
 
-**Linkhorn Bay (Yardi RentCafe)** — plain HTTP
+**Linkhorn Bay (Yardi RentCafe)** — headless Chrome (`fetch.Browser`) since 2026-11-02
 - All RentCafe sites sit behind Yardi's Cloudflare; it challenged this Mac 2026-10-10 (new network),
-  cleared by 10-12 on its own (see Status).
+  cleared by 10-12 on its own (see Status). On 2026-11-02 all three RentCafe complexes (Linkhorn Bay,
+  Indigo 19, Salt Meadow Bay) got 403 challenges on both the 9:00 and 14:00 runs, and curl from the Mac
+  got the same. Headless Chrome passed on all three that evening (5–15 s per site), so `rentcafe.scrape`
+  now loads the listing and every detail page through one `Browser` (5–10 s pause between pages; the
+  parsers didn't change). Watch the next few Mondays: "Stuck on Cloudflare challenge" in the log means
+  Chrome stopped passing too.
 - `/floorplans` has one `.fp-container` card per plan (code = numeric ID in
   `id="fp-container-602897"`), with "Starting at" price and "N Available". The count
   element has `data-max="6"`, so cards may cap the count; the scraper uses the number

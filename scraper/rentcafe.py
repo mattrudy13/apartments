@@ -20,7 +20,7 @@ from urllib.parse import urljoin
 from bs4 import BeautifulSoup, Tag
 
 from .entrata import parse_property  # same schema.org ApartmentComplex JSON-LD
-from .fetch import http_get, parse_date, to_float, to_int
+from .fetch import Browser, parse_date, to_float, to_int
 from .models import FloorPlan, PropertyInfo, Unit
 
 log = logging.getLogger(__name__)
@@ -135,14 +135,21 @@ def _parse_unit_cards(soup: BeautifulSoup, floorplan_code: str, today: Optional[
 
 
 def scrape(cfg: dict, today: Optional[date] = None) -> Tuple[PropertyInfo, List[FloorPlan], List[Unit]]:
-    listing = http_get(cfg["url"])
+    # RentCafe sites started answering plain HTTP with a Cloudflare challenge (403) on 2026-11-02,
+    # so every page goes through headless Chrome, which passes it. Browser pauses 5-10 s between pages.
+    with Browser() as browser:
+        return _scrape(cfg, browser, today)
+
+
+def _scrape(cfg: dict, browser: Browser, today: Optional[date]) -> Tuple[PropertyInfo, List[FloorPlan], List[Unit]]:
+    listing = browser.get(cfg["url"])
     info = parse_property(listing)
     floorplans = parse_floorplans(listing, cfg["url"], today)
     units: List[Unit] = []
     for fp in floorplans:
         if not fp.units_available or not fp.details_url:
             continue
-        fp_units = parse_units(http_get(fp.details_url), fp.code, today)
+        fp_units = parse_units(browser.get(fp.details_url), fp.code, today)
         if not fp_units:
             log.warning("%s: no unit rows on %s", cfg["slug"], fp.details_url)
             continue
