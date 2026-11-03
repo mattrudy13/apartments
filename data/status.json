@@ -10,16 +10,14 @@
   "ok": true
  },
  "indigo-19": {
-  "error": "Client error '403 Forbidden' for url 'https://www.indigo19apartments.com/floorplans'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403",
   "last_attempt": "2026-11-02",
-  "last_success": "2026-10-26",
-  "ok": false
+  "last_success": "2026-11-02",
+  "ok": true
  },
  "linkhorn-bay": {
-  "error": "Client error '403 Forbidden' for url 'https://www.linkhornbayapartments-prg.com/floorplans'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403",
   "last_attempt": "2026-11-02",
-  "last_success": "2026-10-26",
-  "ok": false
+  "last_success": "2026-11-02",
+  "ok": true
  },
  "nexus": {
   "last_attempt": "2026-11-02",
@@ -42,9 +40,8 @@
   "ok": true
  },
  "salt-meadow-bay": {
-  "error": "Client error '403 Forbidden' for url 'https://www.saltmeadowbay.com/floorplans'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403",
   "last_attempt": "2026-11-02",
-  "last_success": "2026-10-26",
-  "ok": false
+  "last_success": "2026-11-02",
+  "ok": true
  }
 }
