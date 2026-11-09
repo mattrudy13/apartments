@@ -1,0 +1,376 @@
+{
+ "slug": "nexus",
+ "name": "Nexus",
+ "url": "https://liveatnexus.com/",
+ "scraped_at": "2026-11-09T14:05:07+00:00",
+ "property": {
+  "address": "548 Newtown Road, Virginia Beach, VA, 23462",
+  "phone": "757-663-5564"
+ },
+ "floorplans": [
+  {
+   "code": "755261",
+   "name": "A0",
+   "beds": 1.0,
+   "baths": 1.0,
+   "sqft": 563,
+   "rent_min": null,
+   "rent_max": null,
+   "units_available": 0,
+   "earliest_available": null,
+   "image_url": "https://cdn.sightmap.com/assets/1y/wy/1ywy7020wq0/47/d9/47d9aba435265724bb3a9873a2cb3c04.jpg",
+   "details_url": null,
+   "lease_months": null,
+   "specials": []
+  },
+  {
+   "code": "755262",
+   "name": "A1",
+   "beds": 1.0,
+   "baths": 1.0,
+   "sqft": 739,
+   "rent_min": 1721,
+   "rent_max": 1721,
+   "units_available": 3,
+   "earliest_available": "2026-12-21",
+   "image_url": "https://cdn.sightmap.com/assets/1y/wy/1ywy7020wq0/8e/2e/8e2ed0621e8c191a7ab4d250a5225747.jpg",
+   "details_url": null,
+   "lease_months": 14,
+   "specials": []
+  },
+  {
+   "code": "755263",
+   "name": "A2",
+   "beds": 1.0,
+   "baths": 1.0,
+   "sqft": 744,
+   "rent_min": 1741,
+   "rent_max": 1741,
+   "units_available": 2,
+   "earliest_available": "2026-11-09",
+   "image_url": "https://cdn.sightmap.com/assets/1y/wy/1ywy7020wq0/55/bb/55bbc6ea29967af0ac8702922ef79cc8.jpg",
+   "details_url": null,
+   "lease_months": 14,
+   "specials": []
+  },
+  {
+   "code": "755264",
+   "name": "A3",
+   "beds": 1.0,
+   "baths": 1.0,
+   "sqft": 899,
+   "rent_min": 1796,
+   "rent_max": 1796,
+   "units_available": 3,
+   "earliest_available": "2026-11-09",
+   "image_url": "https://cdn.sightmap.com/assets/1y/wy/1ywy7020wq0/a3/c6/a3c65029a021368b0c5ba76a9abab236.jpg",
+   "details_url": null,
+   "lease_months": 14,
+   "specials": []
+  },
+  {
+   "code": "755265",
+   "name": "B1",
+   "beds": 2.0,
+   "baths": 2.0,
+   "sqft": 1106,
+   "rent_min": null,
+   "rent_max": null,
+   "units_available": 0,
+   "earliest_available": null,
+   "image_url": "https://cdn.sightmap.com/assets/1y/wy/1ywy7020wq0/e3/5b/e35bdd59cfa4ba54ab55b686f20a9b03.jpg",
+   "details_url": null,
+   "lease_months": null,
+   "specials": []
+  },
+  {
+   "code": "755266",
+   "name": "B2",
+   "beds": 2.0,
+   "baths": 2.0,
+   "sqft": 1239,
+   "rent_min": null,
+   "rent_max": null,
+   "units_available": 0,
+   "earliest_available": null,
+   "image_url": "https://cdn.sightmap.com/assets/1y/wy/1ywy7020wq0/6d/67/6d67460b47de5e5c4f33b92ab3edb246.jpg",
+   "details_url": null,
+   "lease_months": null,
+   "specials": []
+  },
+  {
+   "code": "755267",
+   "name": "B3",
+   "beds": 2.0,
+   "baths": 2.0,
+   "sqft": 1157,
+   "rent_min": null,
+   "rent_max": null,
+   "units_available": 0,
+   "earliest_available": null,
+   "image_url": "https://cdn.sightmap.com/assets/1y/wy/1ywy7020wq0/86/a2/86a2e4f34b5586f7bb183e8c19207a8e.jpg",
+   "details_url": null,
+   "lease_months": null,
+   "specials": []
+  },
+  {
+   "code": "755268",
+   "name": "E1",
+   "beds": 0.0,
+   "baths": 1.0,
+   "sqft": 563,
+   "rent_min": null,
+   "rent_max": null,
+   "units_available": 0,
+   "earliest_available": null,
+   "image_url": "https://cdn.sightmap.com/assets/1y/wy/1ywy7020wq0/ed/81/ed8159c4bf1417480823f8506ddd9333.jpg",
+   "details_url": null,
+   "lease_months": null,
+   "specials": []
+  }
+ ],
+ "units": [
+  {
+   "unit_number": "546-428",
+   "floorplan_code": "755264",
+   "price": 1796,
+   "sqft": 899,
+   "floor": null,
+   "building": "546",
+   "available_date": "2026-11-09",
+   "apply_url": null,
+   "total_price": 1842,
+   "lease_months": 14,
+   "specials": [],
+   "lease_options": [
+    {
+     "months": 12,
+     "price": 2070,
+     "total_price": 2116
+    },
+    {
+     "months": 13,
+     "price": 1796,
+     "total_price": 1842
+    },
+    {
+     "months": 14,
+     "price": 1796,
+     "total_price": 1842
+    }
+   ]
+  },
+  {
+   "unit_number": "552-430",
+   "floorplan_code": "755264",
+   "price": 1796,
+   "sqft": 899,
+   "floor": null,
+   "building": "552",
+   "available_date": "2026-11-13",
+   "apply_url": null,
+   "total_price": 1842,
+   "lease_months": 14,
+   "specials": [],
+   "lease_options": [
+    {
+     "months": 12,
+     "price": 2070,
+     "total_price": 2116
+    },
+    {
+     "months": 13,
+     "price": 1796,
+     "total_price": 1842
+    },
+    {
+     "months": 14,
+     "price": 1796,
+     "total_price": 1842
+    }
+   ]
+  },
+  {
+   "unit_number": "550-202",
+   "floorplan_code": "755262",
+   "price": 1721,
+   "sqft": 739,
+   "floor": null,
+   "building": "550",
+   "available_date": "2026-12-21",
+   "apply_url": null,
+   "total_price": 1767,
+   "lease_months": 14,
+   "specials": [],
+   "lease_options": [
+    {
+     "months": 12,
+     "price": 1721,
+     "total_price": 1767
+    },
+    {
+     "months": 13,
+     "price": 1721,
+     "total_price": 1767
+    },
+    {
+     "months": 14,
+     "price": 1721,
+     "total_price": 1767
+    }
+   ]
+  },
+  {
+   "unit_number": "550-206",
+   "floorplan_code": "755263",
+   "price": 1741,
+   "sqft": 744,
+   "floor": null,
+   "building": "550",
+   "available_date": "2026-11-09",
+   "apply_url": null,
+   "total_price": 1787,
+   "lease_months": 14,
+   "specials": [],
+   "lease_options": [
+    {
+     "months": 12,
+     "price": 2007,
+     "total_price": 2053
+    },
+    {
+     "months": 13,
+     "price": 1741,
+     "total_price": 1787
+    },
+    {
+     "months": 14,
+     "price": 1741,
+     "total_price": 1787
+    }
+   ]
+  },
+  {
+   "unit_number": "550-210",
+   "floorplan_code": "755264",
+   "price": 1796,
+   "sqft": 899,
+   "floor": null,
+   "building": "550",
+   "available_date": "2026-12-16",
+   "apply_url": null,
+   "total_price": 1842,
+   "lease_months": 14,
+   "specials": [],
+   "lease_options": [
+    {
+     "months": 12,
+     "price": 1796,
+     "total_price": 1842
+    },
+    {
+     "months": 13,
+     "price": 1796,
+     "total_price": 1842
+    },
+    {
+     "months": 14,
+     "price": 1796,
+     "total_price": 1842
+    }
+   ]
+  },
+  {
+   "unit_number": "550-301",
+   "floorplan_code": "755262",
+   "price": 1721,
+   "sqft": 739,
+   "floor": null,
+   "building": "550",
+   "available_date": "2027-01-07",
+   "apply_url": null,
+   "total_price": 1767,
+   "lease_months": 14,
+   "specials": [],
+   "lease_options": [
+    {
+     "months": 12,
+     "price": 1721,
+     "total_price": 1767
+    },
+    {
+     "months": 13,
+     "price": 1721,
+     "total_price": 1767
+    },
+    {
+     "months": 14,
+     "price": 1721,
+     "total_price": 1767
+    }
+   ]
+  },
+  {
+   "unit_number": "550-403",
+   "floorplan_code": "755262",
+   "price": 1721,
+   "sqft": 739,
+   "floor": null,
+   "building": "550",
+   "available_date": "2026-12-25",
+   "apply_url": null,
+   "total_price": 1767,
+   "lease_months": 14,
+   "specials": [],
+   "lease_options": [
+    {
+     "months": 12,
+     "price": 1721,
+     "total_price": 1767
+    },
+    {
+     "months": 13,
+     "price": 1721,
+     "total_price": 1767
+    },
+    {
+     "months": 14,
+     "price": 1721,
+     "total_price": 1767
+    }
+   ]
+  },
+  {
+   "unit_number": "550-409",
+   "floorplan_code": "755263",
+   "price": 1741,
+   "sqft": 744,
+   "floor": null,
+   "building": "550",
+   "available_date": "2026-12-07",
+   "apply_url": null,
+   "total_price": 1787,
+   "lease_months": 14,
+   "specials": [],
+   "lease_options": [
+    {
+     "months": 12,
+     "price": 1741,
+     "total_price": 1787
+    },
+    {
+     "months": 13,
+     "price": 1741,
+     "total_price": 1787
+    },
+    {
+     "months": 14,
+     "price": 1741,
+     "total_price": 1787
+    }
+   ]
+  }
+ ],
+ "price_basis": "base",
+ "property_specials": []
+}
