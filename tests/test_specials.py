@@ -147,3 +147,29 @@ def test_effective_by_bedroom_count():
     assert one.rent == 1600 and one.applied == [] and "not offered for 1 BR" in one.skipped[0]
     late = effective_rent(1800, t, 12, "2026-11-15", "2026-10-04", beds=2)
     assert late.rent == 1800 and "move-in deadline" in late.skipped[0]
+
+
+# Attain's banner from 2026-11-02: two offers, each for its own sizes, "moved in by" wording.
+ATTAIN_NOV = ("Receive $500 Off 1 & 2-Bedroom Homes OR One Month Free + a Free Year of Internet "
+              "on 3-Bedroom Homes When Moved In by November 20th!")
+
+
+def test_offers_split_by_bedroom_count():
+    t = p(ATTAIN_NOV)
+    assert t.parsed and t.beds_off == {"1": 500, "2": 500} and t.beds_free == {"3": 1.0}
+    assert t.months_free == 0 and t.one_time_off == 0
+    assert t.move_in_by == "2026-11-20" and "1 month free for 3 BR" in t.caveats
+    # Free rent with no size named still applies to every plan.
+    assert p("One month free on 12+ month leases").months_free == 1.0
+    assert p("Two months free for 1 and 2 bedroom homes").beds_free == {"1": 2.0, "2": 2.0}
+
+
+def test_effective_with_offers_split_by_bedroom_count():
+    t = [p(ATTAIN_NOV)]
+    one = effective_rent(1548, t, 12, "2026-11-09", "2026-11-09", beds=1)
+    three = effective_rent(2400, t, 12, "2026-11-09", "2026-11-09", beds=3)
+    assert one.rent == round(1548 - 500 / 12) and three.rent == 2200
+    studio = effective_rent(1400, t, 12, "2026-11-09", "2026-11-09", beds=0)
+    assert studio.rent == 1400 and "not offered for studios" in studio.skipped[0]
+    late = effective_rent(1548, t, 12, "2026-12-09", "2026-11-09", beds=1)
+    assert late.rent == 1548 and "move-in deadline" in late.skipped[0]

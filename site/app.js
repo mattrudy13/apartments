@@ -776,8 +776,10 @@ function describeTerms(t) {
   if (t.monthly_off) parts.push(`${money(t.monthly_off)} off per month`);
   const beds = Object.entries(t.beds_off || {}).sort();
   if (beds.length) parts.push(beds.map(([k, v]) => `${money(v)} off once for ${k === "0" ? "studios" : k + " BR"}`).join(", "));
-  // The per-bedroom caveat ("$500 off 2 BR, ...") repeats what's spelled out above.
-  const caveats = t.caveats.filter((c) => !(beds.length && c.startsWith("$")));
+  const free = Object.entries(t.beds_free || {}).sort();
+  if (free.length) parts.push(free.map(([k, v]) => `${+v.toFixed(2)} month${v === 1 ? "" : "s"} free for ${k === "0" ? "studios" : k + " BR"}`).join(", "));
+  // The per-bedroom caveats ("$500 off 2 BR, ...", "1 month free for 3 BR") repeat what's spelled out above.
+  const caveats = t.caveats.filter((c) => !(beds.length && c.startsWith("$")) && !(free.length && / free for /.test(c)));
   return `Read as: ${parts.join(" + ")}${caveats.length ? " — " + caveats.join(", ") : ""}.`;
 }
 
@@ -785,7 +787,9 @@ function describeTerms(t) {
 const specialEnded = (t, asOf) => (t.expires && t.expires < asOf) || (t.move_in_by && t.move_in_by < asOf);
 /** Site-wide banners show on a floorplan only while running and offered for its bedroom count. */
 const siteWideShows = (t, f, asOf) => !specialEnded(t, asOf)
-  && (!Object.keys(t.beds_off || {}).length || t.months_free || t.one_time_off || t.monthly_off || String(Math.trunc(f.beds)) in t.beds_off);
+  && (!(Object.keys(t.beds_off || {}).length || Object.keys(t.beds_free || {}).length)
+    || t.months_free || t.one_time_off || t.monthly_off
+    || String(Math.trunc(f.beds)) in (t.beds_off || {}) || String(Math.trunc(f.beds)) in (t.beds_free || {}));
 
 async function renderComplex() {
   const slug = new URLSearchParams(location.search).get("c");
@@ -895,7 +899,8 @@ async function renderComplex() {
   const siteWideBadge = (t, f) => {
     const own = (t.beds_off || {})[String(Math.trunc(f.beds))];
     const parts = [];
-    if (t.months_free) parts.push(`${+t.months_free.toFixed(2)} mo free`);
+    const months = (t.months_free || 0) + ((t.beds_free || {})[String(Math.trunc(f.beds))] || 0);
+    if (months) parts.push(`${+months.toFixed(2)} mo free`);
     if (t.one_time_off || own) parts.push(`${money((t.one_time_off || 0) + (own || 0))} off`);
     if (t.monthly_off) parts.push(`${money(t.monthly_off)}/mo off`);
     const deadline = t.move_in_by ? `move in by ${shortDate(t.move_in_by)}` : t.expires ? `ends ${shortDate(t.expires)}` : null;

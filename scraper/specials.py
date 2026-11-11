@@ -7,8 +7,10 @@ Supported phrasing (case-insensitive), e.g.:
   "Two Months Free", "1 month free", "6 weeks free", "half a month free"
   "$500 off", "$1,000 off your first month", "$100 off per month"
   "$500 off 2-bedroom homes or $1,000 off 3-bedroom homes" -> amount per bedroom count
+  "$500 off 1 & 2-bedroom homes or one month free on 3-bedroom homes" -> each offer for its sizes only
   "on 12+ month leases", "12 month lease or longer", "minimum 13-month lease"
-  "move in by Nov 30", "move-in by 11/30/2026", "must move in before December 1st"
+  "move in by Nov 30", "move-in by 11/30/2026", "when moved in by November 20th",
+  "must move in before December 1st"
   "sign by Oct 15", "lease by ...", "apply by ...", "expires 10/31", "valid through ...", "ends ..."
   "on select units/homes" -> flagged as a caveat (applicability unknown)
 """
@@ -43,6 +45,7 @@ class SpecialTerms:
     expires: Optional[str] = None      # ISO; offer must be signed by / ends on
     select_units: bool = False         # "on select units" — may not apply to every unit
     beds_off: Dict[str, int] = field(default_factory=dict)  # one-time $ off by bedroom count ("0" = studio)
+    beds_free: Dict[str, float] = field(default_factory=dict)  # months free by bedroom count
     site_wide: bool = False            # from a site banner rather than floorplan/unit data
     parsed: bool = False               # True if a discount amount was understood
     caveats: List[str] = field(default_factory=list)
@@ -83,8 +86,17 @@ def _parse_loose_date(text: str, ref: date) -> Optional[date]:
     return None
 
 
+# "2-bedroom", "1 bed", "1 & 2-bedroom", "1, 2 and 3 BR", "studios"; group 1 holds the digits.
+_BED_SIZES = r"(?:((?:\d\s*(?:,|&|/|and|or)\s*)*\d)[\s-]*(?:bed(?:room)?s?|br)\b|studios?\b)"
 # "$500 off 2-bedroom homes", "$750 off our 1 bed", "$300 off studios"
-_BEDS_RE = re.compile(r"\s*(?:(?:on|for|all|our|any|a|the)\s+)?(?:(\d)[\s-]*(?:bed(?:room)?s?|br)\b|studios?\b)")
+_BEDS_RE = re.compile(r"\s*(?:(?:on|for|all|our|any|a|the)\s+)?" + _BED_SIZES)
+# "one month free + a free year of internet on 3-bedroom homes": sizes named later in the clause.
+_FREE_BEDS_RE = re.compile(r"\b(?:on|for)\s+(?:(?:all|our|any|the)\s+)?" + _BED_SIZES)
+
+
+def _bed_keys(m: "re.Match") -> List[str]:
+    """Bedroom counts named by a _BED_SIZES match, as beds_off keys ("0" = studio)."""
+    return re.findall(r"\d", m.group(1)) if m.group(1) else ["0"]
 
 
 def parse_special(title: str, description: str = "", ref: Optional[date] = None) -> SpecialTerms:
@@ -96,12 +108,23 @@ def parse_special(title: str, description: str = "", ref: Optional[date] = None)
     # --- discount amount (take the first clear statement; title usually leads) ---
     m = re.search(_NUM + r"\s+(months?|weeks?)\s+(?:of\s+)?(?:base\s+)?(?:rent\s+)?free", low) or \
         re.search(r"free\s+(?:rent\s+)?(?:for\s+)?" + _NUM + r"\s+(months?|weeks?)", low)
+    free = None
     if m:
         qty = _num(m.group(1))
-        terms.months_free = round(qty if m.group(2).startswith("month") else qty * 7 / (365 / 12), 3)
-        terms.parsed = True
-    elif re.search(r"\b(?:first|1st)\s+month(?:'s)?\s+(?:rent\s+)?(?:is\s+)?free\b|\bmonth\s+free\b", low):
-        terms.months_free = 1.0
+        free = round(qty if m.group(2).startswith("month") else qty * 7 / (365 / 12), 3)
+    else:
+        m = re.search(r"\b(?:first|1st)\s+month(?:'s)?\s+(?:rent\s+)?(?:is\s+)?free\b|\bmonth\s+free\b", low)
+        if m:
+            free = 1.0
+    if free is not None:
+        # Free rent offered only for some sizes ("... OR one month free on 3-bedroom homes") must
+        # not lower every plan's net rent. Look no further than the clause's end or the next "$".
+        sizes = _FREE_BEDS_RE.search(re.match(r"[^.;$]*", low[m.end():]).group(0))
+        if sizes:
+            for key in _bed_keys(sizes):
+                terms.beds_free[key] = free
+        else:
+            terms.months_free = free
         terms.parsed = True
 
     # The tail stops at the next "$" so "$500 off 2-bedroom or $1,000 off 3-bedroom" reads as two clauses.
@@ -110,7 +133,8 @@ def parse_special(title: str, description: str = "", ref: Optional[date] = None)
         tail = m.group(2)
         beds = _BEDS_RE.match(tail)
         if beds:
-            terms.beds_off[beds.group(1) or "0"] = amount
+            for key in _bed_keys(beds):
+                terms.beds_off[key] = amount
             terms.parsed = True
             continue
         if re.search(r"\b(per|a|each|every)\s+month\b|/\s*mo\b|\bmonthly\b", tail):
@@ -122,6 +146,10 @@ def parse_special(title: str, description: str = "", ref: Optional[date] = None)
     # --- caveats ---
     if terms.beds_off:
         terms.caveats.append(", ".join(f"${v:,} off {'studio' if k == '0' else k + ' BR'}" for k, v in sorted(terms.beds_off.items())))
+    if terms.beds_free:
+        terms.caveats.append(", ".join(
+            f"{v:g} month{'' if v == 1 else 's'} free for {'studios' if k == '0' else k + ' BR'}"
+            for k, v in sorted(terms.beds_free.items())))
     m = re.search(r"(\d{1,2})\s*\+\s*(?:-\s*)?month", low) or \
         re.search(r"(\d{1,2})[\s-]*(?:month|mo)s?[\s-]*(?:lease|term)s?\s+(?:or\s+(?:longer|more|greater)|and\s+(?:up|longer|above))", low) or \
         re.search(r"(?:minimum|min\.?|at\s+least)\s+(?:of\s+)?(?:a\s+)?(\d{1,2})[\s-]*(?:month|mo)", low) or \
@@ -130,7 +158,7 @@ def parse_special(title: str, description: str = "", ref: Optional[date] = None)
         terms.min_lease_months = int(m.group(1))
         terms.caveats.append(f"{terms.min_lease_months}+ month lease")
 
-    m = re.search(r"move[\s-]*in\s+(?:on\s+or\s+)?(?:by|before|no\s+later\s+than)\s+" + _DATE, low)
+    m = re.search(r"moved?[\s-]*in\s+(?:on\s+or\s+)?(?:by|before|no\s+later\s+than)\s+" + _DATE, low)
     if m:
         d = _parse_loose_date(m.group(1), ref)
         if d:
@@ -192,15 +220,17 @@ def effective_rent(
         if s.move_in_by and available_date and available_date > s.move_in_by:
             skipped.append(f"{s.title}: unit available after the {s.move_in_by} move-in deadline")
             continue
-        one_time = s.one_time_off
-        if s.beds_off:
+        one_time, months_free = s.one_time_off, s.months_free
+        if s.beds_off or s.beds_free:
             key = None if beds is None else str(int(beds))
-            if key not in s.beds_off and not (s.months_free or s.one_time_off or s.monthly_off):
+            if key not in s.beds_off and key not in s.beds_free \
+                    and not (s.months_free or s.one_time_off or s.monthly_off):
                 label = "this size" if key is None else "studios" if key == "0" else f"{key} BR"
                 skipped.append(f"{s.title}: not offered for {label}")
                 continue
             one_time += s.beds_off.get(key, 0)
-        total -= s.months_free * rent + one_time + s.monthly_off * lease_months
+            months_free += s.beds_free.get(key, 0)
+        total -= months_free * rent + one_time + s.monthly_off * lease_months
         applied.append(s.title)
         uncertain = uncertain or s.select_units
     if not applied:
