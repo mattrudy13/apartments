@@ -362,14 +362,18 @@ plain request each for their homepage banner.
   defaults to cheapest first. Price sorts use the net price when specials lower it;
   complexes with no price (or no units of that size) always sort last.
 - Complex detail page charts **lowest price by bedroom count** (≤4 series) instead of
-  one line per floorplan (Attain has 49 plans, which would be unreadable). Per-floorplan
-  trends are sparklines in the floorplan table instead.
+  one line per floorplan (Attain has 49 plans, which would be unreadable). The floorplan
+  table shows a **90-day range** per plan instead (replaced per-plan sparklines 2026-11-11; the
+  user found them uninformative), see below.
 - **90-day lows** (added 2026-10-19; the user's target move is early Feb 2027): `build.bed_lows`
   gives each complex's lowest by_beds prices over the last 90 days of pulls (`summary.lows`), and
-  each floorplan gets `low` (`rent_min`/`effective_min`). The window starts no earlier than
+  each floorplan gets `low` and `high` (`rent_min`/`effective_min`; the high is the highest its
+  From price reached, not its priciest unit). The window starts no earlier than
   `unit_history_since`, so Attain's wrong pre-10-06 prices never set a low. The overview shows it
   under each bedroom price in the cell's mode (base or total, plus net when lower), always with
-  the amount ("at low" wording made the columns too wide). Complex pages show it under From/Net.
+  the amount ("at low" wording made the columns too wide). Complex pages show a "90-day range"
+  column (low – high, plus a net range when specials lowered either end); phones hide the column
+  and show the ranges under From/Net instead. The overview keeps lows only (user's choice).
   Attain's lows come from 10-06, its last flat-pricing pull, and sit well under its later prices.
 - **Latest move-in** column (overview): furthest-out `available_date` among listed units; undated
   units don't count (Indigo 19 has none, so "—"). Sorts furthest first on the first click. To fit

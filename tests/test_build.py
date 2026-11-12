@@ -315,6 +315,7 @@ def test_lows_cover_the_window_and_start_at_unit_history_since():
     summary, detail = build_complex(cfg, h, {"ok": True})
     assert summary["lows"]["1 BR"]["min_price"] == 1500
     assert detail["floorplans"][0]["low"]["rent_min"] == 1500
+    assert detail["floorplans"][0]["high"]["rent_min"] == 1700
     summary, _ = build_complex({"slug": "t", "name": "T", "url": "x"}, h, {"ok": True})
     assert summary["lows"]["1 BR"]["min_price"] == 1200
 
@@ -327,6 +328,14 @@ def test_lows_skip_pulls_older_than_90_days():
     assert summary["lows"]["1 BR"]["min_price"] == 1500
 
 
+def test_floorplan_high_skips_pulls_older_than_90_days():
+    old, mid, new = snap([unit("1", 2000)]), snap([unit("1", 1600)]), snap([unit("1", 1500)])
+    for s, d in ((old, "2026-06-01"), (mid, "2026-10-04"), (new, "2026-10-11")):
+        apply_specials(s, d)
+    _, detail = build_complex({"slug": "t", "name": "T", "url": "x"},
+                              [("2026-06-01", old), ("2026-10-04", mid), ("2026-10-11", new)], {"ok": True})
+    fp = detail["floorplans"][0]
+    assert (fp["low"]["rent_min"], fp["high"]["rent_min"]) == (1500, 1600)
 def test_latest_move_in_ignores_undated_units():
     s = snap([unit("1", 1500, avail="2026-11-01"), unit("2", 1600, avail="2027-01-15"), unit("3", 1700, avail=None)])
     summary, _ = build_complex({"slug": "t", "name": "T", "url": "x"}, history(s), {"ok": True})

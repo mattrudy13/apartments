@@ -450,7 +450,10 @@ def build_complex(cfg: dict, history: list, st: dict, criteria: Optional[dict] =
             })
     for fp in latest["floorplans"]:
         window = [p for p in fp_history[fp["code"]] if p["date"] >= low_start and p["units"]]
-        fp["low"] = {k: min((p[k] for p in window if p[k]), default=None) for k in ("rent_min", "effective_min")}
+        # The high is the highest the plan's From price (its cheapest unit) reached, not its priciest
+        # unit, so low and high bracket the same number the page lists as From.
+        for name, pick in (("low", min), ("high", max)):
+            fp[name] = {k: pick((p[k] for p in window if p[k]), default=None) for k in ("rent_min", "effective_min")}
     unit_window = [(d, s) for d, s in history if d >= since] or history[-1:]
     uh, gone = unit_histories(unit_window)
     checks = data_checks(unit_window, series)

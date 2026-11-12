@@ -888,7 +888,7 @@ async function renderComplex() {
         "aria-sort": state.sort === c.key ? (state.dir > 0 ? "ascending" : "descending") : null,
         onclick: () => { state.dir = state.sort === c.key ? -state.dir : 1; state.sort = c.key; drawHead(); drawTable(); },
       }, c.label)),
-      h("th", { class: "hide-sm" }, "Trend"), h("th", { class: "hide-sm" }, "Specials")));
+      h("th", { class: "r hide-sm" }, "90-day range"), h("th", { class: "hide-sm" }, "Specials")));
   };
 
   const caveatText = (t) => (t.caveats.length ? t.caveats.join(" · ") : "");
@@ -943,7 +943,14 @@ async function renderComplex() {
   };
   // Unit, Price, Sq ft, $/sq ft, Available, Listed, Price change, Apply, plus the optional columns.
   const unitColumns = 8 + hasBuilding + hasFloor + hasTotal + hasNet;
-  const lowLine = (low) => (low == null ? null : h("div", { class: "muted small" }, `90-day low ${money(low)}`));
+  // 90-day low and high of the plan's From price (listed, and net of specials when they lowered it).
+  const rangeText = (lo, hi) => (lo == null ? null : lo === hi ? `${money(lo)} (no change)` : `${money(lo)} – ${money(hi)}`);
+  const listedRange = (f) => rangeText(f.low && f.low.rent_min, f.high && f.high.rent_min);
+  const netRange = (f) => {
+    const lo = f.low && f.low.effective_min, hi = f.high && f.high.effective_min;
+    const listedLo = f.low && f.low.rent_min, listedHi = f.high && f.high.rent_min;
+    return lo != null && (lo < (listedLo ?? Infinity) || hi < (listedHi ?? Infinity)) ? rangeText(lo, hi) : null;
+  };
   const historyStart = d.history_start || d.dates[0];
   const open = new Set();
   const planStarred = (f) => shortlist.has(planId(d.slug, f.code));
@@ -968,7 +975,6 @@ async function renderComplex() {
       const hasStarredUnits = starredOnly && units.some(unitStarred);
       if (hasStarredUnits && !planStarred(f)) units = units.filter(unitStarred);
       if (viableOnly) units = units.filter((u) => u.viable);
-      const hist = (d.floorplan_history[f.code] || []).map((p) => p.rent_min);
       const isOpen = open.has(f.code) || (hasStarredUnits && !closed.has(f.code));
       const toggle = () => {
         if (!units.length) return;
@@ -990,15 +996,16 @@ async function renderComplex() {
           f.units_available && f.total_min && !totalBasis ? h("div", { class: "muted small", title: "Base rent plus required monthly fees" }, `${money(f.total_min)} total`) : null,
           // Phones hide the $/sq ft column, so show it under the price instead.
           f.ppsf != null ? h("div", { class: "muted small show-sm" }, `${fmtPpsf(f.ppsf)}/sq ft`) : null,
-          lowLine(f.low && f.low.rent_min)),
+          // Phones hide the range column, so the listed range sits under the price.
+          listedRange(f) ? h("div", { class: "muted small show-sm" }, `90d ${listedRange(f)}`) : null),
         h("td", { class: "r num hide-sm" }, f.units_available ? ppsfEl(f.rent_min, f.effective_min, f.sqft) : h("span", { class: "muted" }, "—")),
         hasNet && h("td", { class: "r num" }, f.units_available && f.effective_min != null && f.effective_min < f.rent_min
           ? h("strong", { title: "Lowest effective monthly rent after specials" }, money(f.effective_min)) : h("span", { class: "muted" }, "—"),
-          f.low && f.low.effective_min != null && f.low.effective_min < (f.low.rent_min ?? Infinity)
-            ? lowLine(f.low.effective_min) : null),
+          netRange(f) ? h("div", { class: "muted small show-sm" }, `90d ${netRange(f)}`) : null),
         h("td", { class: "r num" }, viableOnly ? [f.viable_units, h("span", { class: "muted small hide-sm" }, ` of ${f.units_available}`)] : f.units_available || h("span", { class: "muted" }, "0")),
         h("td", {}, f.units_available ? availLabel(f.earliest_available, today) : "—"),
-        h("td", { class: "hide-sm" }, sparkline(hist, { width: 70, height: 22 })),
+        h("td", { class: "r num hide-sm" }, listedRange(f) ?? h("span", { class: "muted" }, "—"),
+          netRange(f) ? h("div", { class: "muted small" }, `net ${netRange(f)}`) : null),
         h("td", { class: "hide-sm specials-cell" }, planSpecials(f)),
       ));
       if (isOpen) {
@@ -1057,7 +1064,7 @@ async function renderComplex() {
   add(root, h("div", { class: "card stack" },
     h("h2", {}, "Floorplans"), filterRow, filterNote,
     h("div", { class: "table-scroll" }, h("table", {}, thead, tbody)),
-    h("p", { class: "note" }, "Click a floorplan to see its available units. Star ☆ a floorplan or unit to add it to your shortlist on the overview (saved in this browser). “From” is the lowest listed price, with its lease term under it (where the site prices several terms, each unit uses its cheapest one; tap a unit's price to compare terms); “$/sq ft” is that price per square foot; “Net” is the lowest effective monthly rent after specials. Tap a special or a unit's net rent for the details (* = the special is for select units only, so confirm the unit qualifies). The trend shows that plan's lowest listed price at each pull; “90-day low” is the lowest it has been over the last 90 days of pulls."),
+    h("p", { class: "note" }, "Click a floorplan to see its available units. Star ☆ a floorplan or unit to add it to your shortlist on the overview (saved in this browser). “From” is the lowest listed price, with its lease term under it (where the site prices several terms, each unit uses its cheapest one; tap a unit's price to compare terms); “$/sq ft” is that price per square foot; “Net” is the lowest effective monthly rent after specials. Tap a special or a unit's net rent for the details (* = the special is for select units only, so confirm the unit qualifies). “90-day range” is the lowest and highest the From price has been over the last 90 days of pulls (with the net range under it when specials lowered it)."),
     totalBasis ? h("p", { class: "note" }, "This site only shows a “Total Monthly Leasing Price”, which already includes required monthly fees, so its prices run slightly higher than base rent elsewhere.") : null,
     hasTotal && !totalBasis ? h("p", { class: "note" }, "Prices are base rent. “Total/mo” adds the required monthly fees the site lists (e.g. trash, pest control).") : null,
     d.units.length && d.units.every((u) => u.price == null) ? h("p", { class: "note" }, "This site lists available units but doesn't publish prices (“Call”).") : null,
