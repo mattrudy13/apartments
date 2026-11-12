@@ -46,6 +46,8 @@ body {
 a { color: var(--accent); text-decoration: none; }
 a:hover { text-decoration: underline; }
 .wrap { max-width: 1100px; margin: 0 auto; padding: 24px 16px 64px; }
+/* Complex pages are wider so the floorplan table's fixed columns (below) fit beside Specials. */
+body[data-page="complex"] .wrap { max-width: 1240px; }
 header.top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
 h1 { font-size: 24px; margin: 0; letter-spacing: -0.01em; }
 h2 { font-size: 16px; margin: 0 0 12px; }
@@ -204,3 +206,22 @@ tr:has(+ tr.breakdown-row) td { border-bottom: 0; }
 /* Complex pages' unit tables are wider than a phone; left-aligned and sticky, the details stay on screen however far the table is scrolled. */
 tr.breakdown-row.left td { text-align: left; }
 tr.breakdown-row.left .expand-detail { position: sticky; left: 0; max-width: min(340px, calc(100vw - 96px)); }
+
+/* Floorplan table: fixed column widths, sized for the widest value across the complexes, so
+   toggling Viable only or a bed filter doesn't reflow every column (auto layout sizes columns
+   from whichever rows are showing). Specials takes what's left. Only where it all fits; narrower
+   screens keep auto layout. */
+@media (min-width: 1232px) {
+  table.fp-table { table-layout: fixed; }
+  table.fp-table th.col-fp { width: 210px; }
+  table.fp-table th.col-bed { width: 108px; }
+  table.fp-table th.col-sqft { width: 62px; }
+  table.fp-table th.col-from { width: 130px; }
+  table.fp-table th.col-ppsf { width: 72px; }
+  table.fp-table th.col-net { width: 74px; }
+  table.fp-table th.col-units { width: 76px; }
+  table.fp-table th.col-earliest { width: 114px; }
+  table.fp-table th.col-range { width: 164px; }
+  /* Long plan names ("Columbus (Phase 3 Pet Friendly)") wrap beside the ▸, star and thumbnail. */
+  table.fp-table td.fp-name strong { display: inline-block; vertical-align: middle; white-space: normal; max-width: calc(100% - 100px); line-height: 1.3; }
+}

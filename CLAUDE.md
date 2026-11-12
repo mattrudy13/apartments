@@ -365,6 +365,13 @@ plain request each for their homepage banner.
   one line per floorplan (Attain has 49 plans, which would be unreadable). The floorplan
   table shows a **90-day range** per plan instead (replaced per-plan sparklines 2026-11-11; the
   user found them uninformative), see below.
+- The floorplan table has **fixed column widths** on screens ≥1232px (`table.fp-table`,
+  `th.col-*` in `style.css`; added 2026-11-11). Auto layout sized columns from the rows showing, so
+  Viable only and the bed chips reflowed every column (Attain's Specials went 248 → 160px). Widths
+  are the widest value across all nine complexes; Specials takes the rest and long plan names wrap.
+  To fit, complex pages are 1,240px max (other pages 1,100px; the user's choice over trimming
+  content). Narrower screens keep auto layout. The filter note above the table always shows a line
+  so it doesn't jump vertically. The expanded units table is still auto layout.
 - **90-day lows** (added 2026-10-19; the user's target move is early Feb 2027): `build.bed_lows`
   gives each complex's lowest by_beds prices over the last 90 days of pulls (`summary.lows`), and
   each floorplan gets `low` and `high` (`rent_min`/`effective_min`; the high is the highest its

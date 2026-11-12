@@ -871,24 +871,25 @@ async function renderComplex() {
   // Precomputed so the generic column sort handles it; only plans with units have a current price.
   for (const f of d.floorplans) f.ppsf = f.units_available ? ppsf(f.rent_min, f.sqft) : null;
   const columns = [
-    { key: "name", label: "Floorplan" },
-    { key: "beds", label: "Bed / Bath", r: false },
-    { key: "sqft", label: "Sq ft", r: true, hideSm: true },
-    { key: "rent_min", label: "From", r: true },
-    { key: "ppsf", label: "$/sq ft", r: true, hideSm: true, title: "Lowest listed price per square foot; tap a value for net of specials" },
-    hasNet && { key: "effective_min", label: "Net", r: true },
-    { key: "units_available", label: "Units", r: true },
-    { key: "earliest_available", label: "Earliest", r: false },
+    // col-* classes set fixed widths on wide screens (style.css), so filtering doesn't reflow the table.
+    { key: "name", label: "Floorplan", col: "fp" },
+    { key: "beds", label: "Bed / Bath", r: false, col: "bed" },
+    { key: "sqft", label: "Sq ft", r: true, hideSm: true, col: "sqft" },
+    { key: "rent_min", label: "From", r: true, col: "from" },
+    { key: "ppsf", label: "$/sq ft", r: true, hideSm: true, col: "ppsf", title: "Lowest listed price per square foot; tap a value for net of specials" },
+    hasNet && { key: "effective_min", label: "Net", r: true, col: "net" },
+    { key: "units_available", label: "Units", r: true, col: "units" },
+    { key: "earliest_available", label: "Earliest", r: false, col: "earliest" },
   ].filter(Boolean);
   const thead = h("thead");
   const drawHead = () => {
     thead.replaceChildren(h("tr", {},
       columns.map((c) => h("th", {
-        class: `sortable ${c.r ? "r" : ""} ${c.hideSm ? "hide-sm" : ""}`, title: c.title,
+        class: `sortable col-${c.col} ${c.r ? "r" : ""} ${c.hideSm ? "hide-sm" : ""}`, title: c.title,
         "aria-sort": state.sort === c.key ? (state.dir > 0 ? "ascending" : "descending") : null,
         onclick: () => { state.dir = state.sort === c.key ? -state.dir : 1; state.sort = c.key; drawHead(); drawTable(); },
       }, c.label)),
-      h("th", { class: "r hide-sm" }, "90-day range"), h("th", { class: "hide-sm" }, "Specials")));
+      h("th", { class: "r hide-sm col-range" }, "90-day range"), h("th", { class: "hide-sm" }, "Specials")));
   };
 
   const caveatText = (t) => (t.caveats.length ? t.caveats.join(" · ") : "");
@@ -1033,9 +1034,11 @@ async function renderComplex() {
       }
     }
     if (!rows.length) rows.push(h("tr", {}, h("td", { colspan: columns.length + 2, class: "muted" }, "No floorplans match.")));
-    filterNote.textContent = viableOnly ? `Showing floorplans with units that fit (${criteriaText(crit)}); units listed are only those. Turn off “Viable only” to see everything.`
-      : !viableCount ? `No units here fit right now (${criteriaText(crit)}).` : "";
-    filterNote.hidden = !filterNote.textContent;
+    // Always says something, so toggling filters doesn't add or remove a line above the table.
+    filterNote.textContent = starredOnly ? "Showing your starred floorplans and units."
+      : viableOnly ? `Showing floorplans with units that fit (${criteriaText(crit)}); units listed are only those. Turn off “Viable only” to see everything.`
+      : !viableCount ? `No units here fit right now (${criteriaText(crit)}).`
+      : `Showing every floorplan${state.showAll ? ", including ones with nothing available" : " with units available"}. Turn on “Viable only” for units that fit (${criteriaText(crit)}).`;
     tbody.replaceChildren(...rows);
   };
 
@@ -1063,7 +1066,7 @@ async function renderComplex() {
   }
   add(root, h("div", { class: "card stack" },
     h("h2", {}, "Floorplans"), filterRow, filterNote,
-    h("div", { class: "table-scroll" }, h("table", {}, thead, tbody)),
+    h("div", { class: "table-scroll" }, h("table", { class: "fp-table" }, thead, tbody)),
     h("p", { class: "note" }, "Click a floorplan to see its available units. Star ☆ a floorplan or unit to add it to your shortlist on the overview (saved in this browser). “From” is the lowest listed price, with its lease term under it (where the site prices several terms, each unit uses its cheapest one; tap a unit's price to compare terms); “$/sq ft” is that price per square foot; “Net” is the lowest effective monthly rent after specials. Tap a special or a unit's net rent for the details (* = the special is for select units only, so confirm the unit qualifies). “90-day range” is the lowest and highest the From price has been over the last 90 days of pulls (with the net range under it when specials lowered it)."),
     totalBasis ? h("p", { class: "note" }, "This site only shows a “Total Monthly Leasing Price”, which already includes required monthly fees, so its prices run slightly higher than base rent elsewhere.") : null,
     hasTotal && !totalBasis ? h("p", { class: "note" }, "Prices are base rent. “Total/mo” adds the required monthly fees the site lists (e.g. trash, pest control).") : null,
